@@ -68,7 +68,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	}
 
 	private static ApprovalRootState toDomainRoot(String appId, List<FullJoinAppApvState> fullJoinsInRoot) {
-		FullJoinAppApvState firstApp = fullJoinsInRoot.get(0);
+		FullJoinAppApvState first = fullJoinsInRoot.get(0);
 		List<ApprovalPhaseState> phases = fullJoinsInRoot.stream().collect(Collectors.groupingBy(p -> p.getPhaseOrder()))
 				.entrySet().stream()
 				.map(p -> {
@@ -77,17 +77,17 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 					return toDomainPhase(appId, phaseOrder, fullJoinInPhase);
 				}).collect(Collectors.toList());
 		return ApprovalRootState.builder()
-				.CompanyID(firstApp.getCompanyID())
+				.CompanyID(first.getCompanyID())
 				.rootStateID(appId)
-				.employeeID(firstApp.getEmployeeID())
-				.approvalRecordDate(firstApp.getAppDate())
+				.employeeID(first.getEmployeeID())
+				.approvalRecordDate(first.getAppDate())
 				.listApprovalPhaseState(phases)
 				.build();
 	}
 
 	private static ApprovalPhaseState toDomainPhase(String appId, Integer phaseOrder, List<FullJoinAppApvState> fullJoinInPhase) {
-		FullJoinAppApvState firstPhase = fullJoinInPhase.get(0);
-		List<ApprovalFrame> frames = fullJoinInPhase.stream().collect(Collectors.groupingBy(f ->f.getFrameOrder()))
+		FullJoinAppApvState first = fullJoinInPhase.get(0);
+		List<ApprovalFrame> frames = fullJoinInPhase.stream().collect(Collectors.groupingBy(f -> f.getFrameOrder()))
 				.entrySet().stream()
 				.map(f -> {
 					Integer frameOrder = f.getKey();
@@ -97,14 +97,14 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		return ApprovalPhaseState.builder()
 				.rootStateID(appId)
 				.phaseOrder(phaseOrder)
-				.approvalAtr(ApprovalBehaviorAtr.of(firstPhase.getAppPhaseAtr()))
-				.approvalForm(ApprovalForm.of(firstPhase.getApprovalForm()))
+				.approvalAtr(ApprovalBehaviorAtr.of(first.getAppPhaseAtr()))
+				.approvalForm(ApprovalForm.of(first.getApprovalForm()))
 				.listApprovalFrame(frames)
 				.build();
 	}
 
 	private static ApprovalFrame toDomainFrame(String appId, Integer phaseOrder, Integer frameOrder, List<FullJoinAppApvState> fullJoinInFrame) {
-		FullJoinAppApvState firstFrame = fullJoinInFrame.get(0);
+		FullJoinAppApvState first = fullJoinInFrame.get(0);
 		List<ApproverState> approvers = fullJoinInFrame.stream().collect(Collectors.groupingBy(a -> a.getApproverChildID()))
 				.entrySet().stream()
 				.map(a -> {
@@ -115,27 +115,26 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		return ApprovalFrame.builder()
 				.rootStateID(appId)
 				.phaseOrder(phaseOrder)
-				.frameOrder(firstFrame.getFrameOrder())
-				.approvalAtr(ApprovalBehaviorAtr.of(firstFrame.getAppFrameAtr()))
-				.confirmAtr(ConfirmPerson.of(firstFrame.getConfirmAtr()))
-				.approverID(firstFrame.getApproverID())
-				.representerID(firstFrame.getRepresenterID())
-				.approvalDate(firstFrame.getApprovalDate())
-				.approvalReason(firstFrame.getApprovalReason())
+				.frameOrder(first.getFrameOrder())
+				.approvalAtr(ApprovalBehaviorAtr.of(first.getAppFrameAtr()))
+				.confirmAtr(ConfirmPerson.of(first.getConfirmAtr()))
+				.approverID(first.getApproverID())
+				.representerID(first.getRepresenterID())
+				.approvalDate(first.getApprovalDate())
+				.approvalReason(first.getApprovalReason())
 				.listApproverState(approvers)
 				.build();
 	}
 
-	private static ApproverState toDomainApprover(String appId, Integer phaseOrder, Integer frameOrder,
-			List<FullJoinAppApvState> fullJoinInApprover) {
-		FullJoinAppApvState firstApprover = fullJoinInApprover.get(0);
+	private static ApproverState toDomainApprover(String appId, Integer phaseOrder, Integer frameOrder,List<FullJoinAppApvState> fullJoinInApprover) {
+		FullJoinAppApvState first = fullJoinInApprover.get(0);
 		return ApproverState.builder()
 				.rootStateID(appId)
 				.phaseOrder(phaseOrder)
 				.frameOrder(frameOrder)
-				.approverID(firstApprover.getApproverChildID())
-				.companyID(firstApprover.getCompanyID())
-				.date(firstApprover.getAppDate())
+				.approverID(first.getApproverChildID())
+				.companyID(first.getCompanyID())
+				.date(first.getAppDate())
 				.build();
 	}
 
