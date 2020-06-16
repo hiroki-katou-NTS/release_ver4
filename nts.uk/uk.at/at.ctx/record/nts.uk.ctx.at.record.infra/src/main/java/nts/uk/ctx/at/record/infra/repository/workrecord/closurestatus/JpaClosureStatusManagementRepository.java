@@ -9,6 +9,7 @@ import javax.ejb.Stateless;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
@@ -46,9 +47,15 @@ public class JpaClosureStatusManagementRepository extends JpaRepository implemen
 
 	@Override
 	public Optional<ClosureStatusManagement> getLatestByEmpId(String employeeId) {
-		String sql = "SELECT a FROM KrcdtClosureSttMng a WHERE a.pk.employeeId = :employeeId ORDER BY a.end DESC";
-		List<KrcdtClosureSttMng> lstEntity = this.queryProxy().query(sql, KrcdtClosureSttMng.class)
-				.setParameter("employeeId", employeeId).getList();
+		String sql = "SELECT * FROM KRCDT_CLOSURE_STT_MNG  WHERE SID = @employeeId ORDER BY END_DATE DESC";
+
+		List<KrcdtClosureSttMng> lstEntity = new NtsStatement(sql, this.jdbcProxy())
+				.paramString("employeeId", employeeId).getList(rec -> {
+					return new KrcdtClosureSttMng(
+							new KrcdtClosureSttMngPk(rec.getInt("YM"), rec.getString("SID"), rec.getInt("CLOSURE_ID"),
+									rec.getInt("CLOSURE_DAY"), rec.getInt("IS_LAST_DAY")),
+							rec.getGeneralDate("START_DATE"), rec.getGeneralDate("END_DATE"));
+				});
 		if (lstEntity.isEmpty())
 			return Optional.empty();
 		return Optional.of(lstEntity.get(0).toDomain());

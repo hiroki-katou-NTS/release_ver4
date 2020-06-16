@@ -1,4 +1,7 @@
 package nts.uk.ctx.workflow.dom.approverstatemanagement;
+
+import nts.arc.enums.EnumAdaptor;
+
 /**
  * 承認区分
  * @author Doan Duy Hung
@@ -28,5 +31,9 @@ public enum ApprovalBehaviorAtr {
 	ApprovalBehaviorAtr(int type, String name) {
 		this.value = type;
 		this.name = name;
+	}
+	
+	public static ApprovalBehaviorAtr of(int type) {
+		return EnumAdaptor.valueOf(type, ApprovalBehaviorAtr.class);
 	}
 }

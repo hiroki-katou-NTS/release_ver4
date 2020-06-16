@@ -27,7 +27,6 @@ import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirmRepository;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstanceRepository;
-import nts.uk.ctx.workflow.dom.resultrecord.RecordRootType;
 import nts.uk.ctx.workflow.dom.resultrecord.status.daily.GetRouteConfirmStatusDailyApprover;
 import nts.uk.ctx.workflow.dom.resultrecord.status.daily.GetRouteConfirmStatusDailyTarget;
 import nts.uk.ctx.workflow.dom.resultrecord.status.daily.RouteConfirmStatusDaily;
@@ -117,9 +116,9 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 		
 		private void loadCache(String approverEmployeeId, List<String> targetEmployeeIds, DatePeriod period) {
 			//cacheInstance読み込み
-			// TODO:加藤君のRepositoryに差し替え
-			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findByApproverEmployeePeriod(
-					companyId, approverEmployeeId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY).stream()
+			// 承認者の日別実績の承認ルートを取得する（対象者指定）（期間）
+			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceDailyByApproverTarget(
+					approverEmployeeId, targetEmployeeIds, period).stream()
 						.collect(Collectors.toList());
 
 			Map<String, List<DateHistoryCache.Entry<AppRootInstance>>> dataInstance = new HashMap<>();
@@ -135,10 +134,9 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 			cacheInstance = KeyDateHistoryCache.loaded(dataInstance);
 			
 			//cacheConfirm読み込み
-			// TODO:加藤君のRepositoryに差し替え
-			List<AppRootConfirm> approuteConfirmlist = appRootConfirmRepository.findByEmpDate(
-					companyId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY).stream()
-						.collect(Collectors.toList());
+			// 日別実績の承認状況を取得する（複数社員・期間）
+			List<AppRootConfirm> approuteConfirmlist = appRootConfirmRepository.findAppRootConfirmDaily(
+					targetEmployeeIds, period).stream().collect(Collectors.toList());
 
 			Map<String, Map<GeneralDate, AppRootConfirm>> dataConfirm = new HashMap<String, Map<GeneralDate, AppRootConfirm>>();
 			for (AppRootConfirm approuteConfirm : approuteConfirmlist) {
@@ -157,16 +155,14 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 
 		@Override
 		public Optional<AppRootInstance> getAppRootInstancesDaily(
-				String approverEmployeeId, String targetEmployeeId, GeneralDate date) {
+				String approverID, String targetEmployeeId, GeneralDate date) {
 			
 			val cached = cacheInstance.get(targetEmployeeId, date);
 			if (cached.isPresent()) return cached;
 			
-			// TODO
-			return appRootInstanceRepository.findByApproverEmployeePeriod(
-					companyId, approverEmployeeId, Arrays.asList(targetEmployeeId), new DatePeriod(date, date), RecordRootType.CONFIRM_WORK_BY_DAY)
-					.stream().findFirst();
-			//return null;
+			// 承認者の日別実績の承認ルートを取得する（対象者指定）（単一日）
+			return appRootInstanceRepository.findAppRootInstanceDailyByApproverTarget(
+					approverID, Arrays.asList(targetEmployeeId), date).stream().findFirst();
 		}
 
 		@Override
@@ -176,8 +172,8 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 			val cached = cacheConfirm.get(targetEmployeeId, date);
 			if (cached.isPresent()) return cached;
 
-			// TODO:加藤君のRepositoryに差し替え
-			return appRootConfirmRepository.findByEmpDate(companyId, targetEmployeeId, date, RecordRootType.CONFIRM_WORK_BY_DAY);
+			// 日別実績の承認状況を取得する（単一社員・単一日）
+			return appRootConfirmRepository.findAppRootConfirmDaily(targetEmployeeId, date);
 		}
 
 		private List<String> cacheReprentRequesterIdsDaily = null;
@@ -252,10 +248,9 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 
 		private void loadCache(List<String> targetEmployeeIds, DatePeriod period) {
 			//cacheInstance読み込み
-			// TODO:加藤君のRepositoryに差し替え
-			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findByEmpLstPeriod(
-					companyId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY).stream()
-						.collect(Collectors.toList());
+			// 対象者の日別実績の承認ルートを取得する（期間）
+			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceDailyByTarget(
+					targetEmployeeIds, period).stream().collect(Collectors.toList());
 
 			Map<String, List<DateHistoryCache.Entry<AppRootInstance>>> dataInstance = new HashMap<>();
 			for (AppRootInstance approuteInstance : approuteInstancelist) {
@@ -270,10 +265,9 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 			cacheInstance = KeyDateHistoryCache.loaded(dataInstance);
 			
 			//cacheConfirm読み込み
-			// TODO:加藤君のRepositoryに差し替え
-			List<AppRootConfirm> approuteConfirmlist = appRootConfirmRepository.findByEmpDate(
-					companyId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY).stream()
-						.collect(Collectors.toList());
+			// 日別実績の承認状況を取得する（複数社員・期間）
+			List<AppRootConfirm> approuteConfirmlist = appRootConfirmRepository.findAppRootConfirmDaily(
+					targetEmployeeIds, period).stream().collect(Collectors.toList());
 
 			Map<String, Map<GeneralDate, AppRootConfirm>> dataConfirm = new HashMap<String, Map<GeneralDate, AppRootConfirm>>();
 			for (AppRootConfirm approuteConfirm : approuteConfirmlist) {
@@ -295,8 +289,9 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 			val cached = cacheInstance.get(targetEmployeeId, date);
 			if (cached.isPresent()) return cached;
 			
-			// TODO:加藤君のRepositoryに差し替え
-			return appRootInstanceRepository.findByEmpDate(companyId, targetEmployeeId, date, RecordRootType.CONFIRM_WORK_BY_DAY);
+			// 対象者の日別実績の承認ルートを取得する（単一日）
+			return appRootInstanceRepository.findAppRootInstanceDailyByTarget(
+					Arrays.asList(targetEmployeeId), date).stream().findFirst();
 			
 		}
 
@@ -306,8 +301,8 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 			val cached = cacheConfirm.get(targetEmployeeId, date);
 			if (cached.isPresent()) return cached;
 
-			// TODO:加藤君のRepositoryに差し替え
-			return appRootConfirmRepository.findByEmpDate(companyId, targetEmployeeId, date, RecordRootType.CONFIRM_WORK_BY_DAY);
+			// 日別実績の承認状況を取得する（単一社員・単一日）
+			return appRootConfirmRepository.findAppRootConfirmDaily(targetEmployeeId, date);
 		}
 		
 	}

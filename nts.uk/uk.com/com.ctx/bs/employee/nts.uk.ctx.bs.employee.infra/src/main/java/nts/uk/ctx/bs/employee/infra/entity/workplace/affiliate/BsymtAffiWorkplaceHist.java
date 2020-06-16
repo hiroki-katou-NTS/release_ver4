@@ -55,6 +55,16 @@ public class BsymtAffiWorkplaceHist extends UkJpaEntity implements Serializable 
 	@Column(name = "END_DATE")
 	private GeneralDate endDate;
 	
+//	 Merge BSYMT_AFF_WORKPLACE_HIST To BSYMT_AFF_WPL_HIST_ITEM  because response
+	/** The workPlaceId. */
+	@Basic(optional = false)
+	@Column(name = "WORKPLACE_ID")
+	private String workPlaceId;
+	
+	/** The workPlaceId. */
+	@Basic(optional = false)
+	@Column(name = "NORMAL_WORKPLACE_ID")
+	private String normalWkpId;
 
 	/**
 	 * Instantiates a new cempt employment.

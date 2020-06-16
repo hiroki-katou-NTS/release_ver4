@@ -5,6 +5,7 @@ import lombok.Getter;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 @AllArgsConstructor
 @Getter
 public class EmpPerformMonthParam {
@@ -33,5 +34,10 @@ public class EmpPerformMonthParam {
 	 * 社員ID
 	 */
 	private String employeeID;
+	
+	public ClosureMonth toClosureMonth() {
+		return new ClosureMonth(this.yearMonth, this.closureID, this.closureDate);
+	}
+
 	
 }

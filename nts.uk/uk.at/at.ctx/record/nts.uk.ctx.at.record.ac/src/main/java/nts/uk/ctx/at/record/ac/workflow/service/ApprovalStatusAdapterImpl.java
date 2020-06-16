@@ -48,6 +48,7 @@ import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootSttMonthExport;
 import nts.uk.ctx.workflow.pub.spr.SprAppRootStatePub;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 /**
  * @author hungnm
@@ -205,13 +206,23 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 	
 	@Override
 	public List<ApproveRootStatusForEmpImport> getApprovalByListEmplAndListApprovalRecordDateNew(
-			List<GeneralDate> approvalRecordDates, List<String> employeeID, Integer rootType) {
-		return intermediateDataPub.getAppRootStatusByEmpsDates(employeeID, approvalRecordDates, rootType).stream()
+			List<GeneralDate> approvalRecordDates, List<String> employeeID) {
+		return intermediateDataPub.getAppRootStatusByEmpsDates(employeeID, approvalRecordDates).stream()
 				.map((pub) -> new ApproveRootStatusForEmpImport(pub.getEmployeeID(), pub.getDate(),
 						EnumAdaptor.valueOf(pub.getDailyConfirmAtr(), ApprovalStatusForEmployee.class)))
 				.collect(Collectors.toList());
 	}
 
+	@Override
+	public List<ApproveRootStatusForEmpImport> getApprovalByListEmplAndListApprovalRecordDateNew(
+			DatePeriod period, ClosureMonth closureMonth, List<String> employeeID) {
+		return intermediateDataPub.getAppRootStatusByEmps(employeeID, period, closureMonth).stream()
+				.map((pub) -> new ApproveRootStatusForEmpImport(pub.getEmployeeID(), pub.getDate(),
+						EnumAdaptor.valueOf(pub.getDailyConfirmAtr(), ApprovalStatusForEmployee.class)))
+				.collect(Collectors.toList());
+	}
+
+	
 	@Override
 	public List<ApproveRootStatusForEmpImport> getAppRootStatusByEmpPeriodMonth(String employeeID, DatePeriod period) {
 		return Collections.emptyList();
@@ -315,13 +326,13 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 
 	@Override
 	public void deleteRootConfirmDay(String employeeID, GeneralDate date) {
-		intermediateDataPub.deleteRootConfirmDay(employeeID, date);
+		intermediateDataPub.clearDailyApprovalStatus(employeeID, date);
 		
 	}
 
 	@Override
 	public void deleteRootConfirmMonth(String employeeID, List<ConfirmDeleteParamImport> confirmDeleteParamLst) {
-		intermediateDataPub.deleteRootConfirmMonth(employeeID,
+		intermediateDataPub.clearMonthlyApprovalStatus(employeeID,
 				confirmDeleteParamLst.stream()
 						.map(x -> new ConfirmDeleteParam(x.getYearMonth(), x.getClosureID(), x.getClosureDate()))
 						.collect(Collectors.toList()));

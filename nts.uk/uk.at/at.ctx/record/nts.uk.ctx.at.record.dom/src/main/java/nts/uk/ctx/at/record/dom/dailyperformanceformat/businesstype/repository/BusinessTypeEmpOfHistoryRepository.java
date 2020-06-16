@@ -11,12 +11,14 @@ public interface BusinessTypeEmpOfHistoryRepository {
 
 	/**
 	 * insert BusinessTypeOfEmployeeHistory
-	 * 
-	 * @param domain:
-	 *            BusinessTypeOfEmployeeHistory
+	 * Merge KRCMT_BUS_TYPE_HIST To KRCMT_BUS_TYPE_SYAIN  because response
+	 * new Insert Method ↓
+	 *       Class      : here
+	 *       MethodName : addToMerge
 	 */
-	void add(String companyId,String employeeId,String historyId, GeneralDate startDate,GeneralDate endDate);
-
+//	void add(String companyId,String employeeId,String historyId, GeneralDate startDate,GeneralDate endDate);
+	void addToMerge(String companyId, String employeeId, String historyId, GeneralDate startDate, GeneralDate endDate, String businessTypeCode);
+	
 	/**
 	 * update BusinessTypeOfEmployeeHistory
 	 * 
@@ -59,6 +61,5 @@ public interface BusinessTypeEmpOfHistoryRepository {
 	 * @return BusinessTypeOfEmployeeHistory
 	 */
 	Optional<BusinessTypeOfEmployeeHistory> findByHistoryId(String historyId);
-	
 
 }

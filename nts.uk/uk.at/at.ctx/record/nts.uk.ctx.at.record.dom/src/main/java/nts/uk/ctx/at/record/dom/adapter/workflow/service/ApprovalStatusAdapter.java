@@ -20,6 +20,7 @@ import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ConfirmDeleteParam
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.EmpPerformMonthParamImport;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 /**
  * @author hungnm
@@ -132,7 +133,7 @@ public interface ApprovalStatusAdapter {
 	
 	/**
 	 * RequestList155
-	 * [No.155]承認対象者リストと日付リストから承認状況を取得する
+	 * [No.155]承認対象者リストと日付リストから日別実績の承認状況を取得する
 	 * getApprovalByListEmplAndListApprovalRecordDate
 	 * @param approvalRecordDates
 	 * @param employeeID
@@ -140,7 +141,21 @@ public interface ApprovalStatusAdapter {
 	 * @param rootType
 	 * @return
 	 */
-	public List<ApproveRootStatusForEmpImport> getApprovalByListEmplAndListApprovalRecordDateNew(List<GeneralDate> approvalRecordDates, List<String> employeeID,Integer rootType);
+	public List<ApproveRootStatusForEmpImport> getApprovalByListEmplAndListApprovalRecordDateNew(List<GeneralDate> approvalRecordDates, List<String> employeeID);
+
+
+	/**
+	 * RequestList155
+	 * [No.155]承認対象者リストと日付リストから月別実績の承認状況を取得する
+	 * getApprovalByListEmplAndListApprovalRecordDate
+	 * @param approvalRecordDates
+	 * @param employeeID
+	 * @param companyID
+	 * @param rootType
+	 * @return
+	 */
+	public List<ApproveRootStatusForEmpImport> getApprovalByListEmplAndListApprovalRecordDateNew(DatePeriod period, ClosureMonth closureMonth, List<String> employeeID);
+
 	
 	/**
 	 * RequestList 532

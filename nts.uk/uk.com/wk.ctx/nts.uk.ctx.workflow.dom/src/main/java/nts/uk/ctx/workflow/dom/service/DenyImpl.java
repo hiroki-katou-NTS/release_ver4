@@ -39,8 +39,8 @@ public class DenyImpl implements DenyService {
 	@Override
 	public Boolean doDeny(String companyID, String rootStateID, String employeeID, String memo, Integer rootType) {
 		Boolean executedFlag = false;
-		Optional<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID, rootType);
-		if(!opApprovalRootState.isPresent()){
+		Optional<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
+		if(opApprovalRootState.isPresent()){
 			throw new RuntimeException("状態：承認ルート取得失敗"+System.getProperty("line.separator")+"error: ApprovalRootState, ID: "+rootStateID);
 		}
 		ApprovalRootState approvalRootState = opApprovalRootState.get();
@@ -91,7 +91,7 @@ public class DenyImpl implements DenyService {
 				approvalPhaseState.setApprovalAtr(ApprovalBehaviorAtr.DENIAL);
 				executedFlag = true;
 			}
-			approvalRootStateRepository.update(approvalRootState, rootType);
+			approvalRootStateRepository.update(approvalRootState);
 			break;
 		}
 		return executedFlag;

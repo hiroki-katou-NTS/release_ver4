@@ -166,10 +166,14 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 		entity.salarySegment = domain.getSalarySegment()!= null? domain.getSalarySegment().value: null;
 	}
 
-	@Override
-	public void add(EmploymentHistoryItem domain) {
-		this.commandProxy().insert(toEntity(domain));
-	}
+//	 Merge BSYMT_EMPLOYMENT_HIST To BSYMT_EMPLOYMENT_HIS_ITEM  because response
+//	 new Insert Method ↓
+//	         ClassName  : JpaEmploymentHistoryRepository
+//	         MethodName : addToMerge
+//	@Override
+//	public void add(EmploymentHistoryItem domain) {
+//		this.commandProxy().insert(toEntity(domain));
+//	}
 
 	@Override
 	public void update(EmploymentHistoryItem domain) {
@@ -430,16 +434,27 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 		}).collect(Collectors.toList());
 	}
 
+	// fix Response_UK_Thang_5 79 
 	@Override
 	public List<EmploymentHistoryOfEmployee> getEmploymentBySID(String employeeId) {
-		List<Object[]> listTemp =  this.queryProxy()
-				.query(SELECT_BY_EMPID, Object[].class)
-				.setParameter("sid", employeeId).getList();
-		
-		if (listTemp == null || listTemp.isEmpty()){
+		String sql = "SELECT ehi.SID, eh.START_DATE, eh.END_DATE, ehi.EMP_CD FROM BSYMT_EMPLOYMENT_HIS_ITEM ehi"
+				+ " INNER JOIN  BSYMT_EMPLOYMENT_HIST eh on eh.HIST_ID = ehi.HIST_ID"
+				+ " WHERE eh.SID = @employeeId ORDER BY eh.START_DATE";
+    	
+    	NtsStatement stmt = new NtsStatement(sql, this.jdbcProxy())
+    			.paramString("employeeId", employeeId);
+    	List<EmploymentHistoryOfEmployee> listTemp =  stmt.getList(x -> {
+				return new EmploymentHistoryOfEmployee(
+						x.getString("SID"), 
+						x.getGeneralDate("START_DATE"), 
+						x.getGeneralDate("END_DATE"), 
+						x.getString("EMP_CD"));
+			});
+    	
+    	if (listTemp == null || listTemp.isEmpty()){
 			return Collections.emptyList();
 		}
-		return  listTemp.stream().map(i -> createDomainFromEntity(i)).collect(Collectors.toList());
+		return listTemp;
 
 		
 	}

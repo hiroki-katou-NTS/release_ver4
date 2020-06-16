@@ -77,7 +77,6 @@ public class KrcmtOptItemFormula extends UkJpaEntity implements Serializable {
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	private KrcmtFormulaSetting krcmtFormulaSetting;
 
-
 	/**
 	 * Instantiates a new krcmt opt item formula.
 	 */

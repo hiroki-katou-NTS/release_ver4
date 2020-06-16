@@ -313,19 +313,15 @@ public class ApprovalStatusMonthly {
 		}
 
 		// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する : RQ462
-//		List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
-//				.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(datePeriod.end()),
-//						Arrays.asList(employeeId), 2); // 2 : 月別確認
 		ClosureMonth cm = new ClosureMonth(yearMonth, closureId, closureDate);
 		List<ApprovalProgressMonthly> lstApprovalStatus = approvalStatusMonthlyAdapter
-				.getProgress(Arrays.asList(employeeId), cm); // 2 : 月別確認
+				.getProgress(Arrays.asList(employeeId), cm, workPeriod); // 2 : 月別確認
+//		List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
+//				.getApprovalByListEmplAndListApprovalRecordDateNew(workPeriod, new ClosureMonth(yearMonth, closureId, closureDate), Arrays.asList(employeeId));
 		if (lstApprovalStatus.isEmpty())
 			return Optional.empty();
 
 		// 対応するImported「基準社員の承認対象者」を取得する RQ463
-		// ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport =
-		// approvalStatusAdapter.getApprovalRootOfEmloyeeNew(datePeriod.end(),
-		// datePeriod.end(), approverId, companyId, 2); // 2 : 月別確認
 		// Change 463(call 133) by 534 for Tú bro - if have bug, Tú will fix,
 		// don't call Phong
 		AppRootOfEmpMonthImport approvalRootOfEmloyee = this.approvalStatusAdapter.getApprovalEmpStatusMonth(
@@ -374,7 +370,7 @@ public class ApprovalStatusMonthly {
 			// sua theo ý anh Tuấn bảo)
 			List<ApproveRootStatusForEmpImport> lstApprovalStatusDay = approvalStatusAdapter
 					.getApprovalByListEmplAndListApprovalRecordDateNew(workPeriod.datesBetween(),
-							Arrays.asList(employeeId), 1); // 1 : 日別確認
+							Arrays.asList(employeeId));
 			val checkDataNotApprovalDay = lstApprovalStatusDay.stream()
 					.filter(x -> x.getApprovalStatus() != ApprovalStatusForEmployee.APPROVED)
 					.collect(Collectors.toList());

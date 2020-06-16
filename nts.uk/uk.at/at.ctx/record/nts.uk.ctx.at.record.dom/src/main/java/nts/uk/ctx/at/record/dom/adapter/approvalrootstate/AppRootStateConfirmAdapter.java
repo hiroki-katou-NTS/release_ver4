@@ -9,5 +9,4 @@ public interface AppRootStateConfirmAdapter {
 
 	void clearAppRootstate(String rootId);
 	
-	void deleteApprovalByEmployeeIdAndDate(String employeeID, GeneralDate date);
 }

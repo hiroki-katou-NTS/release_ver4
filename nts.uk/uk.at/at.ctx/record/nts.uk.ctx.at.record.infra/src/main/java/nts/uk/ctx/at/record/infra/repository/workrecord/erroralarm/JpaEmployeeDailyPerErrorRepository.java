@@ -585,9 +585,44 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 	public boolean checkErrorByPeriodDate(String companyId, String employeeId, GeneralDate strDate, GeneralDate endDate) {
 		DatePeriod period = new DatePeriod(strDate, endDate);
 
-		return !this.findByPeriodOrderByYmdBy(employeeId, period, KrcdtSyainDpErList.class).isEmpty() ||
-				!this.findByPeriodOrderByYmdBy(employeeId, period, KrcdtEmpDivErAl.class).isEmpty() ||
-				!this.findByPeriodOrderByYmdBy(employeeId, period, KrcdtOtkErAl.class).isEmpty();
+//		return !this.findByPeriodOrderByYmdBy(employeeId, period, KrcdtSyainDpErList.class).isEmpty() ||
+//				!this.findByPeriodOrderByYmdBy(employeeId, period, KrcdtEmpDivErAl.class).isEmpty() ||
+//				!this.findByPeriodOrderByYmdBy(employeeId, period, KrcdtOtkErAl.class).isEmpty();
+		
+		return this.checkByPeriodOrderByYmdBy(employeeId, period, KrcdtSyainDpErList.class) ||
+				this.checkByPeriodOrderByYmdBy(employeeId, period, KrcdtEmpDivErAl.class) ||
+				this.checkByPeriodOrderByYmdBy(employeeId, period, KrcdtOtkErAl.class);
+	}
+	
+	private <T extends KrcdtEmpErAlCommon, U extends KrcdtErAttendanceItem> boolean checkByPeriodOrderByYmdBy(String employeeId, DatePeriod datePeriod, Class<T> className) {
+
+		StringBuilder builderString = new StringBuilder();
+		builderString.append("SELECT count(a) FROM ");
+		builderString.append(className.getSimpleName());
+		builderString.append(" a WHERE a.employeeId = :employeeId ");
+		builderString.append("AND a.processingDate >= :start ");
+		builderString.append("AND a.processingDate <= :end ");
+		String FIND_BY_PERIOD_ORDER_BY_YMD = builderString.toString();
+		
+		long errorExist = this.queryProxy()
+				.query(FIND_BY_PERIOD_ORDER_BY_YMD, Long.class)
+				.setParameter("employeeId", employeeId)
+				.setParameter("start", datePeriod.start())
+				.setParameter("end", datePeriod.end())
+				.getSingleOrNull();
+		
+		return errorExist > 0;
+//		Class<U> cl = (Class<U>) getFrom(className);
+//		Collection<List<String>> splitIds = CollectionUtil.partitionBySize(ids,  DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT);
+//		for(List<String> sbId:  splitIds) {
+//			int exist = this.queryProxy()
+//					.query("SELECT count(e.iD) FROM " + cl.getSimpleName() + " e WHERE e.krcdtErAttendanceItemPK.iD in :er", Integer.class)
+//					.setParameter("er", sbId)
+//					.getSingleOrNull();
+//			if(exist > 0) {
+//				return true;
+//			}
+//		}
 	}
 
 	@Override

@@ -12,6 +12,7 @@ import nts.uk.ctx.workflow.dom.service.output.ApprovalRootStateStatus;
 import nts.uk.ctx.workflow.dom.service.output.Request113Output;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 /**
  * 中間データ版
  * @author Doan Duy Hung
@@ -28,6 +29,10 @@ public interface AppRootInstanceService {
 	 */
 	public Request113Output getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType);
 	
+	public Request113Output getDailyAppRootStatus(List<String> employeeIDLst, DatePeriod period);
+
+	public Request113Output getMonthlyAppRootStatus(List<String> employeeIDLst, DatePeriod period, ClosureMonth closureMonth);
+
 	public List<ApprovalRootStateStatus> getAppRootStatusByEmpsPeriod(String compID, List<String> employeeIDLst, DatePeriod period, RecordRootType rootType);
 	
 	/**

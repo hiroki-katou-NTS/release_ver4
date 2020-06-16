@@ -70,10 +70,14 @@ public class JpaAffJobTitleHistoryItemRepository extends JpaRepository
 		entity.note = domain.getNote().v();
 	}
 
-	@Override
-	public void add(AffJobTitleHistoryItem domain) {
-		this.commandProxy().insert(toEntity(domain));
-	}
+//	 Merge BSYMT_AFF_JOB_HIST To BSYMT_AFF_JOB_HIST_ITEM  because response
+//	 new Insert Method ↓
+//	         ClassName  : JpaAffJobTitleHistoryRepository
+//	         MethodName : addToMerge
+//	@Override
+//	public void add(AffJobTitleHistoryItem domain) {
+//		this.commandProxy().insert(toEntity(domain));
+//	}
 
 	@Override
 	public void update(AffJobTitleHistoryItem domain) {
@@ -182,12 +186,14 @@ public class JpaAffJobTitleHistoryItemRepository extends JpaRepository
 			try (PreparedStatement statement = this.connection().prepareStatement(
 						"SELECT hi.HIST_ID, hi.SID, hi.JOB_TITLE_ID, hi.NOTE from BSYMT_AFF_JOB_HIST_ITEM hi"
 						+ " INNER JOIN BSYMT_AFF_JOB_HIST h ON hi.HIST_ID = h.HIST_ID"
-						+ " WHERE h.START_DATE <= ? and h.END_DATE >= ? AND h.SID IN (" + subList.stream().map(s -> "?").collect(Collectors.joining(",")) + ")")) {
-				statement.setDate(1, Date.valueOf(referDate.localDate()));
-				statement.setDate(2, Date.valueOf(referDate.localDate()));
-				for (int i = 0; i < subList.size(); i++) {
-					statement.setString(i + 3, subList.get(i));
-				}
+                        + " WHERE h.SID IN (" + subList.stream().map(s -> "?").collect(Collectors.joining(",")) + ")"
+                        + " AND h.START_DATE <= ? and h.END_DATE >= ? "
+                    )) {
+                for (int i = 0; i < subList.size(); i++) {
+                    statement.setString(i + 1, subList.get(i));
+                }
+                statement.setDate(subList.size()+1, Date.valueOf(referDate.localDate()));
+                statement.setDate(subList.size()+2, Date.valueOf(referDate.localDate()));
 				data.addAll(new NtsResultSet(statement.executeQuery()).getList(rec -> {
 					return AffJobTitleHistoryItem.createFromJavaType(rec.getString("HIST_ID"), rec.getString("SID"),
 																	rec.getString("JOB_TITLE_ID"), rec.getString("NOTE"));

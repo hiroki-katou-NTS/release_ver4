@@ -24,7 +24,6 @@ import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirmRepository;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstanceRepository;
-import nts.uk.ctx.workflow.dom.resultrecord.RecordRootType;
 import nts.uk.ctx.workflow.dom.resultrecord.status.internal.RouteConfirmProgress;
 import nts.uk.ctx.workflow.dom.resultrecord.status.monthly.GetRouteConfirmStatusMonthlyApprover;
 import nts.uk.ctx.workflow.dom.resultrecord.status.monthly.GetRouteConfirmStatusMonthlyTarget;
@@ -35,6 +34,7 @@ import nts.uk.ctx.workflow.pub.resultrecord.monthly.MonthlyRecordApprovalPub;
 import nts.uk.ctx.workflow.pub.resultrecord.monthly.MonthlySubjectiveStatus;
 import nts.uk.ctx.workflow.pubimp.resultrecord.internal.ConvertRecordApproval;
 import nts.uk.shr.com.context.AppContexts;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.shr.com.time.closure.ClosureMonth;
 
 @Stateless
@@ -52,15 +52,17 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 	
 	@Override
 	public List<MonthlySubjectiveStatus> getSubjectiveStatus(
-			String approverEmployeeId, List<String> targetEmployeeIds, ClosureMonth closureMonth) {
+			String approverEmployeeId, List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period) {
 		
-		val require = new RequireGetSubjectiveStatus(approverEmployeeId, targetEmployeeIds, closureMonth);
+		val require = new RequireGetSubjectiveStatus(approverEmployeeId, targetEmployeeIds, closureMonth, period);
 		
 		List<MonthlySubjectiveStatus> results = new ArrayList<>();
 		for (String targetEmployeeId : targetEmployeeIds) {
-			GetRouteConfirmStatusMonthlyApprover.get(require, approverEmployeeId, targetEmployeeId, closureMonth)
-				.map(status -> toExport(approverEmployeeId, require, closureMonth, status))
-				.ifPresent(r -> results.add(r));
+			results.addAll(
+				GetRouteConfirmStatusMonthlyApprover.get(require, approverEmployeeId, targetEmployeeId, closureMonth, period).stream()
+					.map(status -> toExport(approverEmployeeId, require, closureMonth, status))
+					.collect(Collectors.toList())
+			);
 		}
 		
 		return results;
@@ -86,35 +88,38 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 
 		private final String companyId = AppContexts.user().companyId();
 
-		private NestedMapCache<String, ClosureMonth, AppRootInstance> cacheInstance;
+		private NestedMapCache<String, DatePeriod, List<AppRootInstance>> cacheInstance;
 		private NestedMapCache<String, ClosureMonth, AppRootConfirm> cacheConfirm;
 		
-		public RequireGetSubjectiveStatus(String approverEmployeeId, List<String> targetEmployeeIds, ClosureMonth closureMonth) {
+		public RequireGetSubjectiveStatus(String approverEmployeeId, List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period) {
 			//cacheInstance読み込み
-			// TODO:加藤君のRepositoryに差し替え
-			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findByApproverEmployeePeriod(
-					companyId, approverEmployeeId, targetEmployeeIds, closureMonth.defaultPeriod(), RecordRootType.CONFIRM_WORK_BY_MONTH).stream()
+			// 承認者の月別実績の承認ルートを取得する（対象者指定）（期間）
+			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceMonthlyByApproverTarget(
+					approverEmployeeId, targetEmployeeIds, closureMonth.defaultPeriod()).stream()
 						.collect(Collectors.toList());
 
-			Map<String, Map<ClosureMonth, AppRootInstance>> dataInstance = new HashMap<String, Map<ClosureMonth, AppRootInstance>>();
-			for (AppRootInstance approuteInstance : approuteInstancelist) {
-				if (!dataInstance.containsKey(approuteInstance.getEmployeeID())) {
-					Map<ClosureMonth, AppRootInstance> data = new TreeMap<ClosureMonth, AppRootInstance>() {{ 
-						put (closureMonth, approuteInstance); }};
-						dataInstance.put (approuteInstance.getEmployeeID(), data); 
+			Map<String, Map<DatePeriod, List<AppRootInstance>>> dataInstance = new HashMap<String, Map<DatePeriod, List<AppRootInstance>>>();
+
+			for (String targetEmployeeId : targetEmployeeIds) {
+				List<AppRootInstance> approuteInstance = approuteInstancelist.stream()
+						.filter(instance -> instance.getEmployeeID().equals(targetEmployeeId))
+						.collect(Collectors.toList());
+				if (!dataInstance.containsKey(targetEmployeeId)) {
+					Map<DatePeriod, List<AppRootInstance>> data = new TreeMap<DatePeriod, List<AppRootInstance>>() {{ 
+						put (period, approuteInstance); }};
+						dataInstance.put (targetEmployeeId, data); 
 				}
 				else {
-					dataInstance.get(approuteInstance.getEmployeeID()).put(closureMonth, approuteInstance);
+					dataInstance.get(targetEmployeeId).put(period, approuteInstance);
 				}
 			}
 			
 			cacheInstance = NestedMapCache.preloadedAll(dataInstance);
 			
 			//cacheConfirm読み込み
-			// TODO:加藤君のRepositoryに差し替え
-			List<AppRootConfirm> approuteConfirmlist = appRootConfirmRepository.findByEmpDate(
-					companyId, targetEmployeeIds, closureMonth.defaultPeriod(), RecordRootType.CONFIRM_WORK_BY_MONTH).stream()
-						.collect(Collectors.toList());
+			// 月別実績の承認状況を取得する（複数社員・単一集計期間）
+			List<AppRootConfirm> approuteConfirmlist = appRootConfirmRepository.findAppRootConfirmMonthly(
+					targetEmployeeIds, closureMonth).stream().collect(Collectors.toList());
 
 			Map<String, Map<ClosureMonth, AppRootConfirm>> dataConfirm = new HashMap<String, Map<ClosureMonth, AppRootConfirm>>();
 			for (AppRootConfirm approuteConfirm : approuteConfirmlist) {
@@ -132,15 +137,14 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 		}
 
 		@Override
-		public Optional<AppRootInstance> getAppRootInstancesMonthly(String approverId, String targetEmployeeId,
-				ClosureMonth closureMonth) {
-			val cached = cacheInstance.get(targetEmployeeId, closureMonth);
-			if (cached.isPresent()) return cached;
+		public List<AppRootInstance> getAppRootInstancesMonthly(
+				String approverId, String targetEmployeeId, ClosureMonth closureMonth, DatePeriod period) {
+			val cached = cacheInstance.get(targetEmployeeId, period);
+			if (cached.isPresent()) return cached.get();
 			
-			// TODO
-			return appRootInstanceRepository.findByApproverEmployeePeriod(
-					companyId, approverId, Arrays.asList(targetEmployeeId), closureMonth.defaultPeriod(), RecordRootType.CONFIRM_WORK_BY_MONTH)
-					.stream().findFirst();
+			// 承認者の月別実績の承認ルートを取得する（対象者指定）（期間）
+			return appRootInstanceRepository.findAppRootInstanceMonthlyByApproverTarget(
+					approverId, Arrays.asList(targetEmployeeId), period);
 		}
 
 		@Override
@@ -148,10 +152,8 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 			val cached = cacheConfirm.get(targetEmployeeId, closureMonth);
 			if (cached.isPresent()) return cached;
 
-			// TODO:加藤君のRepositoryに差し替え
-			return appRootConfirmRepository.findByEmpDate(
-					companyId, Arrays.asList(targetEmployeeId), closureMonth.defaultPeriod(), RecordRootType.CONFIRM_WORK_BY_MONTH).stream()
-					.findFirst();
+			// 月別実績の承認状況を取得する（単一社員・単一集計期間）
+			return appRootConfirmRepository.findAppRootConfirmMonthly(targetEmployeeId, closureMonth);
 		}
 		
 		private List<String> cacheReprentRequesterIdsDaily = null;
@@ -170,16 +172,18 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 	}
 
 	@Override
-	public List<MonthlyApprovalProgress> getApprovalProgress(List<String> targetEmployeeIds, ClosureMonth closureMonth) {
+	public List<MonthlyApprovalProgress> getApprovalProgress(List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period) {
 
-		val require = new RequireGetTargetStatus(targetEmployeeIds, closureMonth);
+		val require = new RequireGetTargetStatus(targetEmployeeIds, closureMonth, period);
 		
 		List<MonthlyApprovalProgress> results = new ArrayList<>();
 		
 		for (String targetEmployeeId : targetEmployeeIds) {
-			GetRouteConfirmStatusMonthlyTarget.get(require, targetEmployeeId, closureMonth)
-				.map(r -> toExport(r))
-				.ifPresent(r -> results.add(r));
+			results.addAll(
+				GetRouteConfirmStatusMonthlyTarget.get(require, targetEmployeeId, closureMonth).stream()
+					.map(r -> toExport(r))
+					.collect(Collectors.toList())
+			);
 		}
 		
 		return results;
@@ -204,35 +208,36 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 
 		private final String companyId = AppContexts.user().companyId();
 
-		private NestedMapCache<String, ClosureMonth, AppRootInstance> cacheInstance;
+		private NestedMapCache<String, ClosureMonth, List<AppRootInstance>> cacheInstance;
 		private NestedMapCache<String, ClosureMonth, AppRootConfirm> cacheConfirm;
 		
-		public RequireGetTargetStatus(List<String> targetEmployeeIds, ClosureMonth closureMonth) {
+		public RequireGetTargetStatus(List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period) {
 			//cacheInstance読み込み
-			// TODO:加藤君のRepositoryに差し替え
-			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findByEmpLstPeriod(
-					companyId, targetEmployeeIds, closureMonth.defaultPeriod(), RecordRootType.CONFIRM_WORK_BY_MONTH).stream()
-						.collect(Collectors.toList());
+			// 対象者の月別実績の承認ルートを取得する（期間）
+			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(
+					targetEmployeeIds, period).stream().collect(Collectors.toList());
 
-			Map<String, Map<ClosureMonth, AppRootInstance>> dataInstance = new HashMap<String, Map<ClosureMonth, AppRootInstance>>();
-			for (AppRootInstance approuteInstance : approuteInstancelist) {
-				if (!dataInstance.containsKey(approuteInstance.getEmployeeID())) {
-					Map<ClosureMonth, AppRootInstance> data = new TreeMap<ClosureMonth, AppRootInstance>() {{ 
+			Map<String, Map<ClosureMonth, List<AppRootInstance>>> dataInstance = new HashMap<String, Map<ClosureMonth, List<AppRootInstance>>>();
+			for (String targetEmployeeId : targetEmployeeIds) {
+				List<AppRootInstance> approuteInstance = approuteInstancelist.stream()
+						.filter(instance -> instance.getEmployeeID().equals(targetEmployeeId))
+						.collect(Collectors.toList());
+				if (!dataInstance.containsKey(targetEmployeeId)) {
+					Map<ClosureMonth, List<AppRootInstance>> data = new TreeMap<ClosureMonth, List<AppRootInstance>>() {{ 
 						put (closureMonth, approuteInstance); }};
-						dataInstance.put (approuteInstance.getEmployeeID(), data); 
+						dataInstance.put (targetEmployeeId, data); 
 				}
 				else {
-					dataInstance.get(approuteInstance.getEmployeeID()).put(closureMonth, approuteInstance);
+					dataInstance.get(targetEmployeeId).put(closureMonth, approuteInstance);
 				}
 			}
 			
 			cacheInstance = NestedMapCache.preloadedAll(dataInstance);
 			
 			//cacheConfirm読み込み
-			// TODO:加藤君のRepositoryに差し替え
-			List<AppRootConfirm> approuteConfirmlist = appRootConfirmRepository.findByEmpDate(
-					companyId, targetEmployeeIds, closureMonth.defaultPeriod(), RecordRootType.CONFIRM_WORK_BY_MONTH).stream()
-						.collect(Collectors.toList());
+			// 月別実績の承認状況を取得する（複数社員・単一集計期間）
+			List<AppRootConfirm> approuteConfirmlist = appRootConfirmRepository.findAppRootConfirmMonthly(
+					targetEmployeeIds, closureMonth).stream().collect(Collectors.toList());
 
 			Map<String, Map<ClosureMonth, AppRootConfirm>> dataConfirm = new HashMap<String, Map<ClosureMonth, AppRootConfirm>>();
 			for (AppRootConfirm approuteConfirm : approuteConfirmlist) {
@@ -251,13 +256,12 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 		}
 
 		@Override
-		public Optional<AppRootInstance> getAppRootInstancesMonthly(String targetEmployeeId,
-				ClosureMonth closureMonth) {
+		public List<AppRootInstance> getAppRootInstancesMonthly(String targetEmployeeId, ClosureMonth closureMonth) {
 			val cached = cacheInstance.get(targetEmployeeId, closureMonth);
-			if (cached.isPresent()) return cached;
+			if (cached.isPresent()) return cached.get();
 			
-			// TODO:加藤君のRepositoryに差し替え
-			return appRootInstanceRepository.findByEmpDate(companyId, targetEmployeeId, closureMonth.defaultPeriod().end(), RecordRootType.CONFIRM_WORK_BY_DAY);
+			// 対象者の月別実績の承認ルートを取得する（期間）
+			return appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(Arrays.asList(targetEmployeeId), closureMonth.defaultPeriod());
 		}
 
 		@Override
@@ -265,8 +269,8 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 			val cached = cacheConfirm.get(targetEmployeeId, closureMonth);
 			if (cached.isPresent()) return cached;
 
-			// TODO:加藤君のRepositoryに差し替え
-			return appRootConfirmRepository.findByEmpDate(companyId, targetEmployeeId, closureMonth.defaultPeriod().end(), RecordRootType.CONFIRM_WORK_BY_DAY);
+			// 月別実績の承認状況を取得する（単一社員・単一集計期間） 
+			return appRootConfirmRepository.findAppRootConfirmMonthly(targetEmployeeId, closureMonth);
 		}
 	}
 }

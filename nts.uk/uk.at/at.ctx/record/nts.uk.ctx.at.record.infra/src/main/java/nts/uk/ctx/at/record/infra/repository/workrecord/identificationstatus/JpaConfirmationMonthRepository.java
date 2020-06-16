@@ -1,6 +1,5 @@
 package nts.uk.ctx.at.record.infra.repository.workrecord.identificationstatus;
 
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -11,11 +10,9 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
-import lombok.val;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
-import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
@@ -86,28 +83,26 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<ConfirmationMonth> findBySomeProperty(List<String> employeeIds, ClosureMonth closureMonth) {
+		String sql = "SELECT * from KRCDT_CONFIRMATION_MONTH h "
+				+ " WHERE " + " h.SID IN @employeeIds "
+				+ " AND h.PROCESS_YM = @processYM "
+				+ " AND h.CLOSURE_DAY = @closureDate "
+				+ " AND h.IS_LAST_DAY = @isLastDayOfMonth "
+				+ " AND h.CLOSURE_ID = @closureId ";
 		List<ConfirmationMonth> data = new ArrayList<>();
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			try (PreparedStatement statement = this.connection().prepareStatement(
-						"SELECT * from KRCDT_CONFIRMATION_MONTH h WHERE h.CLOSURE_DAY = ? AND h.IS_LAST_DAY = ? AND h.PROCESS_YM = ?"
-						+ " AND h.CLOSURE_ID = ? AND h.SID IN (" + subList.stream().map(s -> "?").collect(Collectors.joining(",")) + ")")) {
-				statement.setInt(1, closureMonth.closureDate().getClosureDay().v());
-				statement.setInt(2, closureMonth.closureDate().getLastDayOfMonth() ? 1 : 0);
-				statement.setInt(3, closureMonth.yearMonth().v());
-				statement.setInt(4, closureMonth.closureId());
-				for (int i = 0; i < subList.size(); i++) {
-					statement.setString(i + 5, subList.get(i));
-				}
-
-			ClosureId cloId = ClosureId.valueOf(closureMonth.closureId());
-				data.addAll(new NtsResultSet(statement.executeQuery()).getList(rec -> {
-					return new ConfirmationMonth(new CompanyId(rec.getString("CID")),
-							rec.getString("SID"), cloId, closureMonth.closureDate(), closureMonth.yearMonth(),
-							rec.getGeneralDate("IDENTIFY_DATE"));
-				}));
-			}catch (Exception e) {
-				throw new RuntimeException(e);
-			}
+			data.addAll(new NtsStatement(sql, this.jdbcProxy())
+					.paramString("employeeIds", subList)
+					.paramInt("processYM", closureMonth.yearMonth().v())
+					.paramInt("closureDate", closureMonth.closureDate().getClosureDay().v())
+					.paramInt("isLastDayOfMonth", closureMonth.closureDate().getLastDayOfMonth()?1:0)
+					.paramInt("closureId", closureMonth.closureId())
+					.getList(rec -> {
+						ClosureId cloId = ClosureId.valueOf(closureMonth.closureId());
+						return new ConfirmationMonth(new CompanyId(rec.getString("CID")),
+								rec.getString("SID"), cloId, closureMonth.closureDate(), closureMonth.yearMonth(), 
+								rec.getGeneralDate("IDENTIFY_DATE"));
+					}));
 		});
 
 		return data;
@@ -124,25 +119,23 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 
 		return data;
 	}
-
+	
 	@SneakyThrows
 	private List<ConfirmationMonth> internalQuery(List<String> subList, List<YearMonth> ym) {
-		String subEmp = NtsStatement.In.createParamsString(subList);
-		String subYm = NtsStatement.In.createParamsString(ym);
-		try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_CONFIRMATION_MONTH WHERE PROCESS_YM IN (" + subYm +") AND SID IN (" + subEmp + ")")){
-			for (int i = 0; i < ym.size(); i++) {
-				stmt.setInt(i + 1, ym.get(i).v());
-			}
-			for (int i = 0; i < subList.size(); i++) {
-				stmt.setString(i + 1 + ym.size(), subList.get(i));
-			}
-			return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
-				return new ConfirmationMonth(new CompanyId(rec.getString("CID")), rec.getString("SID"),
-						EnumAdaptor.valueOf(rec.getInt("CLOSURE_ID"), ClosureId.class),
-						new ClosureDate(rec.getInt("CLOSURE_DAY"), rec.getBoolean("IS_LAST_DAY")),
-						new YearMonth(rec.getInt("PROCESS_YM")),
-						rec.getGeneralDate("IDENTIFY_DATE"));
-			});
-		}
+		String sql = "SELECT * FROM KRCDT_CONFIRMATION_MONTH WHERE SID IN @subEmp AND PROCESS_YM IN @subYm ";
+		List<ConfirmationMonth> data = new NtsStatement(sql, this.jdbcProxy())
+				.paramString("subEmp", subList)
+				.paramString("subYm", ym.stream().map(c->c.v().toString()).collect(Collectors.toList()))
+				.getList(rec -> {
+					return new ConfirmationMonth(new CompanyId(rec.getString("CID")), rec.getString("SID"), 
+							EnumAdaptor.valueOf(rec.getInt("CLOSURE_ID"), ClosureId.class), 
+							new ClosureDate(rec.getInt("CLOSURE_DAY"), rec.getBoolean("IS_LAST_DAY")), 
+							new YearMonth(rec.getInt("PROCESS_YM")), 
+							rec.getGeneralDate("IDENTIFY_DATE"));
+				});
+		return data;
 	}
+	
+	
+	
 }

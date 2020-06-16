@@ -43,6 +43,11 @@ public class BsymtAffClassHistory extends UkJpaEntity{
 	@Column(name = "END_DATE")
 	public GeneralDate endDate;
 	
+//	 Merge BSYMT_AFF_CLASS_HISTORY To BSYMT_AFF_CLASS_HIS_ITEM  because response
+	/** The classification code. */
+	@Column(name = "CLASSIFICATION_CODE")
+	public String classificationCode;
+	
 	/** The bsymt aff class hist item. */
 	@OneToOne
 	@PrimaryKeyJoinColumns({ @PrimaryKeyJoinColumn(name = "HIST_ID", referencedColumnName = "HIST_ID") })
@@ -65,13 +70,14 @@ public class BsymtAffClassHistory extends UkJpaEntity{
 	 * @param endDate the end date
 	 */
 	public BsymtAffClassHistory(String historyId, String cid, String sid,
-			GeneralDate startDate, GeneralDate endDate) {
+			GeneralDate startDate, GeneralDate endDate, String classificationCode) {
 		super();
 		this.historyId = historyId;
 		this.cid = cid;
 		this.sid = sid;
 		this.startDate = startDate;
 		this.endDate = endDate;
+		this.classificationCode = classificationCode;
 	}
 	
 	/* (non-Javadoc)

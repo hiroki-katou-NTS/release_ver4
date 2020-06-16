@@ -13,6 +13,7 @@ import javax.ejb.Stateless;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.sys.portal.dom.webmenu.webmenulinking.RoleSetLinkWebMenu;
 import nts.uk.ctx.sys.portal.dom.webmenu.webmenulinking.RoleSetLinkWebMenuRepository;
@@ -89,11 +90,17 @@ public class JpaRoleSetLinkWebMenuRepository extends JpaRepository implements Ro
 
     @Override
     public List<RoleSetLinkWebMenu> findByRoleSetCd(String companyId, String roleSetCd) {
-        return this.queryProxy().query(SELECT_All_ROLE_SET_AND_WEB_MENU_BY_COMPANY_ID_AND_ROLE_SET_CD
-                , SptmtRoleSetWebMenu.class)
-                .setParameter("companyId", companyId)
-                .setParameter("roleSetCd", roleSetCd)
-                .getList(c -> toDomain(c));
+    	String sql = " SELECT * FROM SPTMT_ROLE_SET_WEB_MENU WITH(INDEX(SPTMT_ROLE_SET_WEB_MENU_P)) WHERE CID = @companyId AND ROLE_SET_CD = @roleSetCd ";
+    	List<RoleSetLinkWebMenu> resultList = new NtsStatement(sql, this.jdbcProxy())
+    			.paramString("companyId", companyId)
+    			.paramString("roleSetCd", roleSetCd)
+    			.getList(rec -> {
+    				return new RoleSetLinkWebMenu(
+    						rec.getString("CID"),
+    				    	rec.getString("ROLE_SET_CD"),
+    						rec.getString("WEB_MENU_CD"));
+    			});
+        return resultList;
     }
 
     public List<RoleSetLinkWebMenu> findByListRoleSetCd(String companyId, List<String> roleSetCds) {

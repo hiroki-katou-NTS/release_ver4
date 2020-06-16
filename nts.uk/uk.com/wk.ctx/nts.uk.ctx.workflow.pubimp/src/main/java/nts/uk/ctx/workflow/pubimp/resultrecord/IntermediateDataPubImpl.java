@@ -71,6 +71,7 @@ import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 /**
  * 
@@ -109,8 +110,7 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	private EmployeeAdapter employeeAdapter;
 
 	@Override
-	public Request113Export getAppRootStatusByEmpPeriod(List<String> employeeIDLst, DatePeriod period,
-			Integer rootType) throws BusinessException {
+	public Request113Export getAppRootStatusByEmpPeriod(List<String> employeeIDLst, DatePeriod period, Integer rootType) throws BusinessException {
 		Request113Output result = appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class));
 		return new Request113Export(
 				result.getAppRootStatusLst().stream()
@@ -121,21 +121,50 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	}
 
 	@Override
+	public Request113Export getDailyAppRootStatus(List<String> employeeIDLst, DatePeriod period) throws BusinessException {
+		Request113Output result = appRootInstanceService.getDailyAppRootStatus(employeeIDLst, period);
+		return new Request113Export(
+				result.getAppRootStatusLst().stream()
+					.map(x -> new AppRootStateStatusSprExport(x.getDate(), x.getEmployeeID(), x.getDailyConfirmAtr().value)).collect(Collectors.toList()), 
+				result.isErrorFlg(), 
+				result.getErrorMsgID(), 
+				result.getEmpLst());
+	}
+
+	@Override
+	public Request113Export getMonthlyAppRootStatus(List<String> employeeIDLst, DatePeriod  period, ClosureMonth closureMonth) throws BusinessException {
+		Request113Output result = appRootInstanceService.getMonthlyAppRootStatus(employeeIDLst, period, closureMonth);
+		return new Request113Export(
+				result.getAppRootStatusLst().stream()
+					.map(x -> new AppRootStateStatusSprExport(x.getDate(), x.getEmployeeID(), x.getDailyConfirmAtr().value)).collect(Collectors.toList()), 
+				result.isErrorFlg(), 
+				result.getErrorMsgID(), 
+				result.getEmpLst());
+	}
+
+	
+	@Override
 	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsDates(List<String> employeeIDLst,
-			List<GeneralDate> dateLst, Integer rootType) {
+			List<GeneralDate> dateLst) {
 		List<AppRootStateStatusSprExport> result = new ArrayList<>();
 		List<DatePeriod> periods = DatePeriod.create(dateLst);
 		periods.forEach(period -> {
-			result.addAll(appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class)).getAppRootStatusLst()
+			result.addAll(appRootInstanceService.getDailyAppRootStatus(employeeIDLst, period).getAppRootStatusLst()
 			.stream().map(x -> convertStatusFromDomain(x)).collect(Collectors.toList()));
 		});
 		return result;
 	}
 
 	@Override
+	public List<AppRootStateStatusSprExport> getAppRootStatusByEmps(List<String> employeeIDLst, DatePeriod  period, ClosureMonth closureMonth) {
+		return appRootInstanceService.getMonthlyAppRootStatus(employeeIDLst, period, closureMonth).getAppRootStatusLst()
+			.stream().map(x -> convertStatusFromDomain(x)).collect(Collectors.toList());
+	}
+
+	@Override
 	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period,
 			Integer rootType) {
-		return appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class)).getAppRootStatusLst()
+		return appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, RecordRootType.of(rootType)).getAppRootStatusLst()
 			.stream().map(x -> convertStatusFromDomain(x)).collect(Collectors.toList());
 	}
 	
@@ -144,7 +173,7 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 			Integer rootType) {
 		String companyID = AppContexts.user().companyId();
 		
-		return appRootInstanceService.getAppRootStatusByEmpsPeriod(companyID, employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class))
+		return appRootInstanceService.getAppRootStatusByEmpsPeriod(companyID, employeeIDLst, period, RecordRootType.of(rootType))
 			.stream().map(x -> convertStatusFromDomain(x)).collect(Collectors.toList());
 	}
 	
@@ -325,11 +354,18 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 		
 		return convertToPub(approvalEmpStatus);
 	}
-
+	
 	@Override
 	public void cleanApprovalRootState(String employeeID, GeneralDate date, Integer rootType) {
-		String companyID = AppContexts.user().companyId();
-		appRootConfirmRepository.clearStatus(companyID, employeeID, date, EnumAdaptor.valueOf(rootType, RecordRootType.class));
+		if (RecordRootType.of(rootType) == RecordRootType.CONFIRM_WORK_BY_MONTH) {
+			throw new RuntimeException("月次には対応しない");
+		}
+		Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmDaily(employeeID, date);
+		if(opAppRootConfirm.isPresent()){
+			AppRootConfirm appRootConfirm = opAppRootConfirm.get();
+			appRootConfirm.setListAppPhase(new ArrayList<>());
+			appRootConfirmRepository.update(appRootConfirm);
+		}
 	}
 
 	@Override
@@ -347,10 +383,41 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	}
 
 	@Override
-	public void deleteApprovalStatus(String employeeID, GeneralDate date, Integer rootType) {
-		String companyID =  AppContexts.user().companyId();
-		this.appRootConfirmRepository.deleteByRequestList424(companyID, employeeID, date, rootType);
+	public void clearDailyApprovalStatus(String employeeID, GeneralDate date) {
+		Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmDaily(employeeID, date);
+		if(opAppRootConfirm.isPresent()){
+			AppRootConfirm appRootConfirm = opAppRootConfirm.get();
+			appRootConfirm.setListAppPhase(new ArrayList<>());
+			appRootConfirmRepository.update(appRootConfirm);
+		}
 	}
+	
+	@Override
+	public void clearMonthlyApprovalStatus(String employeeID, ConfirmDeleteParam confirmDeleteParam) {
+		Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmMonthly(employeeID, confirmDeleteParam.toClosureMonth());
+		if(opAppRootConfirm.isPresent()){
+			AppRootConfirm appRootConfirm = opAppRootConfirm.get();
+			appRootConfirm.setListAppPhase(new ArrayList<>());
+			appRootConfirmRepository.update(appRootConfirm);
+		}
+	}
+
+	@Override
+	public void clearMonthlyApprovalStatus(String employeeID, List<ConfirmDeleteParam> confirmDeleteParamLst) {
+		for(ConfirmDeleteParam confirmDeleteParam : confirmDeleteParamLst){
+			clearMonthlyApprovalStatus(employeeID, confirmDeleteParam);
+		}
+	}
+	
+	@Override
+	//修正が必要　加藤メモ（現在日次しか消してない。日次と月次同時に消す必要がある）
+	public void deleteApprovalStatus(String employeeID, GeneralDate date, Integer rootType) {
+		if (RecordRootType.of(rootType) == RecordRootType.CONFIRM_WORK_BY_MONTH) {
+			throw new RuntimeException("月次には対応しない");
+		}
+		this.appRootConfirmRepository.deleteAppRootConfirmDaily(employeeID, date);
+	}
+	
 
 	@Override
 	public void approveMonth(String approverID, List<EmpPerformMonthParam> empPerformMonthParamLst) {
@@ -383,8 +450,7 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 			ClosureDate closureDate) {
 		String companyID = AppContexts.user().companyId();
 		
-		Optional<AppRootConfirm> opAppRootConfirm =
-				appRootConfirmRepository.findByEmpMonth(companyID, employeeID, yearMonth, closureID, closureDate, RecordRootType.CONFIRM_WORK_BY_MONTH);
+		Optional<AppRootConfirm> opAppRootConfirm =	appRootConfirmRepository.findAppRootConfirmMonthly(employeeID, new ClosureMonth(yearMonth, closureID, closureDate));
 		if(!opAppRootConfirm.isPresent()){
 			String rootID = IdentifierUtil.randomUniqueId();
 			
@@ -423,27 +489,10 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 		};
 		return result;
 	}
+	
 
 	@Override
-	public List<AppRootSttMonthExport> getAppRootStatusByEmpPeriodMonth(String employeeID, DatePeriod period) {
-		String companyID = AppContexts.user().employeeId();
-		// ドメインモデル「就業実績確認状態」を取得する
-		AppRootConfirm appRootConfirm = appRootConfirmRepository.findByEmpPeriodMonth(companyID, employeeID, period).get();
-		// ドメインモデル「中間データ」を取得する
-		AppRootInstance appRootInstance = appRootInstanceRepository.findByContainDate(companyID, employeeID, appRootConfirm.getRecordDate(), 
-				RecordRootType.CONFIRM_WORK_BY_MONTH).get();
-		// 中間データから承認ルートインスタンスに変換する
-		ApprovalRootState approvalRootState = appRootInstanceService.convertFromAppRootInstance(appRootInstance, appRootConfirm);
-		// 承認ルート状況を取得する
-		return approvalRootStateStatusService.getApprovalRootStateStatus(Arrays.asList(approvalRootState))
-				.stream().map(x -> convertSttToMonthFromDomain(x, appRootConfirm.getYearMonth().get(), appRootConfirm.getClosureID().get(), appRootConfirm.getClosureDate().get()))
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public Request533Export getAppRootStatusByEmpsMonth(
-			List<EmpPerformMonthParam> empPerformMonthParamLst) throws BusinessException{
-		String companyID = AppContexts.user().companyId();
+	public Request533Export getAppRootStatusByEmpsMonth(List<EmpPerformMonthParam> empPerformMonthParamLst) throws BusinessException{
 		List<AppRootSttMonthExport> appRootSttMonthLst = new ArrayList<>();
 		boolean errorFlg = false;
 		String errorMsgID = "";
@@ -465,8 +514,7 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 				continue;
 			}
 			// ドメインモデル「就業実績確認状態」を取得する
-			Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findByEmpMonth(companyID, employee.getEmployeeID(), employee.getYearMonth(), 
-					employee.getClosureID(), employee.getClosureDate(), RecordRootType.CONFIRM_WORK_BY_MONTH);
+			Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmMonthly(employee.getEmployeeID(), employee.toClosureMonth());
 			if(!opAppRootConfirm.isPresent()){
 				continue;
 			}
@@ -550,14 +598,14 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 		List<EmpSprDailyConfirmExport> result = new ArrayList<>();
 		List<AppRootInstance> appRootInstanceLst = new ArrayList<>();
 		// ドメインモデル「承認ルート中間データ」を取得する
-		List<AppRootInstance> approverInstLst = appRootInstanceRepository.findByApproverDateCID(companyID, approverID, date, RecordRootType.CONFIRM_WORK_BY_DAY);
+		List<AppRootInstance> approverInstLst = appRootInstanceRepository.findAppRootInstanceDailyByApprover(Arrays.asList(approverID), date);
 		appRootInstanceLst.addAll(approverInstLst);
 		// ドメインモデル「代行承認」を取得する
 		GeneralDate systemDate = GeneralDate.today();
 		List<Agent> agentInfoOutputs = agentRepository.findByApproverAndDate(companyID, approverID, systemDate, systemDate);
 		agentInfoOutputs.forEach(agent -> {
 			// ドメインモデル「承認ルート中間データ」を取得する
-			List<AppRootInstance> agentInstLst = appRootInstanceRepository.findByApproverDateCID(companyID, agent.getEmployeeId(), date, RecordRootType.CONFIRM_WORK_BY_DAY);
+			List<AppRootInstance> agentInstLst = appRootInstanceRepository.findAppRootInstanceDailyByApprover(Arrays.asList(agent.getEmployeeId()), date);
 			appRootInstanceLst.addAll(agentInstLst);
 		});
 		if(CollectionUtil.isEmpty(appRootInstanceLst)){
@@ -566,8 +614,8 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 		// 取得した「承認ルート中間データ」をループする
 		appRootInstanceLst.forEach(appRootInstance -> {
 			// 対象日の就業実績確認状態を取得する
-			Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findByEmpDate(companyID, appRootInstance.getEmployeeID(), date, RecordRootType.CONFIRM_WORK_BY_DAY);
-			if(!opAppRootConfirm.isPresent()){
+			Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmDaily(appRootInstance.getEmployeeID(), date);
+			if(!!opAppRootConfirm.isPresent()){
 				return;
 			}
 			AppRootConfirm appRootConfirm = opAppRootConfirm.get();
@@ -598,19 +646,18 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	@Override
 	public ApproverApproveExport getApproverByPeriodMonth(String employeeID, Integer closureID,
 			YearMonth yearMonth, ClosureDate closureDate, GeneralDate date) {
-		String companyID = AppContexts.user().companyId();
 		// 対象者と期間から承認ルート中間データを取得する
-		Optional<AppRootInstance> opAppRootInstance = appRootInstanceRepository.findByContainDate(companyID, employeeID, date, RecordRootType.CONFIRM_WORK_BY_MONTH);
-		if(!opAppRootInstance.isPresent()){
+		List<AppRootInstance> opAppRootInstance = appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(Arrays.asList(employeeID), date);
+		if(opAppRootInstance.isEmpty()){
 			return new ApproverApproveExport(date, employeeID, Collections.emptyList());
 		}
 		// ドメインモデル「就業実績確認状態」を取得する
-		Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findByEmpMonth(companyID, employeeID, yearMonth, closureID, closureDate, RecordRootType.CONFIRM_WORK_BY_MONTH);
+		Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmMonthly(employeeID, new ClosureMonth(yearMonth, closureID, closureDate));
 		if(!opAppRootConfirm.isPresent()){
 			return new ApproverApproveExport(date, employeeID, Collections.emptyList());
 		}
 		// 中間データから承認ルートインスタンスに変換する
-		ApprovalRootState approvalRootState = appRootInstanceService.convertFromAppRootInstance(opAppRootInstance.get(), opAppRootConfirm.get());
+		ApprovalRootState approvalRootState = appRootInstanceService.convertFromAppRootInstance(opAppRootInstance.get(0), opAppRootConfirm.get());
 		// 承認するべき承認者を取得する
 		ApproverToApprove approverToApprove = appRootInstanceService.getApproverToApprove(approvalRootState);
 		return new ApproverApproveExport(date, employeeID, 
@@ -631,32 +678,16 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	}
 
 	@Override
-	public void deleteRootConfirmDay(String employeeID, GeneralDate date) {
-		String companyID = AppContexts.user().companyId();
-		Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findByEmpDate(companyID, employeeID, date, RecordRootType.CONFIRM_WORK_BY_DAY);
-		if(opAppRootConfirm.isPresent()){
-			AppRootConfirm appRootConfirm = opAppRootConfirm.get();
-			appRootConfirm.setListAppPhase(new ArrayList<>());
-			appRootConfirmRepository.update(appRootConfirm);
+	public List<String> findEmpRequest610(String approverID, DatePeriod period, Integer rootType) {		
+		//日次の場合	
+		if(RecordRootType.of(rootType) == RecordRootType.CONFIRM_WORK_BY_DAY){
+			return appRootInstanceRepository.findDailyApprovalTarget(approverID, period);
+		} 
+		//月次の場合
+		else {
+			return appRootInstanceRepository.findMonthlyApprovalTarget(approverID, period);
 		}
+
 	}
 
-	@Override
-	public void deleteRootConfirmMonth(String employeeID, List<ConfirmDeleteParam> confirmDeleteParamLst) {
-		String companyID = AppContexts.user().companyId();
-		for(ConfirmDeleteParam confirmDeleteParam : confirmDeleteParamLst){
-			Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findByEmpMonth(companyID, employeeID, confirmDeleteParam.getYearMonth(),
-					confirmDeleteParam.getClosureID(), confirmDeleteParam.getClosureDate(), RecordRootType.CONFIRM_WORK_BY_MONTH);
-			if(opAppRootConfirm.isPresent()){
-				AppRootConfirm appRootConfirm = opAppRootConfirm.get();
-				appRootConfirm.setListAppPhase(new ArrayList<>());
-				appRootConfirmRepository.update(appRootConfirm);
-			}
-		}
-	}
-
-	@Override
-	public List<String> findEmpRequest610(String approverID, DatePeriod period, Integer rootType) {
-		return appRootInstanceRepository.findEmpLstByRq610(approverID, period, EnumAdaptor.valueOf(rootType, RecordRootType.class));
-	}
 }

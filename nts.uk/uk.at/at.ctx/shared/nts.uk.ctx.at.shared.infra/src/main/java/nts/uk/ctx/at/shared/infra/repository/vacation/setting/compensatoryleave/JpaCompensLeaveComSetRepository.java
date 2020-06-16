@@ -63,7 +63,7 @@ public class JpaCompensLeaveComSetRepository extends JpaRepository implements Co
     @Override
 	public CompensatoryLeaveComSetting find(String companyId) {
 
-		String sqlJdbcOc = "SELECT * FROM KOCMT_OCCURRENCE_SET WHERE CID = ?";
+		String sqlJdbcOc = "SELECT * FROM KOCMT_OCCURRENCE_SET WITH(INDEX(PK_KOCMT_OCCURRENCE_SET)) WHERE CID = ?";
 
 		try (PreparedStatement stmtOc = this.connection().prepareStatement(sqlJdbcOc)) {
 			stmtOc.setString(1, companyId);

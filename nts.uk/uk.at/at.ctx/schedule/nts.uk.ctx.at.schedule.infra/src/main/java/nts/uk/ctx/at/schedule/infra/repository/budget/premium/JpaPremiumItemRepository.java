@@ -14,6 +14,7 @@ import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.schedule.dom.budget.premium.PremiumItem;
 import nts.uk.ctx.at.schedule.dom.budget.premium.PremiumItemRepository;
@@ -31,7 +32,7 @@ public class JpaPremiumItemRepository extends JpaRepository implements PremiumIt
 
 	private static final String FIND_ALL = "SELECT a FROM KmnmtPremiumItem a WHERE a.kmnmpPremiumItemPK.companyID = :CID";
 	
-	private static final String FIND_BY_LIST_DISPLAY_NUMBER = FIND_ALL + " AND a.kmnmpPremiumItemPK.displayNumber IN :displayNumbers";
+	//private static final String FIND_BY_LIST_DISPLAY_NUMBER = FIND_ALL + " AND a.kmnmpPremiumItemPK.displayNumber IN :displayNumbers";
 	
 	private static final String FIND_BY_LIST_PREMIUM_NO_IS_USE = FIND_ALL +  " AND a.kmnmpPremiumItemPK.displayNumber NOT IN :displayNumbers AND a.useAtr = :useAtr";
 	
@@ -62,14 +63,23 @@ public class JpaPremiumItemRepository extends JpaRepository implements PremiumIt
 	@Override
 	public List<PremiumItem> findByCompanyIDAndDisplayNumber(String companyID, List<Integer> displayNumbers) {
 		List<PremiumItem> resultList = new ArrayList<>();
-		CollectionUtil.split(displayNumbers, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			resultList.addAll(this.queryProxy().query(FIND_BY_LIST_DISPLAY_NUMBER, KmnmtPremiumItem.class)
-								  .setParameter("CID", companyID)
-								  .setParameter("displayNumbers", subList)
-								  .getList(x -> convertToDomain(x)));
-		});
+		 CollectionUtil.split(displayNumbers, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			 String sql = " SELECT * FROM KMNMT_PREMIUM_ITEM  WITH(INDEX(PK_KMNMT_PREMIUM_ITEM)) WHERE CID = @companyID AND PREMIUM_NO IN @displayNumbers ";
+			 resultList.addAll(  new NtsStatement(sql, this.jdbcProxy())
+						.paramString("companyID", companyID)
+						.paramInt("displayNumbers", subList)		
+						.getList(rec -> {
+								return new PremiumItem(
+										companyID,
+										rec.getInt("PREMIUM_NO"),
+										new PremiumName (rec.getString("PREMIUM_NAME")),
+										EnumAdaptor.valueOf(rec.getInt("USE_ATR"), UseAttribute.class) );
+						})
+			 );
+		 });
 		return resultList;
 	}
+
 	
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
@@ -125,6 +135,7 @@ public class JpaPremiumItemRepository extends JpaRepository implements PremiumIt
 				new PremiumName(kmnmtPremiumItem.name), 
 				EnumAdaptor.valueOf(kmnmtPremiumItem.useAtr, UseAttribute.class));
 	}
+
 
 	
 }

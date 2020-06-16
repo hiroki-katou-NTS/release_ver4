@@ -9,10 +9,15 @@ public class AffCompanyHistService {
 	private AffCompanyHistRepository affCompanyHistRepository;
 	
 	/** Add new affiliation history */
-	public void add(AffCompanyHistByEmployee domain, String pId){
+//	public void add(AffCompanyHistByEmployee domain, String pId){
+//		// Insert last item
+//		AffCompanyHistItem itemToBeAdded = domain.getLstAffCompanyHistoryItem().get(domain.getLstAffCompanyHistoryItem().size() -1);
+//		affCompanyHistRepository.add(domain.getSId(), pId, itemToBeAdded);
+//	}
+	public void addToMerge(AffCompanyHistByEmployee domain, String pId, AffCompanyInfo newComInfo){
 		// Insert last item
 		AffCompanyHistItem itemToBeAdded = domain.getLstAffCompanyHistoryItem().get(domain.getLstAffCompanyHistoryItem().size() -1);
-		affCompanyHistRepository.add(domain.getSId(), pId, itemToBeAdded);
+		affCompanyHistRepository.addToMerge(domain.getSId(), pId, itemToBeAdded, newComInfo);
 	}
 	/** Update one affiliation history */
 	public void update(AffCompanyHistByEmployee domain, AffCompanyHistItem itemToBeUpdated){

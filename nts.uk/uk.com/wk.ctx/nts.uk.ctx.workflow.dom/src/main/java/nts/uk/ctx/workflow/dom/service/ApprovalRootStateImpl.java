@@ -14,6 +14,7 @@ import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootStateRepository;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.RootType;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRootContentOutput;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 
@@ -34,29 +35,17 @@ public class ApprovalRootStateImpl implements ApprovalRootStateService {
 			GeneralDate appDate, String appID, Integer rootType, GeneralDate baseDate) {
 		ApprovalRootContentOutput approvalRootContentOutput = collectApprovalRootService.getApprovalRootOfSubjectRequest(companyID, employeeID, EmploymentRootAtr.APPLICATION, appType, baseDate);
 		ApprovalRootState approvalRootState = approvalRootContentOutput.getApprovalRootState();
-		approvalRootStateRepository.insert(companyID, ApprovalRootState.createFromFirst(
-				companyID,
-				appID,  
-				RootType.EMPLOYMENT_APPLICATION, 
-				approvalRootState.getHistoryID(), 
-				appDate, 
-				employeeID, 
-				approvalRootState),
-				rootType);
+		approvalRootStateRepository.insert(ApprovalRootState.createFromFirst(companyID, appID,  employeeID, appDate, approvalRootState));
 	}
 
 	@Override
 	public void delete(String rootStateID, Integer rootType) {
-		approvalRootStateRepository.delete(rootStateID, rootType);
+		approvalRootStateRepository.delete(rootStateID);
 	}
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<ApprovalRootState> getByPeriod(String employeeID, GeneralDate startDate, GeneralDate endDate, Integer rootType) {
-		return approvalRootStateRepository.findAppByEmployeeIDRecordDate(
-				startDate, 
-				endDate, 
-				employeeID, 
-				rootType);
+		return approvalRootStateRepository.findAppApvRootStateByEmployee(new DatePeriod(startDate, endDate), employeeID);
 	}
 }

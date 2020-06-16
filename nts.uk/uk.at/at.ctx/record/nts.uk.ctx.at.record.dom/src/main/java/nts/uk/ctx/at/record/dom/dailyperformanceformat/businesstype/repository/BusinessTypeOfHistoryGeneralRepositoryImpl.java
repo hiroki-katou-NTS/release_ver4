@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployee;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployeeHistory;
 import nts.uk.shr.com.history.DateHistoryItem;
 
@@ -21,11 +22,11 @@ public class BusinessTypeOfHistoryGeneralRepositoryImpl implements BusinessTypeO
 	private BusinessTypeEmpOfHistoryRepository historyRepos;
 
 	@Override
-	public void addBusinessTypeEmpOfHistory(BusinessTypeOfEmployeeHistory bEmployeeHistory) {
+	public void addBusinessTypeEmpOfHistory(BusinessTypeOfEmployeeHistory bEmployeeHistory, BusinessTypeOfEmployee bEmployee){
 		List<DateHistoryItem> history = bEmployeeHistory.getHistory();
 		DateHistoryItem item = history.get(history.size() - 1);
-		historyRepos.add(bEmployeeHistory.getCompanyId(), bEmployeeHistory.getEmployeeId(), item.identifier(),
-				item.start(), item.end());
+		historyRepos.addToMerge(bEmployeeHistory.getCompanyId(), bEmployeeHistory.getEmployeeId(), item.identifier(),
+				item.start(), item.end(), bEmployee.getBusinessTypeCode().v());
 		updateItemBefore(bEmployeeHistory, item);
 	}
 

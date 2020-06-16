@@ -74,7 +74,7 @@ public class JpaBusinessTypeEmpOfHistory extends JpaRepository
 	}
 
 	private static KrcmtBusinessTypeOfHistory toEntity(String companyId, String employeeId, String historyId,
-			GeneralDate startDate, GeneralDate endDate) {
+			GeneralDate startDate, GeneralDate endDate, String businessTypeCode) {
 
 		KrcmtBusinessTypeOfHistory entity = new KrcmtBusinessTypeOfHistory();
 		KrcmtBusinessTypeOfHistoryPK pk = new KrcmtBusinessTypeOfHistoryPK(historyId);
@@ -83,6 +83,7 @@ public class JpaBusinessTypeEmpOfHistory extends JpaRepository
 		entity.endDate = endDate;
 		entity.cID = companyId;
 		entity.sId = employeeId;
+		entity.businessTypeCode = businessTypeCode;
 		return entity;
 
 	}
@@ -134,10 +135,18 @@ public class JpaBusinessTypeEmpOfHistory extends JpaRepository
 			return Optional.of(toDomain(entities));
 		}
 	}
-
+	
+//	 Merge KRCMT_BUS_TYPE_HIST To KRCMT_BUS_TYPE_SYAIN  because response
+//	 new Insert Method ↓
+//	         Class      : here
+//	         MethodName : addToMerge
+//	@Override
+//	public void add(String companyId, String employeeId, String historyId, GeneralDate startDate, GeneralDate endDate) {
+//		this.commandProxy().insert(toEntity(companyId, employeeId, historyId, startDate, endDate));
+//	}
 	@Override
-	public void add(String companyId, String employeeId, String historyId, GeneralDate startDate, GeneralDate endDate) {
-		this.commandProxy().insert(toEntity(companyId, employeeId, historyId, startDate, endDate));
+	public void addToMerge(String companyId, String employeeId, String historyId, GeneralDate startDate, GeneralDate endDate, String businessTypeCode) {
+		this.commandProxy().insert(toEntity(companyId, employeeId, historyId, startDate, endDate, businessTypeCode));
 	}
 
 	@Override

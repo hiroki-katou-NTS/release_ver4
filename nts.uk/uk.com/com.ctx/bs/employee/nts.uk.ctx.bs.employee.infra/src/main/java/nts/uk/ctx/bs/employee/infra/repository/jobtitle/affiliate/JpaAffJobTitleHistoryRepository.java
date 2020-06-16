@@ -2,6 +2,7 @@ package nts.uk.ctx.bs.employee.infra.repository.jobtitle.affiliate;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.bs.employee.dom.jobtitle.affiliate.AffJobTitleHistory;
@@ -49,11 +51,7 @@ public class JpaAffJobTitleHistoryRepository extends JpaRepository implements Af
 	
 	private static final String GET_BY_LIST_HID_SID = "select h from BsymtAffJobTitleHist h"
 			+ " where h.sid IN :sids and h.hisId IN :hisIds";
-	
-	private static final String GET_BY_EMPIDS_PERIOD = "select h from BsymtAffJobTitleHist h"
-			+ " where h.sid IN :lstSid and h.strDate <= :endDate and h.endDate >= :startDate"
-			+ " ORDER BY h.sid, h.strDate";
-	
+		
 	private static final String GET_BY_DATE = "select h from BsymtAffJobTitleHist h"
 			+ " where h.strDate <= :date and h.endDate >= :date "
 			+ " AND h.cid = :cid ";
@@ -79,8 +77,9 @@ public class JpaAffJobTitleHistoryRepository extends JpaRepository implements Af
 	 * @param domain
 	 * @return
 	 */
-	private BsymtAffJobTitleHist toEntity(String cid, String sId, DateHistoryItem domain) {
-		return new BsymtAffJobTitleHist(domain.identifier(), sId, cid, domain.start(), domain.end());
+	private BsymtAffJobTitleHist toEntity(String cid, String sId, DateHistoryItem domain, String jobTitleId, String note) {
+		return new BsymtAffJobTitleHist(domain.identifier(), sId, cid, domain.start(), domain.end(),
+				jobTitleId, note);
 	}
 
 	@Override
@@ -105,9 +104,17 @@ public class JpaAffJobTitleHistoryRepository extends JpaRepository implements Af
 		return Optional.empty();
 	}
 
+//	 Merge BSYMT_AFF_JOB_HIST To BSYMT_AFF_JOB_HIST_ITEM  because response
+//	 new Insert Method ↓
+//	         Class      : here
+//	         MethodName : addToMerge
+//	@Override
+//	public void add(String cid, String sid, DateHistoryItem item) {
+//		this.commandProxy().insert(toEntity(cid, sid, item));
+//	}
 	@Override
-	public void add(String cid, String sid, DateHistoryItem item) {
-		this.commandProxy().insert(toEntity(cid, sid, item));
+	public void addToMerge(String cid, String sid, DateHistoryItem item, String jobTitleId, String note) {
+		this.commandProxy().insert(toEntity(cid, sid, item, jobTitleId, note));
 	}
 
 	@Override
@@ -296,13 +303,46 @@ public class JpaAffJobTitleHistoryRepository extends JpaRepository implements Af
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<AffJobTitleHistory> getByEmployeeListPeriod(List<String> employeeIds, DatePeriod period) {
 		
+		if(CollectionUtil.isEmpty(employeeIds)) {
+			return Collections.emptyList();
+		}
+		
 		List<BsymtAffJobTitleHist> entities = new ArrayList<>();
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIds -> {
-			List<BsymtAffJobTitleHist> subEntities = this.queryProxy()
-					.query(GET_BY_EMPIDS_PERIOD, BsymtAffJobTitleHist.class).setParameter("lstSid", subIds)
-					.setParameter("startDate", period.start()).setParameter("endDate", period.end()).getList();
+			String sql = "select * from BSYMT_AFF_JOB_HIST h"
+					+ " inner join BSYMT_AFF_JOB_HIST_ITEM i"
+					+ " on h.HIST_ID = i.HIST_ID"
+					+ " where h.SID in (" + NtsStatement.In.createParamsString(subIds) + ")"
+					+ " and h.START_DATE <= ?"
+					+ " and h.END_DATE >= ?";
 			
-			entities.addAll(subEntities);
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				
+				int i = 0;
+				for (; i < subIds.size(); i++) {
+					stmt.setString(1 + i, subIds.get(i));
+				}
+
+				stmt.setDate(1 + i, Date.valueOf(period.end().localDate()));
+				stmt.setDate(2 + i, Date.valueOf(period.start().localDate()));
+				
+				List<BsymtAffJobTitleHist> ents = new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+					BsymtAffJobTitleHist ent = new BsymtAffJobTitleHist();
+					ent.hisId = rec.getString("HIST_ID");
+					ent.cid = rec.getString("CID");
+					ent.sid = rec.getString("SID");
+					ent.strDate = rec.getGeneralDate("START_DATE");
+					ent.endDate = rec.getGeneralDate("END_DATE");
+					return ent;
+				});
+				entities.addAll(ents);
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+//			List<BsymtAffJobTitleHist> subEntities = this.queryProxy()
+//					.query(GET_BY_EMPIDS_PERIOD, BsymtAffJobTitleHist.class).setParameter("lstSid", subIds)
+//					.setParameter("startDate", period.start()).setParameter("endDate", period.end()).getList();
+//			entities2.addAll(subEntities);
 		});
 		
 		entities.sort((o1, o2) -> {
@@ -324,10 +364,10 @@ public class JpaAffJobTitleHistoryRepository extends JpaRepository implements Af
 		});
 		return resultList;
 	}
-	
+		
 	private List<DateHistoryItem> convertToDateHistoryItem(List<BsymtAffJobTitleHist> entities) {
 		return entities.stream()
-				.map(ent -> new DateHistoryItem(ent.bsymtAffJobTitleHistItem.hisId,
+				.map(ent -> new DateHistoryItem(ent.hisId,
 						new DatePeriod(ent.strDate, ent.endDate)))
 				.collect(Collectors.toList());
 	}

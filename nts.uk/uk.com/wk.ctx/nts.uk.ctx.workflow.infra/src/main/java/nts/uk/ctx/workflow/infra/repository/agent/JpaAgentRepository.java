@@ -373,37 +373,31 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 	public List<AgentInfoOutput> findAgentByPeriod(String companyID, List<String> listApprover, GeneralDate startDate,
 			GeneralDate endDate, int agentType) {
 		
-		return NtsStatement.In.split(listApprover, approverIds -> {
-			
+		List<AgentInfoOutput> result = new ArrayList<>();
+		
+		CollectionUtil.split(listApprover, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			String agentSidColumn = "AGENT_SID" + agentType;
 			String sql = "select * from CMMMT_AGENT"
-					+ " where " + agentSidColumn + " in (" + NtsStatement.In.createParamsString(approverIds) + ")"
-					+ " and START_DATE <= ?"
-					+ " and END_DATE >= ?"
-					+ " and CID = ?";
+					+ " where " + agentSidColumn + " in @listApprover"
+					+ " and START_DATE <= @startDate"
+					+ " and END_DATE >= @endDate"
+					+ " and CID = @companyID";
 			
-			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
-				
-				for (int i = 0; i < approverIds.size(); i++) {
-					stmt.setString(1 + i, approverIds.get(i));
-				}
-				stmt.setDate(1 + approverIds.size(), Date.valueOf(endDate.localDate()));
-				stmt.setDate(2 + approverIds.size(), Date.valueOf(startDate.localDate()));
-				stmt.setString(3 + approverIds.size(), companyID);
-				
-				return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
-					CmmmtAgent c = CmmmtAgent.MAPPER.toEntity(rec);
-					return new AgentInfoOutput(
-							rec.getString(agentSidColumn),
-							c.cmmmtAgentPK.employeeId,
-							c.startDate,
-							c.endDate);
-				});
-				
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
+			result.addAll(new NtsStatement(sql, this.jdbcProxy())
+					.paramString("listApprover", subList)
+					.paramDate("startDate", startDate)
+					.paramDate("endDate", endDate)
+					.paramString("companyID", companyID)
+					.getList(rec -> {
+						CmmmtAgent c = CmmmtAgent.MAPPER.toEntity(rec);
+						return new AgentInfoOutput(
+								rec.getString(agentSidColumn),
+								c.cmmmtAgentPK.employeeId,
+								c.startDate,
+								c.endDate);
+					}));
 		});
+		return result;
 	}
 
 	@Override

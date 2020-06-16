@@ -44,6 +44,20 @@ public class BsymtAffCompanyHist extends UkJpaEntity implements Serializable {
 	@Column(name = "END_DATE")
 	@Convert(converter = GeneralDateToDBConverter.class)
 	public GeneralDate endDate;
+	
+	
+	@Column(name = "RECRUIMENT_CATEGORY_CD")
+	public String recruitmentCategoryCode;
+	
+	@Column(name = "ADOPTION_DATE")
+	@Convert(converter = GeneralDateToDBConverter.class)
+	public GeneralDate adoptionDate;
+
+	@Column(name = "RETIREMENT_CALC_STR_D")
+	@Convert(converter = GeneralDateToDBConverter.class)
+	public GeneralDate retirementAllowanceCalcStartDate;
+	
+	
 
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "bpsdtAffCompanyHist", cascade = CascadeType.REMOVE)
 	public BsymtAffCompanyInfo bsymtAffCompanyInfo;

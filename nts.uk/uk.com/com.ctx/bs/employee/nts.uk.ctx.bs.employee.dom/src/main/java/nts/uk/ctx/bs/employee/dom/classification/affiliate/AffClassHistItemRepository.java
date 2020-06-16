@@ -23,11 +23,12 @@ public interface AffClassHistItemRepository {
 	Optional<AffClassHistItem> getByHistoryId(String historyId);
 	
 	/**
-	 * Adds the.
-	 *
-	 * @param item the item
+//	 Merge BSYMT_AFF_CLASS_HISTORY To BSYMT_AFF_CLASS_HIS_ITEM  because response
+//	 new Insert Method ↓
+//	         ClassName  : JpaAffClassHistoryRepository
+//	         MethodName : addToMerge
 	 */
-	void add(AffClassHistItem item); 
+//	void add(AffClassHistItem item); 
 	
 	/**
 	 * Update.

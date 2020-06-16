@@ -2,6 +2,7 @@ package nts.uk.ctx.workflow.pub.resultrecord.monthly;
 
 import java.util.List;
 
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.shr.com.time.closure.ClosureMonth;
 
 /**
@@ -14,17 +15,19 @@ public interface MonthlyRecordApprovalPub {
 	 * @param approverEmployeeId 承認者
 	 * @param targetEmployeeIds 対象社員
 	 * @param closureMonth 締め月
+	 * @param period 実締め毎集計期間
 	 * @return
 	 */
 	List<MonthlySubjectiveStatus> getSubjectiveStatus(
-			String approverEmployeeId, List<String> targetEmployeeIds, ClosureMonth closureMonth);
+			String approverEmployeeId, List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period);
 	
 	/**
 	 * 指定社員の実績承認の進捗状況を取得する
 	 * @param targetEmployeeIds 対象社員
 	 * @param closureMonth 締め月
+	 * @param period 実締め毎集計期間
 	 * @return
 	 */
 	List<MonthlyApprovalProgress> getApprovalProgress(
-			List<String> targetEmployeeIds, ClosureMonth closureMonth);
+			List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period);
 }

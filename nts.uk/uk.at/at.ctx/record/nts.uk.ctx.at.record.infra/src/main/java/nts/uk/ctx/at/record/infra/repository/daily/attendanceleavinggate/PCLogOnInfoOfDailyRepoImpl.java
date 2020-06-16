@@ -17,6 +17,7 @@ import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
@@ -72,13 +73,15 @@ public class PCLogOnInfoOfDailyRepoImpl extends JpaRepository implements PCLogOn
 			return Collections.emptyList();
 		}
 		List<PCLogOnInfoOfDaily> result = new ArrayList<>();
-		String query = "SELECT al FROM KrcdtDayPcLogonInfo al WHERE al.id.sid IN :sid AND al.id.ymd <= :end AND al.id.ymd >= :start";
-		TypedQueryWrapper<KrcdtDayPcLogonInfo> tQuery=  this.queryProxy().query(query, KrcdtDayPcLogonInfo.class);
+		String sql = "SELECT al.* FROM KRCDT_DAY_PC_LOGON_INFO al WHERE al.SID IN @sid AND al.YMD <= @end AND al.YMD >= @start";
 		CollectionUtil.split(employeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, empIds -> {
-			result.addAll(toList(tQuery.setParameter("sid", empIds)
-										.setParameter("end", baseDate.end())
-										.setParameter("start", baseDate.start()).getList().stream()));
+
+			result.addAll(toList(new NtsStatement(sql, this.jdbcProxy()).paramString("sid", empIds)
+					.paramDate("end", baseDate.end())
+					.paramDate("start", baseDate.start())
+					.getList(rec -> KrcdtDayPcLogonInfo.MAPPER.toEntity(rec)).stream()));
 		});
+
 		return result;
 	}
 
@@ -89,14 +92,14 @@ public class PCLogOnInfoOfDailyRepoImpl extends JpaRepository implements PCLogOn
 			return Collections.emptyList();
 		}
 		List<PCLogOnInfoOfDaily> result = new ArrayList<>();
-		String query = "SELECT al FROM KrcdtDayPcLogonInfo al WHERE al.id.sid IN :sid AND al.id.ymd IN :date";
-		TypedQueryWrapper<KrcdtDayPcLogonInfo> tQuery=  this.queryProxy().query(query, KrcdtDayPcLogonInfo.class);
+		String sql = "SELECT al.* FROM KRCDT_DAY_PC_LOGON_INFO al WHERE al.SID IN @sid AND al.YMD IN @date";
 		CollectionUtil.split(param, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, p -> {
-			result.addAll(toList(tQuery.setParameter("sid", p.keySet())
-										.setParameter("date", p.values().stream().flatMap(List::stream).collect(Collectors.toSet()))
-										.getList().stream()
-										.filter(c -> p.get(c.id.sid).contains(c.id.ymd))
-										));
+			
+			result.addAll(toList(new NtsStatement(sql, this.jdbcProxy())
+					.paramString("sid", p.keySet().stream().collect(Collectors.toList()))
+					.paramDate("date", p.values().stream().flatMap(List::stream).collect(Collectors.toList()))
+					.getList(rec -> KrcdtDayPcLogonInfo.MAPPER.toEntity(rec)).stream()));
+			
 		});
 		return result;
 	}

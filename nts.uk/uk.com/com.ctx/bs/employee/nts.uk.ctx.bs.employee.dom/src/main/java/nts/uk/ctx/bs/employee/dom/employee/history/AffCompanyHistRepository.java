@@ -7,9 +7,20 @@ import nts.arc.time.GeneralDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 public interface AffCompanyHistRepository {
-	/** add new affiliation history */
-	void add(AffCompanyHist domain);
+	/** add new affiliation history 
+	 * Merge BSYMT_AFF_COM_HIST To BSYMT_AFF_COM_INFO  because response
+	 * new Insert Method ↓
+	 *       ClassName  : AffCompanyHistRepositoryImp
+	 *       MethodName : addToMerge
+	 */
+//	void add(AffCompanyHist domain);
+	void addToMerge(AffCompanyHist newComHist, AffCompanyInfo newComInfo);
 
+	/** Add new affiliation history */
+//	void add(String sid, String pId, AffCompanyHistItem item);
+	void addToMerge(String sid, String pId, AffCompanyHistItem item, AffCompanyInfo newComInfo);
+	
+	
 	/** update one affiliation history */
 	void update(AffCompanyHist domain);
 
@@ -49,9 +60,6 @@ public interface AffCompanyHistRepository {
 	AffCompanyHist getAffCompanyHistoryOfHistInfo(String histId);
 
 	/** Hop.NT */
-
-	/** Add new affiliation history */
-	void add(String sid, String pId, AffCompanyHistItem item);
 
 	/** Update one affiliation history */
 	void update(AffCompanyHistItem item);

@@ -23,14 +23,15 @@ public class AffClassHistoryRepositoryService {
 	 * add domain history
 	 * add last item and update before items
 	 * @param history
+	 * @param classificationCode 
 	 */
-	public void add(AffClassHistory history){
+	public void addToMerge(AffClassHistory history, String classificationCode){
 		if (history.getPeriods().isEmpty()) {
 			return;
 		}
 		List<DateHistoryItem> periods = history.getPeriods();
 		DateHistoryItem historyItem = periods.get(periods.size() - 1);
-		affClassHistoryRepo.add(history.getCompanyId(), history.getEmployeeId(), historyItem);
+		affClassHistoryRepo.addToMerge(history.getCompanyId(), history.getEmployeeId(), historyItem, classificationCode);
 
 		updateItemBefore(history, historyItem);
 	}

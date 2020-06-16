@@ -1,6 +1,7 @@
 package nts.uk.ctx.workflow.dom.approvermanagement.workroot;
 
 import lombok.AllArgsConstructor;
+import nts.arc.enums.EnumAdaptor;
 /**
  * 確定者
  * @author hoatt
@@ -13,4 +14,9 @@ public enum ConfirmPerson {
 	/** 確定*/
 	CONFIRM(1);
 	public final int value;
+	
+	public static ConfirmPerson of(int type) {
+		return EnumAdaptor.valueOf(type, ConfirmPerson.class);
+	}
+
 }

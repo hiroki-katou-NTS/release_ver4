@@ -50,7 +50,17 @@ public class BsymtEmploymentHist extends UkJpaEntity implements Serializable {
 	@Column(name = "END_DATE")
 	@Convert(converter = GeneralDateToDBConverter.class)
 	public GeneralDate endDate;
-
+	
+//	 Merge BSYMT_EMPLOYMENT_HIST To BSYMT_EMPLOYMENT_HIS_ITEM  because response
+	/** The empCode. */
+	@Basic(optional = false)
+	@Column(name = "EMP_CD")
+	public String empCode;
+	
+	@Basic(optional = true)
+	@Column(name = "SALARY_SEGMENT")
+	public Integer salarySegment;
+	
 	/**
 	 * Instantiates a new cempt employment.
 	 */

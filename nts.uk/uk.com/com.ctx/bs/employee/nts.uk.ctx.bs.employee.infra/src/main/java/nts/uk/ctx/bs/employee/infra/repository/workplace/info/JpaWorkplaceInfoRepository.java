@@ -25,10 +25,16 @@ import javax.persistence.criteria.Root;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
+import nts.uk.ctx.bs.employee.dom.workplace.info.OutsideWorkplaceCode;
+import nts.uk.ctx.bs.employee.dom.workplace.info.WkpCode;
+import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceDisplayName;
+import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceGenericName;
 import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfo;
 import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfoRepository;
+import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceName;
 import nts.uk.ctx.bs.employee.infra.entity.workplace.BsymtWorkplaceHist;
 import nts.uk.ctx.bs.employee.infra.entity.workplace.BsymtWorkplaceHist_;
 import nts.uk.ctx.bs.employee.infra.entity.workplace.BsymtWorkplaceInfo;
@@ -165,29 +171,31 @@ public class JpaWorkplaceInfoRepository extends JpaRepository implements Workpla
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<WorkplaceInfo> findByWkpId(String wpkId, GeneralDate baseDate) {
-		// get entity manager
-		EntityManager em = this.getEntityManager();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		String sql = "select i.*,h.* from BSYMT_WORKPLACE_INFO i " + 
+				" inner join BSYMT_WORKPLACE_HIST h " + 
+				" on i.WKPID = h.WKPID and i.CID = h.CID and i.HIST_ID = h.HIST_ID" + 
+				" where h.WKPID = @wkpId" + 
+				" and h.START_DATE <= @baseDate" + 
+				" and h.END_DATE >= @baseDate";
 
-		CriteriaQuery<BsymtWorkplaceInfo> cq = criteriaBuilder.createQuery(BsymtWorkplaceInfo.class);
-		Root<BsymtWorkplaceInfo> root = cq.from(BsymtWorkplaceInfo.class);
+		Optional<WorkplaceInfo> data = new NtsStatement(sql, this.jdbcProxy())
+		.paramString("wkpId", wpkId)
+		.paramDate("baseDate", baseDate)
+		.getList(rec -> {
+				return new WorkplaceInfo(
+					rec.getString("CID"),
+					rec.getString("HIST_ID"),
+					rec.getString("WKPID"),
+					new WkpCode(rec.getString("WKPCD")),
+					new WorkplaceName(rec.getString("WKP_NAME")),
+					new WorkplaceGenericName(rec.getString("WKP_GENERIC_NAME")),
+					new WorkplaceDisplayName(rec.getString("WKP_DISPLAY_NAME")),
+					rec.getString("WKP_OUTSIDE_CODE") ==null?new OutsideWorkplaceCode(""):
+						new OutsideWorkplaceCode(rec.getString("WKP_OUTSIDE_CODE"))
+					);	
+		}).stream().findFirst();
 
-		// select root
-		cq.select(root);
-
-		// add where
-		List<Predicate> lstpredicateWhere = new ArrayList<>();
-		lstpredicateWhere.add(criteriaBuilder
-				.equal(root.get(BsymtWorkplaceInfo_.bsymtWorkplaceInfoPK).get(BsymtWorkplaceInfoPK_.wkpid), wpkId));
-		lstpredicateWhere.add(criteriaBuilder.lessThanOrEqualTo(
-				root.get(BsymtWorkplaceInfo_.bsymtWorkplaceHist).get(BsymtWorkplaceHist_.strD), baseDate));
-		lstpredicateWhere.add(criteriaBuilder.greaterThanOrEqualTo(
-				root.get(BsymtWorkplaceInfo_.bsymtWorkplaceHist).get(BsymtWorkplaceHist_.endD), baseDate));
-
-		cq.where(lstpredicateWhere.toArray(new Predicate[] {}));
-
-		return em.createQuery(cq).getResultList().stream()
-				.map(item -> new WorkplaceInfo(new JpaWorkplaceInfoGetMemento(item))).findFirst();
+		return data;
 	}
 
 	/*

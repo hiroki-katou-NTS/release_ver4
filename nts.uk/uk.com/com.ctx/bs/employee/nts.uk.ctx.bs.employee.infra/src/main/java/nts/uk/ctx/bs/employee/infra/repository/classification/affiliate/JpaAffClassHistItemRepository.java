@@ -53,14 +53,17 @@ public class JpaAffClassHistItemRepository extends JpaRepository implements AffC
 	private AffClassHistItem toDomain(BsymtAffClassHistItem entity) {
 		return AffClassHistItem.createFromJavaType(entity.sid, entity.historyId, entity.classificationCode);
 	}
-
-	@Override
-	public void add(AffClassHistItem item) {
-		BsymtAffClassHistItem entity = new BsymtAffClassHistItem(item.getHistoryId(), item.getEmployeeId(),
-				item.getClassificationCode().v());
-		this.commandProxy().insert(entity);
-
-	}
+	
+//	 Merge BSYMT_AFF_CLASS_HISTORY To BSYMT_AFF_CLASS_HIS_ITEM  because response
+//	 new Insert Method ↓
+//	         ClassName  : JpaAffClassHistoryRepository
+//	         MethodName : addToMerge
+//	@Override
+//	public void add(AffClassHistItem item) {
+//		BsymtAffClassHistItem entity = new BsymtAffClassHistItem(item.getHistoryId(), item.getEmployeeId(),
+//				item.getClassificationCode().v());
+//		this.commandProxy().insert(entity);
+//	}
 
 	@Override
 	public void update(AffClassHistItem item) {

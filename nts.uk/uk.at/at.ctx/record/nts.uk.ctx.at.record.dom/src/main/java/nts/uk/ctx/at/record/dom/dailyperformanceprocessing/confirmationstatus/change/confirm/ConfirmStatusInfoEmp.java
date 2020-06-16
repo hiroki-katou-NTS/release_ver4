@@ -107,6 +107,9 @@ public class ConfirmStatusInfoEmp {
 		// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 		List<ApprovalProgressDaily> lstApprovalDayStatus = approvalStatusDailyAdapter
 				.getProgress(Arrays.asList(employeeId), dateEmpExport);
+//		List<ApproveRootStatusForEmpImport> lstApprovalDayStatus = approvalStatusAdapter
+//				.getApprovalByListEmplAndListApprovalRecordDateNew(dateEmpExport.datesBetween(),
+//						Arrays.asList(employeeId));
 
 		List<ApplicationRecordImport> lstApplication = applicationRecordAdapter
 				.getApplicationBySID(Arrays.asList(employeeId), dateEmpExport.start(), dateEmpExport.end());
@@ -122,8 +125,19 @@ public class ConfirmStatusInfoEmp {
 
 			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 			List<ApprovalProgressMonthly> lstApprovalMonthStatus = approvalStatusMonthlyAdapter
-					.getProgress(Arrays.asList(employeeId), mergePeriodClr.getClosureMonth());
+					.getProgress(Arrays.asList(employeeId), mergePeriodClr.getClosureMonth(), mergePeriodClr.getPeriod());
 
+//					Arrays.asList(employeeId), mergePeriodClr.getYearMonth().v(),
+//					mergePeriodClr.getClosureDate().getClosureDay().v(),
+//					mergePeriodClr.getClosureDate().getLastDayOfMonth(), mergePeriodClr.getClosureId().value);
+//			//List<ClosureMonth> closureMonthLst = 
+//
+//			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
+//			List<ApproveRootStatusForEmpImport> lstApprovalMonthStatus = approvalStatusAdapter
+//					.getApprovalByListEmplAndListApprovalRecordDateNew(mergePeriodClr.getPeriod(), new ClosureMonth(mergePeriodClr.getYearMonth(),mergePeriodClr.getClosureId().value, mergePeriodClr.getClosureDate()),
+//							Arrays.asList(employeeId));
+//			lstApprovalMonthStatusAll.addAll(lstApprovalMonthStatus);
+//			lstConfirmMonthAll.addAll(lstConfirmMonth);
 			inforMonths.add(new InformationMonth(mergePeriodClr, lstConfirmMonth, lstApprovalMonthStatus));
 		}
 
@@ -189,10 +203,6 @@ public class ConfirmStatusInfoEmp {
 				});
 		}
 
-//		for (AggrPeriodEachActualClosure mergePeriodClr : aggrPeriods.keySet()) {
-//			List<String> emplist = new ArrayList<>(aggrPeriods.get(mergePeriodClr));
-//		}
-
 		List<InformationMonth> inforMonths = new ArrayList<>();
 		for (AggrPeriodEachActualClosure mergePeriodClr : aggrPeriods.keySet()) {
 			List<String> emplist = new ArrayList<>(aggrPeriods.get(mergePeriodClr));
@@ -202,7 +212,7 @@ public class ConfirmStatusInfoEmp {
 
 			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 			List<ApprovalProgressMonthly> lstApprovalMonthStatus = approvalStatusMonthlyAdapter
-					.getProgress(emplist, mergePeriodClr.getClosureMonth());
+					.getProgress(emplist, mergePeriodClr.getClosureMonth(), mergePeriodClr.getPeriod());
 
 			for (String employeeId : emplist) {
 				inforMonths.add(new InformationMonth(
@@ -327,6 +337,9 @@ public class ConfirmStatusInfoEmp {
 			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 			List<ApprovalProgressDaily> lstApprovalDayStatus = approvalStatusDailyAdapter
 					.getProgress(Arrays.asList(employeeId), dateEmpExport);
+//			List<ApproveRootStatusForEmpImport> lstApprovalDayStatus = approvalStatusAdapter
+//					.getApprovalByListEmplAndListApprovalRecordDateNew(dateEmpExport.datesBetween(),
+//							Arrays.asList(employeeId));
 
 			// [No.26]社員、期間に一致する申請を取得する
 			List<ApplicationRecordImport> lstApplication = applicationRecordAdapter
@@ -350,7 +363,9 @@ public class ConfirmStatusInfoEmp {
 
 				// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 				List<ApprovalProgressMonthly> lstApprovalMonthStatus = approvalStatusMonthlyAdapter
-						.getProgress(Arrays.asList(employeeId), mergePeriodClr.getClosureMonth());
+						.getProgress(Arrays.asList(employeeId), mergePeriodClr.getClosureMonth(), mergePeriodClr.getPeriod());
+//				List<ApproveRootStatusForEmpImport> lstApprovalMonthStatus = approvalStatusAdapter
+//						.getApprovalByListEmplAndListApprovalRecordDateNew(mergePeriodClr.getPeriod(),new ClosureMonth(mergePeriodClr.getYearMonth(), mergePeriodClr.getClosureId().value, mergePeriodClr.getClosureDate()), Arrays.asList(employeeId));
 				inforMonths.add(new InformationMonth(mergePeriodClr, lstConfirmMonth, lstApprovalMonthStatus));
 			}
 

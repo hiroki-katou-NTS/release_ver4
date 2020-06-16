@@ -1,6 +1,3 @@
-/*
- * 
- */
 package nts.uk.ctx.sys.auth.dom.registration.user.service;
 
 import java.util.ArrayList;

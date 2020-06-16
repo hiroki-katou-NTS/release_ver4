@@ -29,9 +29,6 @@ public class AddAffJobTitleMainCommandHandler extends CommandHandlerWithResult<A
 	@Inject
 	private AffJobTitleHistoryRepository affJobTitleHistoryRepository;
 	
-	@Inject
-	private AffJobTitleHistoryItemRepository affJobTitleHistoryItemRepository;
-	
 	@Inject 
 	private AffJobTitleHistoryService affJobTitleHistoryService;
 	
@@ -62,10 +59,9 @@ public class AddAffJobTitleMainCommandHandler extends CommandHandlerWithResult<A
 		
 		itemtoBeAdded.add(dateItem);
 		
-		affJobTitleHistoryService.add(itemtoBeAdded);
-		
 		AffJobTitleHistoryItem histItem = AffJobTitleHistoryItem.createFromJavaType(histId, command.getSid(), command.getJobTitleId(), command.getNote());
-		affJobTitleHistoryItemRepository.add(histItem);
+		
+		affJobTitleHistoryService.addToMerge(itemtoBeAdded, histItem);
 		
 		return new PeregAddCommandResult(histId);
 	}

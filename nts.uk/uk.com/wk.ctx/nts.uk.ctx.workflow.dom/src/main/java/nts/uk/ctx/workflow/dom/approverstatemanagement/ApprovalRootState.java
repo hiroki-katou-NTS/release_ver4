@@ -2,9 +2,7 @@ package nts.uk.ctx.workflow.dom.approverstatemanagement;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.util.Strings;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,25 +22,23 @@ import nts.arc.time.GeneralDate;
 @Builder
 public class ApprovalRootState extends AggregateRoot {
 	
+	private String CompanyID;
+	
 	private String rootStateID;
 	
-	private RootType rootType;
-	
-	private String historyID;
+	private String employeeID;
 	
 	private GeneralDate approvalRecordDate;
 	
-	private String employeeID;
+//	private RootType rootType;
+	
 	@Setter
 	private List<ApprovalPhaseState> listApprovalPhaseState;
 	
-	public static ApprovalRootState createFromFirst(String companyID, String appID, RootType rootType, String historyID, 
-			GeneralDate date, String employeeID, ApprovalRootState approvalRootState){
+	public static ApprovalRootState createFromFirst(String companyID, String appID, String employeeID, GeneralDate date, ApprovalRootState approvalRootState){
 		if(Strings.isBlank(approvalRootState.getRootStateID())){
 			return ApprovalRootState.builder()
 					.rootStateID(appID)
-					.rootType(rootType)
-					.historyID(historyID)
 					.approvalRecordDate(date)
 					.employeeID(employeeID)
 					.listApprovalPhaseState(approvalRootState.getListApprovalPhaseState().stream()
@@ -51,4 +47,9 @@ public class ApprovalRootState extends AggregateRoot {
 		}
 		return approvalRootState;
 	}
+	
+	// もう使っていない
+//	public String getHistoryID() {
+//		return null;
+//	}
 }

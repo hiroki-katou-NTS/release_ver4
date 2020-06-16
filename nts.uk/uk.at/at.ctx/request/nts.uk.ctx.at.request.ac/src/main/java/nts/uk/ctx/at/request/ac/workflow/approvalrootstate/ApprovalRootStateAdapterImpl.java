@@ -314,7 +314,7 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 	@Override
 	public List<ApproveRootStatusForEmpImPort> getApprovalByEmplAndDate(GeneralDate startDate, GeneralDate endDate,
 			String employeeID, String companyID, Integer rootType) throws BusinessException {
-		return intermediateDataPub.getAppRootStatusByEmpPeriod(employeeID, new DatePeriod(startDate, endDate), rootType)
+		return intermediateDataPub.getAppRootStatusByEmpPeriod(Arrays.asList(employeeID), new DatePeriod(startDate, endDate), rootType)
 				.getAppRootStateStatusLst()
 				.stream().map(x -> new ApproveRootStatusForEmpImPort(
 						x.getEmployeeID(), 
