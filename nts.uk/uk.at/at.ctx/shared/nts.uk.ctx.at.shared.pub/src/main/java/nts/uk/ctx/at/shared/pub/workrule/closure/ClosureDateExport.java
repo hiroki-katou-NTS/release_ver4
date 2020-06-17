@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.shared.pub.workrule.closure;
 
 import lombok.Getter;
+import nts.uk.shr.com.time.calendar.date.ClosureDate;
 
 @Getter
 public class ClosureDateExport {
@@ -15,5 +16,9 @@ public class ClosureDateExport {
 	public ClosureDateExport(Integer closureDay, Boolean lastDayOfMonth) {
 		this.closureDay = closureDay;
 		this.lastDayOfMonth = lastDayOfMonth;
+	}
+	
+	public ClosureDate toClosureDate() {
+		return new ClosureDate(this.closureDay, this.lastDayOfMonth);
 	}
 }

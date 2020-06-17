@@ -14,6 +14,7 @@ import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.collection.CollectionUtil;
+import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriod;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.PrePostAtr;
@@ -21,6 +22,7 @@ import nts.uk.ctx.at.request.dom.application.UseAtr;
 import nts.uk.ctx.at.request.dom.application.common.adapter.bs.EmployeeRequestAdapter;
 import nts.uk.ctx.at.request.dom.application.common.adapter.bs.dto.PesionInforImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.bs.dto.SEmpHistImport;
+import nts.uk.ctx.at.request.dom.application.common.adapter.closure.RqClosureAdapter;
 import nts.uk.ctx.at.request.dom.application.common.adapter.record.actuallock.ActualLockAdapter;
 import nts.uk.ctx.at.request.dom.application.common.adapter.record.actuallock.ActualLockImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.record.workfixed.WorkFixedAdapter;
@@ -49,7 +51,9 @@ import nts.uk.ctx.at.request.dom.setting.request.application.common.AllowAtr;
 import nts.uk.ctx.at.request.dom.setting.request.application.common.CheckMethod;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
+import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 @Stateless
 public class NewBeforeRegisterImpl_New implements NewBeforeRegister_New {
@@ -88,6 +92,9 @@ public class NewBeforeRegisterImpl_New implements NewBeforeRegister_New {
 	private ActualLockAdapter actualLockAdapter;
 	@Inject
 	private WorkFixedAdapter workFixedAdater;
+	
+	@Inject
+	private RqClosureAdapter rqClosureAdapter;
 	
 	@Inject
 	private IdentificationAdapter identificationAdapter;
@@ -397,6 +404,7 @@ public class NewBeforeRegisterImpl_New implements NewBeforeRegister_New {
 			// 「Imported(申請承認)「実績確定状態」．月別実績が確認済)
 			List<ApproveRootStatusForEmpImPort> approveRootStatus = Collections.emptyList();
 			try {
+				ClosureMonth closurePeriod = rqClosureAdapter.getClosureById(companyID, closureEmployment.get().getClosureId()).get().toClosureMonth();
 				approveRootStatus = this.approvalRootStateAdapter.getApprovalByEmplAndDate(appDate, appDate, employeeID, companyID, 2);
 			} catch (Exception e) {
 				approveRootStatus = Collections.emptyList();

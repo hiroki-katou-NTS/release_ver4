@@ -21,11 +21,13 @@ import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalPhaseState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootStateRepository;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApproverState;
+import nts.uk.ctx.workflow.dom.resultrecord.AppPhaseConfirm;
 import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.FullJoinAppApvState;
 import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvApproverState;
 import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvFrameState;
 import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvPhaseState;
 import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvRootState;
+import nts.uk.ctx.workflow.infra.entity.resultrecord.FullJoinAppRootConfirm;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -69,13 +71,17 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 
 	private static ApprovalRootState toDomainRoot(String appId, List<FullJoinAppApvState> fullJoinsInRoot) {
 		FullJoinAppApvState first = fullJoinsInRoot.get(0);
-		List<ApprovalPhaseState> phases = fullJoinsInRoot.stream().collect(Collectors.groupingBy(p -> p.getPhaseOrder()))
-				.entrySet().stream()
-				.map(p -> {
-					Integer phaseOrder = p.getKey();
-					List<FullJoinAppApvState> fullJoinInPhase = p.getValue();
-					return toDomainPhase(appId, phaseOrder, fullJoinInPhase);
-				}).collect(Collectors.toList());
+		//↓Phase以降の情報はNULLのときがある
+		List<ApprovalPhaseState> phases = new ArrayList<ApprovalPhaseState>();
+		if(first.getPhaseOrder() != null) {
+			phases = fullJoinsInRoot.stream().collect(Collectors.groupingBy(p -> p.getPhaseOrder()))
+					.entrySet().stream()
+					.map(p -> {
+						Integer phaseOrder = p.getKey();
+						List<FullJoinAppApvState> fullJoinInPhase = p.getValue();
+						return toDomainPhase(appId, phaseOrder, fullJoinInPhase);
+					}).collect(Collectors.toList());
+		}	
 		return ApprovalRootState.builder()
 				.CompanyID(first.getCompanyID())
 				.rootStateID(appId)
