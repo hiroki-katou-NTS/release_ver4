@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
@@ -45,51 +44,72 @@ import nts.uk.shr.com.time.closure.ClosureMonth;
 public class JpaAppRootConfirmRepository extends JpaRepository implements AppRootConfirmRepository {
 
 	private List<AppRootConfirm> toDomain(List<FullJoinAppRootConfirm> listFullJoin) {
-		return listFullJoin.stream().collect(Collectors.groupingBy(FullJoinAppRootConfirm::getRootID)).entrySet()
-				.stream().map(x -> {
-					String companyID = x.getValue().get(0).getCompanyID();
-					String rootID = x.getValue().get(0).getRootID();
-					GeneralDate recordDate = x.getValue().get(0).getRecordDate();
-					RecordRootType rootType = EnumAdaptor.valueOf(x.getValue().get(0).getRootType(),
-							RecordRootType.class);
-					String employeeID = x.getValue().get(0).getEmployeeID();
-					Integer yearMonth = x.getValue().get(0).getYearMonth();
-					Integer closureID = x.getValue().get(0).getClosureID();
-					Integer closureDay = x.getValue().get(0).getClosureDay();
-					Integer lastDayFlg = x.getValue().get(0).getLastDayFlg();
-					List<AppPhaseConfirm> listAppPhase = new ArrayList<>();
-					Optional<FullJoinAppRootConfirm> isEmptyConfirm = x.getValue().stream()
-							.filter(y1 -> y1.getPhaseOrder() == null).findAny();
-
-					if (!isEmptyConfirm.isPresent()) {
-						listAppPhase = x.getValue().stream()
-								.collect(Collectors.groupingBy(FullJoinAppRootConfirm::getPhaseOrder)).entrySet()
-								.stream().map(y -> {
-									Integer phaseOrder = y.getValue().get(0).getPhaseOrder();
-									ApprovalBehaviorAtr appPhaseAtr = EnumAdaptor
-											.valueOf(y.getValue().get(0).getAppPhaseAtr(), ApprovalBehaviorAtr.class);
-									List<AppFrameConfirm> listAppFrame = y.getValue().stream()
-											.collect(Collectors.groupingBy(FullJoinAppRootConfirm::getFrameOrder))
-											.entrySet().stream().map(z -> {
-												Integer frameOrder = z.getValue().get(0).getFrameOrder();
-												Optional<String> frameApproverID = Optional
-														.ofNullable(z.getValue().get(0).getApproverID());
-												Optional<String> representerID = Optional
-														.ofNullable(z.getValue().get(0).getRepresenterID());
-												GeneralDate approvalDate = z.getValue().get(0).getApprovalDate();
-												return new AppFrameConfirm(frameOrder, frameApproverID, representerID,
-														approvalDate);
-											}).collect(Collectors.toList());
-									return new AppPhaseConfirm(phaseOrder, appPhaseAtr, listAppFrame);
-								}).collect(Collectors.toList());
-					}
-					return new AppRootConfirm(rootID, companyID, employeeID, recordDate, rootType, listAppPhase,
-							yearMonth == null ? Optional.empty() : Optional.of(new YearMonth(yearMonth)),
-							closureID == null ? Optional.empty() : Optional.of(closureID),
-							closureDay == null ? Optional.empty()
-									: Optional.of(new ClosureDate(closureDay, lastDayFlg == 1)));
+		return listFullJoin.stream().collect(Collectors.groupingBy(r -> r.getRootID()))
+				.entrySet().stream()
+				.map(r -> {
+					String appId = r.getKey();
+					List<FullJoinAppRootConfirm> fullJoinsInRoot = r.getValue();
+					return toDomainRoot(appId, fullJoinsInRoot);
 				}).collect(Collectors.toList());
 	}
+	
+	private static AppRootConfirm toDomainRoot(String appId, List<FullJoinAppRootConfirm> fullJoinInRoot) {
+		FullJoinAppRootConfirm first = fullJoinInRoot.get(0);
+		//↓Phase以降の情報はNULLのときがある
+		List<AppPhaseConfirm> phases = new ArrayList<AppPhaseConfirm>();
+		if(first.getPhaseOrder() != null) {
+			phases = fullJoinInRoot.stream().collect(Collectors.groupingBy(p -> p.getPhaseOrder()))
+					.entrySet().stream()
+					.map(p -> {
+						Integer phaseOrder = p.getKey();
+						List<FullJoinAppRootConfirm> fullJoinInPhase = p.getValue();
+						return toDomainPhase(appId, phaseOrder, fullJoinInPhase);
+					}).collect(Collectors.toList());
+		}	
+		
+		return AppRootConfirm.builder()
+				.rootID(first.getRootID())
+				.companyID(first.getCompanyID())
+				.employeeID(first.getEmployeeID())
+				.recordDate(first.getRecordDate())
+				.rootType(RecordRootType.of(first.getRootType()))
+				.listAppPhase(phases)
+				.yearMonth(Optional.ofNullable(first.getYearMonth()).map(ym -> YearMonth.of(ym)))
+				.closureID(Optional.ofNullable(first.getClosureID()))
+				.closureDate(Optional.ofNullable(first.getClosureDay()).map(cd -> new ClosureDate(cd, first.getLastDayFlg() == 1)))
+				.build();	
+	}
+	
+	
+	private static AppPhaseConfirm toDomainPhase(String appId, Integer phaseOrder, List<FullJoinAppRootConfirm> fullJoinInPhase) {
+		FullJoinAppRootConfirm first = fullJoinInPhase.get(0);
+		List<AppFrameConfirm> frames = fullJoinInPhase.stream().collect(Collectors.groupingBy(f -> f.getFrameOrder()))
+				.entrySet().stream()
+				.map(f -> {
+					Integer frameOrder = f.getKey();
+					List<FullJoinAppRootConfirm> fullJoinInFrame = f.getValue();
+					return toDomainFrame(appId, phaseOrder, frameOrder, fullJoinInFrame);
+				}).collect(Collectors.toList());
+		return AppPhaseConfirm.builder()
+				.phaseOrder(first.getPhaseOrder())
+				.appPhaseAtr(ApprovalBehaviorAtr.of(first.getAppPhaseAtr()))
+				.listAppFrame(frames)				
+				.build();
+				
+	}
+
+	
+	
+	private static AppFrameConfirm toDomainFrame(String appId, Integer phaseOrder, Integer frameOrder, List<FullJoinAppRootConfirm> fullJoinInFrame) {
+		FullJoinAppRootConfirm first = fullJoinInFrame.get(0);
+		return AppFrameConfirm.builder()
+				.frameOrder(first.getFrameOrder())
+				.approverID(Optional.ofNullable(first.getApproverID()))
+				.representerID(Optional.ofNullable(first.getRepresenterID()))
+				.approvalDate(first.getApprovalDate())
+				.build();
+	}
+
 
 	private FullJoinAppRootConfirm createFullJoinAppRootConfirmDaily(NtsResultRecord rs) {
 		return new FullJoinAppRootConfirm(
@@ -184,126 +204,54 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		}
 	}
 
+	private static final List<String> DELETE_DAILY_TABLES = Arrays.asList(
+			"delete from WWFDT_DAY_APV_RT_CONFIRM",
+			"delete from WWFDT_DAY_APV_PH_CONFIRM",
+			"delete from WWFDT_DAY_APV_FR_CONFIRM",
+			"delete from WWFDT_DAY_APV_AP_CONFIRM"
+	);
+	private static final List<String> DELETE_MONTHLY_TABLES = Arrays.asList(
+			"delete from WWFDT_MON_APV_RT_CONFIRM",
+			"delete from WWFDT_MON_APV_PH_CONFIRM",
+			"delete from WWFDT_MON_APV_FR_CONFIRM",
+			"delete from WWFDT_MON_APV_AP_CONFIRM"
+	);
+	
+	
 	@Override
 	public void delete(AppRootConfirm appRootConfirm) {
-		// 日次の場合
-		if (appRootConfirm.getRootType().value == 1) {
-			String sqlDelete = " delete "
-					+ " from WWFDT_DAY_APV_RT_CONFIRM as rt "
-					+ " inner join WWFDT_DAY_APV_PH_CONFIRM as ph "
-					+ " on rt.ROOT_ID = ph.ROOT_ID "
-					+ " inner join WWFDT_DAY_APV_FR_CONFIRM as fr "
-					+ " on ph.ROOT_ID = fr.ROOT_ID "
-					+ " and ph.PHASE_ORDER = fr.PHASE_ORDER "
-					+ " left join WWFDT_DAY_APV_AP_CONFIRM as ap "
-					+ " on fr.ROOT_ID = ap.ROOT_ID "
-					+ " and fr.PHASE_ORDER = ap.PHASE_ORDER " 
-					+ " and fr.FRAME_ORDER = ap.FRAME_ORDER "
-					+ " where rt.ROOT_ID = @rootId ";
-
-			jdbcProxy().query(sqlDelete.toString())
-						.paramString("rootId", appRootConfirm.getRootID());
-		}
-		// 月次の場合
-		else {
-			String sqlDelete = " delete "
-					+ " from WWFDT_MON_APV_RT_CONFIRM as rt "
-					+ " inner join WWFDT_MON_APV_PH_CONFIRM as ph "
-					+ " on rt.ROOT_ID = ph.ROOT_ID "
-					+ " inner join WWFDT_MON_APV_FR_CONFIRM as fr "
-					+ " on ph.ROOT_ID = fr.ROOT_ID "
-					+ " and ph.PHASE_ORDER = fr.PHASE_ORDER "
-					+ " left join WWFDT_MON_APV_AP_CONFIRM as ap "
-					+ " on fr.ROOT_ID = ap.ROOT_ID "
-					+ " and fr.PHASE_ORDER = ap.PHASE_ORDER " 
-					+ " and fr.FRAME_ORDER = ap.FRAME_ORDER "
-					+ " where rt.ROOT_ID = @rootId ";
-
-			jdbcProxy().query(sqlDelete.toString())
-						.paramString("rootId", appRootConfirm.getRootID());
-		}
+		List<String> targetTables = appRootConfirm.getRootType().value == 1
+				?DELETE_DAILY_TABLES   //日次の場合
+				:DELETE_MONTHLY_TABLES;//月次の場合
+		delete(targetTables,appRootConfirm.getRootID());
 	}
 
-	private final String DELETE_DAILY
-			= " delete "
-			+ " from WWFDT_DAY_APV_RT_CONFIRM as rt" 
-			+ " inner join WWFDT_DAY_APV_PH_CONFIRM as ph"
-			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " inner join WWFDT_DAY_APV_FR_CONFIRM as fr"
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
-
-	private final String DELETE_DAILY_SQL
-			= " delete "
-			+ " from WWFDT_DAY_APV_RT_CONFIRM as rt" 
-			+ " inner join WWFDT_DAY_APV_PH_CONFIRM as ph"
-			+ " with (index(WWFDI_DAY_APV_PH_CONFIRM)) " 
-			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " inner join WWFDT_DAY_APV_FR_CONFIRM as fr"
-			+ " with (index(WWFDI_DAY_APV_RT_CONFIRM)) " 
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
-	
+	private void delete(List<String> targetTables, String rootID) {
+		targetTables.forEach(table ->{
+			String sql = table + " where ROOT_ID = @rootId "; 
+			jdbcProxy().query(sql).paramString("rootId", rootID);				
+		});
+	}
 
 	@Override
 	public void deleteAppRootConfirmDaily(String employeeID, GeneralDate date) {
-		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(DELETE_DAILY_SQL);
-		} else {
-			sql.append(DELETE_DAILY);
-		}
-		sql.append(" where rt.EMPLOYEE_ID in @sid ");
-		sql.append(" and rt.RECORD_DATE = @date ");
-
-		jdbcProxy().query(sql.toString())
-				.paramString("sid", employeeID)
-				.paramDate("date", date);
+		findAppRootConfirmDaily(employeeID, date).ifPresent(result ->{
+			deleteAppRootConfirm(DELETE_DAILY_TABLES, result);
+		});
 	} 
 	
-	
-	private final String DELETE_MONTHLY
-	= " delete "
-	+ " from WWFDT_APP_MON_RT_CONFIRM as rt" 
-	+ " inner join WWFDT_APP_MON_PH_CONFIRM as ph"
-	+ " on rt.ROOT_ID = ph.ROOT_ID" 
-	+ " inner join WWFDT_APP_MON_FR_CONFIRM as fr"
-	+ " on ph.ROOT_ID = fr.ROOT_ID" 
-	+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
-
-	private final String DELETE_MONTHLY_SQL
-	= " delete "
-	+ " from WWFDT_MON_APV_RT_CONFIRM as rt" 
-	+ " inner join WWFDT_MON_APV_PH_CONFIRM as ph"
-	+ " with (index(WWFDI_MON_APV_PH_CONFIRM)) " 
-	+ " on rt.ROOT_ID = ph.ROOT_ID" 
-	+ " inner join WWFDT_MON_APV_FR_CONFIRM as fr"
-	+ " with (index(WWFDI_MON_APV_RT_CONFIRM)) " 
-	+ " on ph.ROOT_ID = fr.ROOT_ID" 
-	+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
-
 	@Override
 	public void deleteAppRootConfirmMonthly(String employeeID, ClosureMonth closureMonth) {
-		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(DELETE_MONTHLY_SQL);
-		} else {
-			sql.append(DELETE_MONTHLY);
-		}
-		sql.append(" where rt.EMPLOYEE_ID in @sid ");
-		sql.append(" and rt.YEARMONTH = @yearMonth ");
-		sql.append(" and rt.CLOSURE_ID = @closureId ");
-		sql.append(" and rt.CLOSURE_DAY = @closureDay ");
-		sql.append(" and rt.IS_LAST_DAY = @isLastDay ");
+		findAppRootConfirmMonthly(employeeID, closureMonth).ifPresent(result ->{
+			deleteAppRootConfirm(DELETE_MONTHLY_TABLES, result);
+		});
+	}
 
-		jdbcProxy().query(sql.toString())
-				.paramString("sid", employeeID)
-				.paramInt("yearMonth", closureMonth.yearMonth().v())
-				.paramInt("closureId", closureMonth.closureId())
-				.paramInt("closureDay", closureMonth.closureDate().getClosureDay().v())
-				.paramInt("isLastDay", closureMonth.closureDate().getLastDayOfMonth() ? 1 : 0);
+	private void deleteAppRootConfirm(List<String> targetTables, AppRootConfirm confirm) {
+		targetTables.forEach(ts ->{
+			String sql = ts + " where ROOT_ID = @rootID";
+			jdbcProxy().query(sql).paramString("rootId", confirm.getRootID());
+		});
 	}
 
 	
@@ -428,7 +376,6 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		} else {
 			sql.append(FIND_MON_CONFIRM);
 		}
-		sql.append("and rt.EMPLOYEE_ID IN ( ");
 		sql.append(" and rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and rt.YEARMONTH in @yearmonth ");
 
@@ -445,10 +392,10 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			= " select rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.YEARMONTH, rt.CLOSURE_ID, rt.CLOSURE_DAY, rt.LAST_DAY_FLG, "
 					+ " ph.PHASE_ORDER, ph.APP_PHASE_ATR, "
 					+ " fr.FRAME_ORDER, fr.APPROVER_ID, fr.REPRESENTER_ID, fr.APPROVAL_DATE "
-			+ " from WWFDT_APP_MON_RT_CONFIRM as rt" 
-			+ " left join WWFDT_APP_MON_PH_CONFIRM as ph"
+			+ " from WWFDT_MON_APV_RT_CONFIRM as rt" 
+			+ " left join WWFDT_MON_APV_PH_CONFIRM as ph"
 			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " left join WWFDT_APP_MON_FR_CONFIRM as fr"
+			+ " left join WWFDT_MON_APV_FR_CONFIRM as fr"
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
 
@@ -456,12 +403,12 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			= " select rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.YEARMONTH, rt.CLOSURE_ID, rt.CLOSURE_DAY, rt.LAST_DAY_FLG, "
 					+ " ph.PHASE_ORDER, ph.APP_PHASE_ATR, "
 					+ " fr.FRAME_ORDER, fr.APPROVER_ID, fr.REPRESENTER_ID, fr.APPROVAL_DATE "
-			+ " from WWFDT_APP_MON_RT_CONFIRM as rt" 
-			+ " left join WWFDT_APP_MON_PH_CONFIRM as ph"
-			+ " with (index(WWFDI_APP_MON_PH_CONFIRM)) " 
+			+ " from WWFDT_MON_APV_RT_CONFIRM as rt" 
+			+ " left join WWFDT_MON_APV_PH_CONFIRM as ph"
+			+ " with (index(WWFDI_MON_APV_PH_CONFIRM)) " 
 			+ " on rt.ROOT_ID = ph.ROOT_ID"
-			+ " left join WWFDT_APP_MON_FR_CONFIRM as fr" 
-			+ " with (index(WWFDI_APP_MON_FR_CONFIRM)) "
+			+ " left join WWFDT_MON_APV_FR_CONFIRM as fr" 
+			+ " with (index(WWFDI_MON_APV_FR_CONFIRM)) "
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
 

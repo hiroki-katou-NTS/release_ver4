@@ -7,8 +7,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
@@ -18,6 +21,7 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @Entity
 @Table(name="WWFDT_MON_APV_RT_CONFIRM")
 @Builder
+@Getter
 public class WwfdtApvRootConfirmMonthly extends UkJpaEntity {
 	
 	@Id
@@ -42,6 +46,7 @@ public class WwfdtApvRootConfirmMonthly extends UkJpaEntity {
 	@Column(name="LAST_DAY_FLG")
 	private Integer lastDayFlg;
 	
+	@Transient
 	public List<WwfdtApvPhaseConfirmMonthly> listWwfdtApvPhaseConfirmMonthly;
 
 	@Override

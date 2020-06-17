@@ -23,7 +23,9 @@ public class RqClosureAdapterImpl implements RqClosureAdapter{
 		Optional<PresentClosingPeriodImport> closure = shClosurePub.find(cId, closureId)
 				.map(c-> new PresentClosingPeriodImport(c.getProcessingYm(),
 						c.getClosureStartDate(),
-						c.getClosureEndDate()));
+						c.getClosureEndDate(),
+						closureId,
+						c.getClosureDate().toClosureDate()));
 		return closure;
 	}
 

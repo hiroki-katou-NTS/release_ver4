@@ -6,6 +6,8 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -32,6 +34,7 @@ public class WwfdtAppApvRootState extends UkJpaEntity {
 	@Column(name="APP_DATE")
 	public GeneralDate appDate;
 	
+	@Transient
 	public List<WwfdtAppApvPhaseState> listWwfdtAppApvPhaseState;
 
 	@Override

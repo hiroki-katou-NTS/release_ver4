@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import nts.arc.time.GeneralDate;
@@ -19,6 +20,7 @@ import nts.uk.shr.com.time.closure.ClosureMonth;
  */
 @AllArgsConstructor
 @Getter
+@Builder
 public class AppRootConfirm {
 	
 	/**
