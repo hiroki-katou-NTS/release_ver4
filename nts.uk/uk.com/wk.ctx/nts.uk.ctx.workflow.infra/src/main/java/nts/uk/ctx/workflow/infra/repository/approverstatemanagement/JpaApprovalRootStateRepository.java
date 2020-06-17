@@ -457,7 +457,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	public boolean checkAppShouldApproval(DatePeriod period) {
 		String loginSID = AppContexts.user().employeeId();
 		StringBuilder sql = new StringBuilder();
-		sql.append(" select count(*) ");
+		sql.append(" select count(*) as COUNT");
 		sql.append(" from( ");
 			sql.append(" select ap.APP_ID ,ap.PHASE_ORDER ");
 			sql.append(" from WWFDT_APP_APV_AP_STATE ap ");
