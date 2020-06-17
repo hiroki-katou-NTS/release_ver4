@@ -433,17 +433,15 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		return NtsStatement.In.split(employeeIDLst, employeeIDs -> {
 			
 			NtsStatement stmt = jdbcProxy().query(sql.toString());
-			stmt.paramString("sids", employeeIDs);
+			stmt = stmt.paramString("sids", employeeIDs);
 			
 			for (int i = 0; i < closureMonths.size(); i++) {
-				stmt.paramInt("yearMonth" + i, closureMonths.get(i).yearMonth().v());
-				stmt.paramInt("closureId" + i, closureMonths.get(i).closureId());
-				stmt.paramInt("closureDay" + i, closureMonths.get(i).closureDate().getClosureDay().v());
-				stmt.paramInt("isLastDay" + i, closureMonths.get(i).closureDate().getLastDayOfMonth() ? 1 : 0);
+				stmt = stmt	.paramInt("yearMonth" + i, closureMonths.get(i).yearMonth().v())
+							.paramInt("closureId" + i, closureMonths.get(i).closureId())
+							.paramInt("closureDay" + i, closureMonths.get(i).closureDate().getClosureDay().v())
+							.paramInt("isLastDay" + i, closureMonths.get(i).closureDate().getLastDayOfMonth() ? 1 : 0);
 			}
-			
-			return toDomain(jdbcProxy().query(sql.toString())
-					.getList(rec -> createFullJoinAppRootConfirmMonthly(rec)));
+			return toDomain(stmt.getList(rec -> createFullJoinAppRootConfirmMonthly(rec)));
 		});
 	}
 
