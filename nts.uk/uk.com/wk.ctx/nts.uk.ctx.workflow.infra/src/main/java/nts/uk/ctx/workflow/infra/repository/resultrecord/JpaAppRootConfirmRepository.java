@@ -1,5 +1,6 @@
 package nts.uk.ctx.workflow.infra.repository.resultrecord;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -9,8 +10,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-
-import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
@@ -55,13 +54,18 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	
 	private static AppRootConfirm toDomainRoot(String appId, List<FullJoinAppRootConfirm> fullJoinInRoot) {
 		FullJoinAppRootConfirm first = fullJoinInRoot.get(0);
-		List<AppPhaseConfirm> phases = fullJoinInRoot.stream().collect(Collectors.groupingBy(p -> p.getPhaseOrder()))
-				.entrySet().stream()
-				.map(p -> {
-					Integer phaseOrder = p.getKey();
-					List<FullJoinAppRootConfirm> fullJoinInPhase = p.getValue();
-					return toDomainPhase(appId, phaseOrder, fullJoinInPhase);
-				}).collect(Collectors.toList());
+		//↓Phase以降の情報はNULLのときがある
+		List<AppPhaseConfirm> phases = new ArrayList<AppPhaseConfirm>();
+		if(first.getPhaseOrder() != null) {
+			phases = fullJoinInRoot.stream().collect(Collectors.groupingBy(p -> p.getPhaseOrder()))
+					.entrySet().stream()
+					.map(p -> {
+						Integer phaseOrder = p.getKey();
+						List<FullJoinAppRootConfirm> fullJoinInPhase = p.getValue();
+						return toDomainPhase(appId, phaseOrder, fullJoinInPhase);
+					}).collect(Collectors.toList());
+		}	
+		
 		return AppRootConfirm.builder()
 				.rootID(first.getRootID())
 				.companyID(first.getCompanyID())
@@ -72,7 +76,7 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 				.yearMonth(Optional.ofNullable(first.getYearMonth()).map(ym -> YearMonth.of(ym)))
 				.closureID(Optional.ofNullable(first.getClosureID()))
 				.closureDate(Optional.ofNullable(first.getClosureDay()).map(cd -> new ClosureDate(cd, first.getLastDayFlg() == 1)))
-				.build();
+				.build();	
 	}
 	
 	
