@@ -23,13 +23,14 @@ import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.AggrPeriodEachActualClo
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.CalcPeriodForClosureProcValue;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.CalcPeriodForClosureProcess;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriod;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
- * 
+ *
  * @author HungTT - <<Domain Service>> 月締め更新Mgrクラス
  *
  */
@@ -97,8 +98,8 @@ public class MonthlyUpdateMgr {
 	// 月別実績の勤怠時間の取得
 	private AttendanceTimeOfMonthly getAttendanceTimeOfMonthly(String monthlyClosureLogId, String empId,
 			AggrPeriodEachActualClosure period) {
-		Optional<AttendanceTimeOfMonthly> opt = attTimeMonthlyRepo.find(empId, period.getYearMonth(),
-				period.getClosureId(), period.getClosureDate());
+		Optional<AttendanceTimeOfMonthly> opt = attTimeMonthlyRepo.find(empId, period.getClosureMonth().yearMonth(),
+				ClosureId.valueOf(period.getClosureMonth().closureId()), period.getClosureMonth().closureDate());
 		if (opt.isPresent()) {
 			return opt.get();
 		} else {

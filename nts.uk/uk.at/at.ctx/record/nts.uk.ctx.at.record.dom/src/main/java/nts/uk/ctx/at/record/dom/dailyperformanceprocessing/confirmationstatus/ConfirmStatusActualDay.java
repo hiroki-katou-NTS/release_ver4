@@ -59,16 +59,16 @@ public class ConfirmStatusActualDay {
 
 	@Inject
 	private ConfirmationMonthRepository confirmationMonthRepository;
-	
+
 	@Inject
 	private IFindDataDCRecord iFindDataDCRecord;
-	
+
 	@Inject
 	private RealityStatusService realityStatusService;
-	
+
 	@Inject
 	private ApplicationRecordAdapter applicationRecordAdapter;
-	
+
 	/**
 	 * 日の実績の確認状況を取得する
 	 */
@@ -84,7 +84,7 @@ public class ConfirmStatusActualDay {
 				.getListAffComHistByListSidAndPeriod(keyRandom, employeeIds, period).stream().filter(x -> x.getEmployeeId() != null).collect(Collectors.toList());
 		// ドメインモデル「日の本人確認」を取得する
 		statusOfEmps.stream().forEach(statusOfEmp -> {
-			List<ConfirmStatusActualResult> lstResultEmpTemp = new ArrayList<>(), 
+			List<ConfirmStatusActualResult> lstResultEmpTemp = new ArrayList<>(),
 											lstResultEmpTemp1 = new ArrayList<>(),
 											lstResultEmpTemp2 = new ArrayList<>();
 			List<DatePeriod> lstPeriod = statusOfEmp.getListPeriod();
@@ -180,17 +180,17 @@ public class ConfirmStatusActualDay {
 					lstResultEmpTemp1.addAll(lstEmpDateApproval);
 				}
 			}
-			
+
 			//取得した「承認処理の利用設定．日の承認者確認を利用する」をチェックする true
 			if(approvalUseSettingOpt.isPresent() && approvalUseSettingOpt.get().getUseDayApproverConfirm()) {
 				lstPeriod.stream().forEach(periodTemp -> {
-					
+
 					List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
 							.getApprovalByListEmplAndListApprovalRecordDateNew(periodTemp.datesBetween(),
 									Arrays.asList(employeeId));
 					val mapApprovalStatus = lstApprovalStatus.stream().collect(Collectors
 							.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus()));
-					//lstResultEmpTemp3 = 
+					//lstResultEmpTemp3 =
 					lstResultEmpTemp1.forEach(x ->{
 						if (mapApprovalStatus == null) {
 							x.setPermission(true, true);
@@ -206,10 +206,10 @@ public class ConfirmStatusActualDay {
 							}
 						}
 					});
-					
+
 				});
 			}
-			
+
 			lstResult.addAll(lstResultEmpTemp1);
 		});
 		List<ConfirmStatusActualResult> results = new ArrayList<>();
@@ -275,7 +275,7 @@ public class ConfirmStatusActualDay {
 			}).collect(Collectors.toList());
 		}
 	}
-	
+
 //  public DatePeriod mergeDateInPeriod(DatePeriod periodNeedMerge, DatePeriod periodCheck) {
 //	  GeneralDate startDate = periodNeedMerge.start().afterOrEquals(periodCheck.start()) ? periodNeedMerge.start() : periodCheck.start();
 //	  GeneralDate endDate = periodNeedMerge.end().beforeOrEquals(periodCheck.end()) ? periodNeedMerge.end() : periodCheck.end();
@@ -422,9 +422,8 @@ public class ConfirmStatusActualDay {
 			}).collect(Collectors.toList());
 		} else {
 
-			List<ConfirmationMonth> lstConfirmMonth = confirmationMonthRepository.findBySomeProperty(employeeIds,
-					mergePeriodClr.getYearMonth().v(), mergePeriodClr.getClosureDate().getClosureDay().v(),
-					mergePeriodClr.getClosureDate().getLastDayOfMonth(), mergePeriodClr.getClosureId().value);
+			List<ConfirmationMonth> lstConfirmMonth = confirmationMonthRepository.findBySomeProperty(
+					employeeIds, mergePeriodClr.closureMonth());
 			Map<String, ConfirmationMonth> mapConfirmMonth = lstConfirmMonth.stream()
 					.collect(Collectors.toMap(x -> x.getEmployeeId(), x -> x, (x, y) -> x));
 			return lstResult.stream().map(x -> {
@@ -433,7 +432,7 @@ public class ConfirmStatusActualDay {
 			}).collect(Collectors.toList());
 		}
 	}
-	
+
 	public Set<Pair<String, GeneralDate>> getErrorAndApplication(List<String> employeeIds, DatePeriod datePeriod, Optional<IdentityProcessUseSet> optIndentity){
 		 Set<Pair<String, GeneralDate>> result = new HashSet<>();
 
@@ -455,7 +454,7 @@ public class ConfirmStatusActualDay {
 			if (disable)
 				result.add(Pair.of(x.getEmployeeID(), x.getAppDate()));
 		});
-		
+
 		return result;
 	}
 }

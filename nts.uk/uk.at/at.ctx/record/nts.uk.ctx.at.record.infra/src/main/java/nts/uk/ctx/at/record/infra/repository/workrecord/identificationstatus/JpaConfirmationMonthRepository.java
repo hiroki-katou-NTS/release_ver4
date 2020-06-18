@@ -24,10 +24,11 @@ import nts.uk.ctx.at.shared.dom.common.CompanyId;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 @Stateless
 public class JpaConfirmationMonthRepository  extends JpaRepository implements ConfirmationMonthRepository{
-    
+
 	private static final String DELETE_BY_PARENT_PK = "DELETE FROM KrcdtConfirmationMonth a "
 			+ "WHERE a.krcdtConfirmationMonthPK.companyID = :companyID "
 			+ "AND a.krcdtConfirmationMonthPK.employeeId = :employeeId "
@@ -35,12 +36,12 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 			+ "AND a.krcdtConfirmationMonthPK.closureDay = :closureDay "
 			+ "AND a.krcdtConfirmationMonthPK.isLastDay = :isLastDayOfMonth "
 			+ "AND a.krcdtConfirmationMonthPK.processYM = :processYM ";
-	
+
 	private static final String FIND_BY_SID_YM = "SELECT a FROM KrcdtConfirmationMonth a "
 			+ "WHERE a.krcdtConfirmationMonthPK.companyID = :companyId "
 			+ "AND a.krcdtConfirmationMonthPK.employeeId = :employeeId "
 			+ "AND a.krcdtConfirmationMonthPK.processYM = :processYM ";
-	
+
 //	private static final String FIND_BY_SOME_PROPERTY = "SELECT a FROM KrcdtConfirmationMonth a "
 //			+ "WHERE a.krcdtConfirmationMonthPK.employeeId IN :employeeIds "
 //			+ "AND a.krcdtConfirmationMonthPK.processYM = :processYM "
@@ -54,7 +55,7 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 	}
 
 	@Override
-	public void insert(ConfirmationMonth confirmationMonth) { 
+	public void insert(ConfirmationMonth confirmationMonth) {
 		this.commandProxy().insert(new KrcdtConfirmationMonth(
 				new KrcdtConfirmationMonthPK(confirmationMonth.getCompanyID().v(), confirmationMonth.getEmployeeId(),
 						confirmationMonth.getClosureId().value, confirmationMonth.getClosureDate().getClosureDay().v(),(confirmationMonth.getClosureDate().getLastDayOfMonth() ? 1 : 0), confirmationMonth.getProcessYM().v()),
@@ -81,8 +82,7 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
-	public List<ConfirmationMonth> findBySomeProperty(List<String> employeeIds, int processYM, int closureDate, boolean isLastDayOfMonth,
-			int closureId) {
+	public List<ConfirmationMonth> findBySomeProperty(List<String> employeeIds, ClosureMonth closureMonth) {
 		String sql = "SELECT * from KRCDT_CONFIRMATION_MONTH h "
 				+ " WHERE " + " h.SID IN @employeeIds "
 				+ " AND h.PROCESS_YM = @processYM "
@@ -93,20 +93,18 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			data.addAll(new NtsStatement(sql, this.jdbcProxy())
 					.paramString("employeeIds", subList)
-					.paramInt("processYM", processYM)
-					.paramInt("closureDate", closureDate)
-					.paramInt("isLastDayOfMonth", isLastDayOfMonth?1:0)
-					.paramInt("closureId", closureId)
+					.paramInt("processYM", closureMonth.yearMonth().v())
+					.paramInt("closureDate", closureMonth.closureDate().getClosureDay().v())
+					.paramInt("isLastDayOfMonth", closureMonth.closureDate().getLastDayOfMonth()?1:0)
+					.paramInt("closureId", closureMonth.closureId())
 					.getList(rec -> {
-						ClosureDate cloDate = new ClosureDate(closureDate, isLastDayOfMonth);
-						YearMonth ym = new YearMonth(processYM);
-						ClosureId cloId = ClosureId.valueOf(closureId);
+						ClosureId cloId = ClosureId.valueOf(closureMonth.closureId());
 						return new ConfirmationMonth(new CompanyId(rec.getString("CID")),
-								rec.getString("SID"), cloId, cloDate, ym, 
+								rec.getString("SID"), cloId, closureMonth.closureDate(), closureMonth.yearMonth(), 
 								rec.getGeneralDate("IDENTIFY_DATE"));
 					}));
 		});
-		
+
 		return data;
 	}
 
@@ -118,7 +116,7 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 				data.addAll(internalQuery(subList, ym));
 			});
 		});
-		
+
 		return data;
 	}
 	

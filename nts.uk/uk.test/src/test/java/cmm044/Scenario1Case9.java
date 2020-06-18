@@ -1,5 +1,6 @@
 package cmm044;
 
+import java.util.Calendar;
 import java.util.List;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,13 +23,16 @@ public class Scenario1Case9 extends TestRoot {
     @Test
     public void test() throws Exception {
         //login申請者
-        login("025445", "Jinjikoi5");        
+        login("025445", "Jinjikoi5");
+
+        Calendar nextweekend = Calendar.getInstance();
+        nextweekend.add(Calendar.DATE, Calendar.SATURDAY - nextweekend.get(Calendar.DAY_OF_WEEK));
 
         //KAF010A 休日出勤申請
         driver.get(domain + "nts.uk.at.web/view/kaf/010/a/index.xhtml");
         WaitPageLoad();
         driver.findElement(By.id("inputdate")).click();
-        driver.findElement(By.id("inputdate")).sendKeys("2020/01/04");
+        driver.findElement(By.id("inputdate")).sendKeys(df1.format(nextweekend.getTime()));
         driver.findElement(By.xpath("//body")).click();
         WaitElementLoad(By.id("inputdate"));
         driver.findElement(By.id("inpStartTime1")).click();
@@ -57,7 +61,7 @@ public class Scenario1Case9 extends TestRoot {
         driver.findElements(By.xpath("//div[contains(@class,'ui-icon-caret-1-s')]")).get(1).click();
         driver.findElement(By.xpath("//li[text()='ログアウト']")).click();
         WaitPageLoad();
-      
+
         //login承認者
         login("022497", "Jinjikoi5");
         driver.get(domain + "nts.uk.at.web/view/cmm/045/a/index.xhtml?a=1");
@@ -69,9 +73,11 @@ public class Scenario1Case9 extends TestRoot {
         WebElement el = listEl.get(listEl.size() - 1);
         el.findElements(By.xpath("preceding-sibling::td")).get(0).click();
         new Actions(driver).moveToElement(el).perform();
-        driver.findElement(By.xpath("//button[@class='ntsButton']")).click();
-        screenShot();
+
+        WaitElementLoad(By.xpath("//button[@class='details']"));
+        driver.findElement(By.xpath("//button[@class='details']")).click();
         WaitPageLoad();
+        screenShot();
         driver.findElement(By.xpath("//*[@id='functions-area']/div/div[2]/div[1]/button")).click();
         WaitElementLoad(By.xpath("//*[@id='functions-area']/div/div[2]/div[1]/button"));
         screenShot();

@@ -2,11 +2,7 @@ package kdw003;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.Calendar;
-
-import org.openqa.selenium.*;
-
 import common.TestRoot;
 
 /**
@@ -23,60 +19,21 @@ public class Scenario1Case4 extends TestRoot {
 
     @Test
     public void test() throws Exception {
-        
         Calendar inputdate = Calendar.getInstance();
         inputdate.add(Calendar.MONTH, -1);
 
-        //login
-        login("018234", "Jinjikoi5");
+        //ログイン（時給者）
+        login("018310", "Jinjikoi5");
+        
+        //処理年月の変更
+        new Kdw003Common().setProcessYearMonth(2, df3.format(inputdate.getTime()));
 
-        //KMK012A 処理年月の設定
-        driver.get(domain + "nts.uk.at.web/view/kmk/012/a/index.xhtml");
-        WaitPageLoad();
-        //click 締め日の割付
-        driver.findElement(By.id("button12")).click();
-        driver.switchTo().frame("window_1");
-        WaitElementLoad(By.xpath("//tr[@data-id ='01']"));
-        driver.findElement(By.xpath("//tr[@data-id ='01']")).click();
-        WaitElementLoad(By.xpath("//div[contains(.,'10日締め')]"));
-        driver.findElements(By.xpath("//div[contains(.,'10日締め')]")).get(2).click();
-        WaitElementLoad(By.id("btnRegistry"));   
-        driver.findElement(By.id("btnRegistry")).click();
-        WaitElementLoad(By.xpath("//body"));   
-        driver.findElement(By.xpath("//body")).sendKeys(Keys.RETURN);
-        WaitElementLoad(By.id("btnClose"));   
-        driver.findElement(By.id("btnClose")).click();
-
-        WebElement clsId2 = driver.findElement(By.xpath("//tr[@data-id = '2']"));
-        clsId2.click();
-        WaitElementLoad(By.id("inpMonth"));   
-        driver.findElement(By.id("inpMonth")).click();
-        WaitElementLoad(By.id("inpMonth"));  
-        driver.findElement(By.id("inpMonth")).clear();
-        WaitElementLoad(By.id("inpMonth"));  
-        driver.findElement(By.id("inpMonth")).sendKeys(df3.format(inputdate.getTime()));
-        driver.findElement(By.xpath("//body")).click();
-        WaitElementLoad(By.className("ui-igcombo-buttonicon"));  
-        driver.findElement(By.className("ui-igcombo-buttonicon")).click();
-        WaitElementLoad(By.xpath("//li[@data-value='10']"));
-        driver.findElement(By.xpath("//li[@data-value='10']")).isSelected();       
-        driver.findElement(By.xpath("//li[@data-value='10']")).click();
-        driver.findElement(By.xpath("//body")).click();
-        WaitElementLoad(By.id("btn_save"));
-        driver.findElement(By.id("btn_save")).click();
-        WaitElementLoad(By.xpath("//button[@class ='large']"));
-        driver.findElement(By.xpath("//button[@class ='large']")).click();
-        screenShotFull(); 
-        driver.findElements(By.xpath("//div[contains(@class,'ui-icon-caret-1-s')]")).get(1).click();
-        driver.findElement(By.xpath("//li[text()='ログアウト']")).click();
-        WaitPageLoad();
-
-        //login 024800
-        login("024800", "Jinjikoi5");
         //KDW003A 勤務報告書
         driver.get(domain + "nts.uk.at.web/view/kdw/003/a/index.xhtml");
+        
         WaitPageLoad();
-        screenShotFull();    
+        
+        screenShot();
         
         this.uploadTestLink(587, 145);
      

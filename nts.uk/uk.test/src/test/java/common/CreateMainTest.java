@@ -1,6 +1,40 @@
 package common;
 
-import org.junit.runner.JUnitCore;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.*;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -15,27 +49,12 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
-
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
-import javax.swing.*;
-import java.awt.event.*;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.awt.Component;
-import java.awt.Color;
+import org.junit.runner.JUnitCore;
 
 public class CreateMainTest {
 
     private static JFrame f = new JFrame(); // creating instance of JFrame
-    public static HashMap<String, String> testCases = new HashMap<String, String>();
+    public static TreeMap<String, String> testCases = new TreeMap<String, String>();
     JUnitCore junit = new JUnitCore();
     public static HashMap<String, Component> componentMap = new HashMap<String, Component>();
     JProgressBar progressBar = new JProgressBar();
@@ -45,6 +64,8 @@ public class CreateMainTest {
     ButtonExecute buttonExecute;
     JLayeredPane layeredPane = new JLayeredPane();
     JButton button = new JButton("リセット");
+
+    JButton button_excel = new JButton("Excel出力");
 
     public void create() {
         // create layout
@@ -58,7 +79,7 @@ public class CreateMainTest {
         tabbedPane.addTab("画面リスト3", (new Tab3()).scrollPane);
         tabbedPane.addTab("画面リスト4", (new Tab4()).scrollPane);
 
-        // create a progressbar 
+        // create a progressbar
         progressBar.setValue(0);
         progressBar.setStringPainted(true);
         progressBar.setForeground(Color.BLUE);
@@ -73,7 +94,7 @@ public class CreateMainTest {
         button1.setHorizontalAlignment(SwingConstants.CENTER);
         button1.setBounds(104, 484, 67, 33); // x axis, y axis, width, height
 
-        
+
         button.setName("button");
         button.setHorizontalAlignment(SwingConstants.CENTER);
         button.setBounds(183, 484, 88, 33);
@@ -82,6 +103,11 @@ public class CreateMainTest {
         button2.setHorizontalAlignment(SwingConstants.CENTER);
         button2.setBounds(283, 484, 100, 33);
 
+        button_excel.setName("button_excel");
+        button_excel.setHorizontalAlignment(SwingConstants.CENTER);
+        button_excel.setBounds(450, 484, 100, 33);
+
+
         chckbxExcel.setName("excel_export");
         chckbxExcel.setBounds(8, 490, 88, 21);
 
@@ -89,6 +115,7 @@ public class CreateMainTest {
         f.getContentPane().add(button1);
         f.getContentPane().add(button);
         f.getContentPane().add(button2);
+        f.getContentPane().add(button_excel);
         f.getContentPane().setLayout(null);
         f.getContentPane().add(layeredPane);
         f.getContentPane().add(chckbxExcel);
@@ -111,11 +138,11 @@ public class CreateMainTest {
             public void actionPerformed(ActionEvent e) {
                 buttonExecute.cancel(true);
                 try {
-                    Runtime.getRuntime().exec("taskkill /F /IM chromedriver.exe");        
+                    Runtime.getRuntime().exec("taskkill /F /IM chromedriver.exe");
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
-                
+
             }
         });
 
@@ -140,12 +167,19 @@ public class CreateMainTest {
             public void windowClosing(WindowEvent e) {
                 System.exit(0);
             }
-        });       
+        });
+
+        // create listener
+        button_excel.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	writeExcel(testCases);
+            }
+        });
     }
 
     private void createComponentMap() {
         List<Component> listComponent = new ArrayList<Component>();
-        Arrays.stream(((JTabbedPane)((JLayeredPane)f.getContentPane().getComponents()[3]).getComponents()[1]).getComponents()).forEach(i -> listComponent.addAll(Arrays.asList(((JPanel)(((JViewport)(((JScrollPane)i).getComponents()[0])).getComponents()[0])).getComponents())));
+        Arrays.stream(((JTabbedPane)((JLayeredPane)f.getContentPane().getComponents()[4]).getComponents()[1]).getComponents()).forEach(i -> listComponent.addAll(Arrays.asList(((JPanel)(((JViewport)(((JScrollPane)i).getComponents()[0])).getComponents()[0])).getComponents())));
         Object[] components = listComponent.toArray();
 
         for (int i = 0; i < components.length; i++) {
@@ -208,8 +242,9 @@ public class CreateMainTest {
                 workbook.close();
 
             }
-        } catch (Exception e) {
-            // TODO: handle exception
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
@@ -276,7 +311,7 @@ public class CreateMainTest {
                 }
                 progressBar.setValue(progressBar.getValue() + 100/testCases.size());
             }
-            
+
             // export excel
             if (chckbxExcel.isSelected()) {
                 writeExcel(testCases);

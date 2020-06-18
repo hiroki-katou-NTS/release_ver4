@@ -20,8 +20,6 @@ import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.adapter.application.ApplicationRecordImport;
 import nts.uk.ctx.at.record.dom.adapter.company.StatusOfEmployeeExport;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApproveRootStatusForEmpImport;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.ReflectedStateRecord;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualResult;
@@ -29,6 +27,8 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.Re
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.CommonProcess;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.AggrPeriodEachActualClosure;
+import nts.uk.ctx.at.record.dom.workrecord.approval.daily.ApprovalProgressDaily;
+import nts.uk.ctx.at.record.dom.workrecord.approval.monthly.ApprovalProgressMonthly;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.enums.SelfConfirmError;
@@ -37,7 +37,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * @author thanhnx
- * 
+ *
  */
 @Stateless
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
@@ -62,8 +62,7 @@ public class ConfirmStatusActualDayChange {
 				.findApprovalByCompanyId(companyId);
 
 		// 確認情報取得処理
-		List<ConfirmInfoResult> confirmInfoResults = confirmInfoAcqProcess.getConfirmInfoAcp(companyId, employeeIds, periodOpt,
-				yearMonthOpt);
+		List<ConfirmInfoResult> confirmInfoResults = confirmInfoAcqProcess.getConfirmInfoAcp(companyId, employeeIds, periodOpt, yearMonthOpt);
 		if (confirmInfoResults.isEmpty())
 			return Collections.emptyList();
 		return checkProcess(companyId, empTarget, employeeIds, confirmInfoResults, optIndentity, approvalUseSettingOpt);
@@ -103,7 +102,7 @@ public class ConfirmStatusActualDayChange {
 
 				lstResultEmpTemp2 = lstResultEmpTemp;
 				List<InformationMonth> informationMonths = data.getInformationMonths();
-				
+
 				for (InformationMonth infoMonth : informationMonths) {
 					AggrPeriodEachActualClosure mergePeriodClr = infoMonth.getActualClosure();
 					if (!approvalUseSettingOpt.isPresent() || !approvalUseSettingOpt.get().getUseMonthApproverConfirm()) {
@@ -119,16 +118,16 @@ public class ConfirmStatusActualDayChange {
 						// Map<Pair<String, GeneralDate>, ApprovalStatusForEmployee> mapApprovalStatus =
 						// new HashMap<>();
 						DatePeriod mergePeriod = mergePeriodClr.getPeriod();
-						List<ApproveRootStatusForEmpImport> lstApprovalStatus = infoMonth.getLstApprovalMonthStatus();
+						List<ApprovalProgressMonthly> lstApprovalStatus = infoMonth.getLstApprovalMonthStatus();
 						val approvalStatusMonth = lstApprovalStatus.isEmpty() ? null : lstApprovalStatus.get(0);
 						val lstEmpDateUnApproval = lstResultEmpTemp2.stream().filter(x -> {
 							if (approvalStatusMonth == null)
 								return true;
 							val value = ((x.getDate().afterOrEquals(mergePeriod.start())
 									&& x.getDate().beforeOrEquals(mergePeriod.end())))
-											? approvalStatusMonth.getApprovalStatus()
+											? approvalStatusMonth
 											: null;
-							if (value != null && value == ApprovalStatusForEmployee.UNAPPROVED)
+							if (value != null && value.isUnapproved())
 								return true;
 							else
 								return false;
@@ -144,9 +143,9 @@ public class ConfirmStatusActualDayChange {
 						val lstEmpDateApproval = lstResultEmpTemp2.stream().filter(x -> {
 							val value = (approvalStatusMonth != null && (x.getDate().afterOrEquals(mergePeriod.start())
 									&& x.getDate().beforeOrEquals(mergePeriod.end())))
-											? approvalStatusMonth.getApprovalStatus()
+											? approvalStatusMonth
 											: null;
-							if (value != null && value != ApprovalStatusForEmployee.UNAPPROVED)
+							if (value != null && value.isUnapproved())
 								return true;
 							else
 								return false;
@@ -159,20 +158,14 @@ public class ConfirmStatusActualDayChange {
 					}
 				}
 
-			List<ApproveRootStatusForEmpImport> lstApprovalStatus = data.getInformationDay().getLstApprovalDayStatus().stream()
+			List<ApprovalProgressDaily> lstApprovalStatus = data.getInformationDay().getLstApprovalDayStatus().stream()
 					.collect(Collectors.toList());
 			// 取得した「承認処理の利用設定．日の承認者確認を利用する」をチェックする true
 				if (approvalUseSettingOpt.isPresent() && approvalUseSettingOpt.get().getUseDayApproverConfirm()) {
 					lstPeriod.stream().forEach(periodTemp -> {
 
-						// List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
-						// .getApprovalByListEmplAndListApprovalRecordDateNew(periodTemp.datesBetween(),
-						// Arrays.asList(employeeId), 1);
-						//List<ApproveRootStatusForEmpImport> lstApprovalStatus = confirmInfoResult.getLstApprovalDayStatus();
-						// .getApprovalByListEmplAndListApprovalRecordDateNew(periodTemp.datesBetween(),
-						// Arrays.asList(employeeId), 1);
 						val mapApprovalStatus = lstApprovalStatus.stream().collect(Collectors
-								.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus(), (x, y) -> x));
+								.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x, (x, y) -> x));
 						// lstResultEmpTemp3 =
 						lstResultEmpTemp1.forEach(x -> {
 							if (mapApprovalStatus == null) {
@@ -181,7 +174,7 @@ public class ConfirmStatusActualDayChange {
 								val temp = mapApprovalStatus.get(Pair.of(x.getEmployeeId(), x.getDate()));
 								if (temp != null) {
 									if (x.getPermissionRelease() == ReleasedAtr.CAN_IMPLEMENT
-											&& temp == ApprovalStatusForEmployee.UNAPPROVED) {
+											&& temp.isUnapproved()) {
 										x.setPermission(true, true);
 									} else {
 										x.setPermission(true, false);
@@ -220,11 +213,11 @@ public class ConfirmStatusActualDayChange {
 			}).collect(Collectors.toList());
 		} else {
 			Optional<ConfirmationMonth> optConfirmMonth = lstConfirmMonth.stream()
-					.filter(x -> x.getClosureId().value == mergePeriodClr.getClosureId().value
-							&& x.getProcessYM().equals(mergePeriodClr.getYearMonth())
-							&& x.getClosureDate().getLastDayOfMonth().booleanValue() == mergePeriodClr.getClosureDate()
+					.filter(x -> x.getClosureId().value == mergePeriodClr.getClosureMonth().closureId()
+							&& x.getProcessYM().equals(mergePeriodClr.getClosureMonth().yearMonth())
+							&& x.getClosureDate().getLastDayOfMonth().booleanValue() == mergePeriodClr.getClosureMonth().closureDate()
 									.getLastDayOfMonth().booleanValue()
-							&& x.getClosureDate().getClosureDay().v() == mergePeriodClr.getClosureDate().getClosureDay()
+							&& x.getClosureDate().getClosureDay().v() == mergePeriodClr.getClosureMonth().closureDate().getClosureDay()
 									.v())
 					.findFirst();
 			return lstResult.stream().map(x -> {
@@ -238,7 +231,7 @@ public class ConfirmStatusActualDayChange {
 		Set<Pair<String, GeneralDate>> result = new HashSet<>();
 		boolean checkError = optIndentity.isPresent() && optIndentity.get().getYourSelfConfirmError().isPresent() && optIndentity.get()
 				.getYourSelfConfirmError().get().value == SelfConfirmError.CAN_NOT_CHECK_WHEN_ERROR.value;
-				
+
 		confirmInfoResults.stream().forEach(confirmInfoResult -> {
 			if (checkError) {
 				result.addAll(confirmInfoResult.getLstOut().stream().filter(x -> x.getHasError())

@@ -12,6 +12,7 @@ import lombok.Setter;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 /**
  * 就業実績確認状態
  * @author Doan Duy Hung
@@ -82,5 +83,9 @@ public class AppRootConfirm {
 						&& s.getRootType().equals(rootType))
 				.findFirst()
 				.orElseGet(() -> AppRootConfirm.dummy(companyID, employeeID, date, rootType));
+	}
+	
+	public ClosureMonth getClosureMonth() {
+		return new ClosureMonth(yearMonth.get(), closureID.get(), closureDate.get());
 	}
 }

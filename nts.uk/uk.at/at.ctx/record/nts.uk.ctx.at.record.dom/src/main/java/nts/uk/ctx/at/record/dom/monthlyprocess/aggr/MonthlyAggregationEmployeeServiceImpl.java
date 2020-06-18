@@ -46,7 +46,7 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.absencerecruitment.export.query.
 import nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.export.query.BreakDayOffRemainMngOfInPeriod;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.InPeriodOfSpecialLeaveResultInfor;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
-import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -74,7 +74,7 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 	/** 月別集計が必要とするリポジトリ */
 	@Inject
 	private RepositoriesRequiredByMonthlyAggr repositories;
-	
+
 	/** リポジトリ：月別実績の勤怠時間 */
 //	@Inject
 //	private TimeOfMonthlyRepository timeOfMonthlyRepo;
@@ -102,20 +102,20 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 //	private ProcMonthlyData procMonthlyData;
 //	@Inject
 //	private StoredProcdureProcess storedProcedureProcess;
-	
+
 	/** 月別実績(WORK)を登録する */
 	@Inject
 	private UpdateAllDomainMonthService monthService;
 	/** 月別集計エラー処理 */
 	@Inject
 	private MonthlyAggregationErrorService monthError;
-	
+
 	@Inject
 	private DetermineActualResultLock lockStatusService;
-	
+
 	@Inject
 	private ClosureService closureService;
-	
+
 	/** 社員の月別実績を集計する */
 	@SuppressWarnings("rawtypes")
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
@@ -125,11 +125,11 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 
 		ProcessState status = ProcessState.SUCCESS;
 		val dataSetter = asyncContext.getDataSetter();
-		
+
 		// 月別集計で必要な会社別設定を取得する
 		val companySets = MonAggrCompanySettings.loadSettings(companyId, this.repositories);
 		if (companySets.getErrorInfos().size() > 0){
-			
+
 			// エラー処理
 			List<MonthlyAggregationErrorInfo> errorInfoList = new ArrayList<>();
 			for (val errorInfo : companySets.getErrorInfos().entrySet()){
@@ -138,13 +138,13 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 			this.errorProc(dataSetter, employeeId, empCalAndSumExecLogID, criteriaDate, errorInfoList);
 			return status;
 		}
-		
+
 		val aggrStatus = this.aggregate(asyncContext, companyId, employeeId, criteriaDate,
 				empCalAndSumExecLogID, executionType, companySets);
-		
+
 		return aggrStatus.getState();
 	}
-	
+
 	/** 社員の月別実績を集計する */
 	@SuppressWarnings("rawtypes")
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -152,10 +152,10 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 	public MonthlyAggrEmpServiceValue aggregate(AsyncCommandHandlerContext asyncContext, String companyId, String employeeId,
 			GeneralDate criteriaDate, String empCalAndSumExecLogID, ExecutionType executionType,
 			MonAggrCompanySettings companySets) {
-		
+
 		MonthlyAggrEmpServiceValue status = new MonthlyAggrEmpServiceValue();
 		val dataSetter = asyncContext.getDataSetter();
-		
+
 		// 前回集計結果を初期化する
 		AggrResultOfAnnAndRsvLeave prevAggrResult = new AggrResultOfAnnAndRsvLeave();
 		Optional<AbsRecRemainMngOfInPeriod> prevAbsRecResultOpt = Optional.empty();
@@ -163,16 +163,16 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 		Map<Integer, InPeriodOfSpecialLeaveResultInfor> prevSpecialLeaveResultMap = new HashMap<>();
 
 		ConcurrentStopwatches.start("11000:集計期間の判断：");
-		
+
 		// 集計期間の判断　（実締め毎集計期間だけをすべて取り出す）
 		List<AggrPeriodEachActualClosure> aggrPeriods = new ArrayList<>();
 		val closurePeriods = this.getClosurePeriod.get(companyId, employeeId, criteriaDate,
 				Optional.empty(), Optional.empty(), Optional.empty());
 		for (val closurePeriod : closurePeriods) aggrPeriods.addAll(closurePeriod.getAggrPeriods());
-		
+
 		// 残数処理を行う期間を計算　（Redmine#107271、EA#3434）
 		DatePeriod remainPeriod = this.calcPeriodForRemainingProc(companySets, aggrPeriods);
-		
+
 		// 全体の期間を求める
 		DatePeriod allPeriod = new DatePeriod(GeneralDate.today(), GeneralDate.today());
 		if (aggrPeriods.size() > 0){
@@ -185,16 +185,16 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 				if (endYmd.before(aggrPeriod.getPeriod().end())) endYmd = aggrPeriod.getPeriod().end();
 				allPeriod = new DatePeriod(startYmd, endYmd);
 			}
-			
+
 			// 前月の36協定の集計があり得るため、1か月前まで読み込む　（Redmine#107701）
 			allPeriod = new DatePeriod(allPeriod.start().addMonths(-1), allPeriod.end());
 		}
-		
+
 		// 月別集計で必要な社員別設定を取得
 		val employeeSets = MonAggrEmployeeSettings.loadSettings(
 				companyId, employeeId, allPeriod, this.repositories);
 		if (employeeSets.getErrorInfos().size() > 0){
-			
+
 			// エラー処理
 			List<MonthlyAggregationErrorInfo> errorInfoList = new ArrayList<>();
 			for (val errorInfo : employeeSets.getErrorInfos().entrySet()){
@@ -203,30 +203,30 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 			this.errorProc(dataSetter, employeeId, empCalAndSumExecLogID, criteriaDate, errorInfoList);
 			return status;
 		}
-		
+
 		ConcurrentStopwatches.stop("11000:集計期間の判断：");
-		
+
 		Closure closureData = closureService.getClosureDataByEmployee(employeeId, criteriaDate);
 		Boolean isCalWhenLock = null;
 		Optional<ExecutionLog> executionLog =  empCalAndSumExeLogRepository.getByExecutionContent(empCalAndSumExecLogID, 3);
 		if(executionLog.isPresent()) {
 			isCalWhenLock = executionLog.get().getIsCalWhenLock();
 		}
-		
+
 		for (val aggrPeriod : aggrPeriods){
-			val yearMonth = aggrPeriod.getYearMonth();
-			val closureId = aggrPeriod.getClosureId();
-			val closureDate = aggrPeriod.getClosureDate();
+			val yearMonth = aggrPeriod.getClosureMonth().yearMonth();
+			val closureId = ClosureId.valueOf(aggrPeriod.getClosureMonth().closureId());
+			val closureDate = aggrPeriod.getClosureMonth().closureDate();
 			val datePeriod = aggrPeriod.getPeriod();
-			
+
 			//ConcurrentStopwatches.start("12000:集計期間ごと：" + aggrPeriod.getYearMonth().toString());
-			
+
 			// 中断依頼が出されているかチェックする
 //			if (asyncContext.hasBeenRequestedToCancel()) {
 //				status.setState(ProcessState.INTERRUPTION);
 //				return status;
 //			}
-			
+
 			// 「就業計算と集計実行ログ」を取得し、実行状況を確認する
 			val exeLogOpt = this.empCalAndSumExeLogRepository.getByEmpCalAndSumExecLogID(empCalAndSumExecLogID);
 			if (!exeLogOpt.isPresent()){
@@ -240,12 +240,12 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 					return status;
 				}
 			}
-			
+
 			// 処理する期間が締められているかチェックする
 			if (employeeSets.checkClosedMonth(datePeriod.end())){
 				continue;
 			}
-			
+
 			// アルゴリズム「実績ロックされているか判定する」を実行する
 //			if (companySets.getDetermineActualLocked(datePeriod.end(), closureId.value) == LockStatus.LOCK){
 //				continue;
@@ -254,24 +254,24 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 			//「ロック中の計算/集計する」の値をチェックする
 			if(isCalWhenLock ==null || isCalWhenLock ==false ) {
 				//
-				lockStatus = lockStatusService.getDetermineActualLocked(companyId, 
+				lockStatus = lockStatusService.getDetermineActualLocked(companyId,
 						datePeriod.end(), closureData.getClosureId().value, PerformanceType.MONTHLY);
 			}
 			if(lockStatus == LockStatus.LOCK) {
 				continue;
 			}
-			
+
 			// 再実行の場合
 			if (executionType == ExecutionType.RERUN){
-				
+
 				// 編集状態を削除
 				this.editStateRepo.remove(employeeId, yearMonth, closureId, closureDate);
 			}
-			
+
 			// 残数処理を行う必要があるかどうか判断　（Redmine#107271、EA#3434）
 			Boolean isRemainProc = false;
 			if (remainPeriod.contains(datePeriod.start())) isRemainProc = true;
-			
+
 			AggregateMonthlyRecordValue value = new AggregateMonthlyRecordValue();
 			try {
 				// 月別実績を集計する　（アルゴリズム）
@@ -290,7 +290,7 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 				status.getOutAggrPeriod().add(aggrPeriod);
 				continue;
 			}
-			
+
 			// 状態を確認する
 			if (value.getErrorInfos().size() > 0) {
 
@@ -298,23 +298,23 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 				List<MonthlyAggregationErrorInfo> errorInfoList = new ArrayList<>();
 				errorInfoList.addAll(value.getErrorInfos().values());
 				this.errorProc(dataSetter, employeeId, empCalAndSumExecLogID, datePeriod.end(), errorInfoList);
-				
+
 				// 中断するエラーがある時、中断処理をする
 				if (value.isInterruption()){
 					//asyncContext.finishedAsCancelled();
 					status.setState(ProcessState.INTERRUPTION);
 					return status;
 				}
-				
+
 				break;
 			}
-			
+
 			// 前回集計結果の退避
 			prevAggrResult = value.getAggrResultOfAnnAndRsvLeave();
 			prevAbsRecResultOpt = value.getAbsRecRemainMngOfInPeriodOpt();
 			prevBreakDayOffresultOpt = value.getBreakDayOffRemainMngOfInPeriodOpt();
 			prevSpecialLeaveResultMap = value.getInPeriodOfSpecialLeaveResultInforMap();
-			
+
 			try {
 				// 月別実績(WORK)を登録する
 				this.monthService.merge(Arrays.asList(value.getIntegration()), datePeriod.end());
@@ -330,12 +330,12 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 			finally {
 				status.getOutAggrPeriod().add(aggrPeriod);
 			}
-			
+
 			//ConcurrentStopwatches.stop("12000:集計期間ごと：" + aggrPeriod.getYearMonth().toString());
 		}
 		return status;
 	}
-	
+
 	/**
 	 * 残数処理を行う期間を計算
 	 * @param companySets 月別集計で必要な会社別設定
@@ -345,21 +345,21 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 	private DatePeriod calcPeriodForRemainingProc(
 			MonAggrCompanySettings companySets,
 			List<AggrPeriodEachActualClosure> aggrPeriods){
-		
+
 		DatePeriod result = new DatePeriod(GeneralDate.min(), GeneralDate.min());
-		
+
 		// 集計期間を取得
 		aggrPeriods.sort((a, b) -> a.getPeriod().start().compareTo(b.getPeriod().start()));
 		for (AggrPeriodEachActualClosure aggrPeriod : aggrPeriods) {
-			
+
 			// 処理年月と締め期間を取得する　（会社別設定内に既に算出してある期間を使う）
-			int closureId = aggrPeriod.getClosureId().value;
+			int closureId = aggrPeriod.getClosureMonth().closureId();
 			if (companySets.getCurrentMonthPeriodMap().containsKey(closureId)) {
-				
+
 				// 処理中の期間が当月かどうか判断
 				DatePeriod currentPeriod = companySets.getCurrentMonthPeriodMap().get(closureId);
 				if (this.periodCompareEx(currentPeriod, aggrPeriod.getPeriod()) == true) {
-					
+
 					// 残数処理を行う期間を更新
 					if (result.start() == GeneralDate.min()) {
 						// 1回目は、開始日・終了日をセット
@@ -372,11 +372,11 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 				}
 			}
 		}
-		
+
 		// 残数処理を行う期間を返す
 		return result;
 	}
-	
+
 	/**
 	 * エラー処理
 	 * @param dataSetter データセッター
@@ -391,10 +391,10 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 			String empCalAndSumExecLogID,
 			GeneralDate outYmd,
 			List<MonthlyAggregationErrorInfo> errorInfoList){
-		
+
 		// 「エラーあり」に更新
 		dataSetter.updateData("monthlyAggregateHasError", ErrorPresent.HAS_ERROR.nameId);
-		
+
 		// エラー出力
 		errorInfoList.sort((a, b) -> a.getResourceId().compareTo(b.getResourceId()));
 		for (val errorInfo : errorInfoList){
@@ -407,7 +407,7 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 					errorInfo.getMessage()));
 		}
 	}
-	
+
 	/**
 	 * 期間重複があるか
 	 * @param period1 期間1
@@ -415,7 +415,7 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 	 * @return true：重複あり、false：重複なし
 	 */
 	private boolean periodCompareEx(DatePeriod period1, DatePeriod period2){
-		
+
 		if (period1.start().after(period2.end())) return false;
 		if (period1.end().before(period2.start())) return false;
 		return true;

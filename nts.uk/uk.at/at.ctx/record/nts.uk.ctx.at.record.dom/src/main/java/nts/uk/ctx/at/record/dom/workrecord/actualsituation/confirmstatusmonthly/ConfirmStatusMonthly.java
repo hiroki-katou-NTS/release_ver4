@@ -2,20 +2,23 @@ package nts.uk.ctx.at.record.dom.workrecord.actualsituation.confirmstatusmonthly
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmInfoAcqProcess;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmInfoResult;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.InformationMonth;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
+import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriod;
+import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriodCacheKey;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentityProcessUseSetRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
@@ -23,7 +26,7 @@ import nts.uk.shr.com.time.calendar.date.ClosureDate;
 
 /**
  * RQ586 : 月の実績の確認状況を取得する
- * 
+ *
  * @author tutk
  *
  */
@@ -41,7 +44,7 @@ public class ConfirmStatusMonthly {
 
 	public Optional<StatusConfirmMonthDto> getConfirmStatusMonthly(String companyId, Integer closureId,
 			ClosureDate closureDate, List<String> listEmployeeId, YearMonth yearmonthInput,
-			List<MonthlyModifyResultDto> results) {
+			List<MonthlyModifyResultDto> results, Map<ClosurePeriodCacheKey, List<ClosurePeriod>> cachedClosurePeriod) {
 		iFindDataDCRecord.clearAllStateless();
 		// ドメインモデル「本人確認処理の利用設定」を取得する
 		Optional<IdentityProcessUseSet> identityProcessUseSet = identityProcessUseSetRepo.findByKey(companyId);
@@ -55,7 +58,7 @@ public class ConfirmStatusMonthly {
 		Optional<ApprovalProcessingUseSetting> optApprovalUse = iFindDataDCRecord.findApprovalByCompanyId(companyId);
 		// 確認情報取得処理
 		List<ConfirmInfoResult> confirmInfoResults = this.confirmInfoAcqProcess.getConfirmInfoAcp(companyId,
-				listEmployeeId, Optional.empty(), Optional.of(yearmonthInput));
+				listEmployeeId, Optional.empty(), Optional.of(yearmonthInput), cachedClosurePeriod);
 		if (confirmInfoResults.isEmpty()) {
 			return Optional.empty();
 		}
@@ -68,7 +71,7 @@ public class ConfirmStatusMonthly {
 
 	/**
 	 * チェック処理（月の確認）
-	 * 
+	 *
 	 * @param listEmployeeId
 	 * @param confirmInfoResults
 	 * @param optApprovalUse
@@ -84,7 +87,7 @@ public class ConfirmStatusMonthly {
 				&& optApprovalUse.get().getUseMonthApproverConfirm()) ? true : false;
 		// Input「社員一覧」でループ
 		confirmInfoResults.forEach(x -> {
-			x.getInformationMonths().removeIf(y -> y.getActualClosure().getClosureId().value != clsId);
+			x.getInformationMonths().removeIf(y -> y.getActualClosure().getClosureMonth().closureId() != clsId);
 		});
 		for (String employeeId : listEmployeeId) {
 			Optional<ConfirmInfoResult> optConfirmInfoResult = confirmInfoResults.stream()
@@ -94,9 +97,9 @@ public class ConfirmStatusMonthly {
 			ConfirmInfoResult confirmInfoResult = optConfirmInfoResult.get();
 			for (InformationMonth infoMonth : confirmInfoResult.getInformationMonths()) {
 				// 対象締め
-				ClosureId closureId = infoMonth.getActualClosure().getClosureId();
+				ClosureId closureId = ClosureId.valueOf(infoMonth.getActualClosure().getClosureMonth().closureId());
 				// 対象年月
-				YearMonth yearMonth = infoMonth.getActualClosure().getYearMonth();
+				YearMonth yearMonth = infoMonth.getActualClosure().getClosureMonth().yearMonth();
 				// 確認状況
 				boolean confirmStatus = !infoMonth.getLstConfirmMonth().isEmpty();
 				// 取得した情報からパラメータ「月の実績の確認状況」を生成する
@@ -110,9 +113,8 @@ public class ConfirmStatusMonthly {
 				if (infoMonth.getLstApprovalMonthStatus().isEmpty()) {
 					confirmStatusResult.setWhetherToRelease(ReleasedAtr.CAN_RELEASE);
 				} else {
-					int approvalStatus = infoMonth.getLstApprovalMonthStatus().get(0).getApprovalStatus().value;
-					if (useMonthApproverConfirm && (approvalStatus == ApprovalStatusForEmployee.APPROVED.value
-							|| approvalStatus == ApprovalStatusForEmployee.DURING_APPROVAL.value)) {
+					val approvalStatus = infoMonth.getLstApprovalMonthStatus().get(0);
+					if (useMonthApproverConfirm && (approvalStatus.isApproved() || approvalStatus.isApproving())) {
 						// パラメータ「月の実績の確認状況」をセットする
 						confirmStatusResult.setWhetherToRelease(ReleasedAtr.CAN_NOT_RELEASE);
 					}

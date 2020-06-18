@@ -40,6 +40,7 @@ import nts.uk.shr.com.time.closure.ClosureMonth;
  *
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class JpaAppRootConfirmRepository extends JpaRepository implements AppRootConfirmRepository {
 
 	private List<AppRootConfirm> toDomain(List<FullJoinAppRootConfirm> listFullJoin) {

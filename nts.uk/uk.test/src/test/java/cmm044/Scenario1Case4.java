@@ -1,8 +1,15 @@
 package cmm044;
 
-import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-import org.openqa.selenium.*;
+
+import java.util.Calendar;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
 
 import common.TestRoot;
 
@@ -23,65 +30,68 @@ public class Scenario1Case4 extends TestRoot {
         //代行者の登録
         login("004515", "Jinjikoi5");
         WaitPageLoad();
+
+        Calendar today = Calendar.getInstance();
+
+        Calendar startdate = Calendar.getInstance();
+        startdate.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), 1);
+
+        Calendar enddate = Calendar.getInstance();
+        enddate.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH) + 1, 1);
+        enddate.add(Calendar.DATE, -1);
+
         //KDW004A 日別実績の確認
         driver.get(domain + "nts.uk.at.web/view/kdw/004/a/index.xhtml");
         WaitPageLoad();
-        WebElement dailogErr = driver.findElement(By.xpath("//div[contains(.,'エラー')]"));
-        if(dailogErr.isDisplayed()){
-            driver.findElement(By.xpath("//button[@class='large']")).click();
-            WebElement startTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsStartDatePicker"));
-            startTime.clear();
-            startTime.sendKeys("2019/12/01");  
-            driver.findElement(By.xpath("//body")).click();
-            //startTime.wait(700);
-           
-            WebElement endTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsEndDatePicker"));
-            endTime.clear();
-            endTime.sendKeys("2019/12/31"); 
-            driver.findElement(By.xpath("//body")).click();
-            //endTime.wait(700);
-            driver.findElement(By.xpath("//button[@id='extractBtn']")).click();
-            WaitPageLoad();
-            
+
+        WebElement startTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsStartDatePicker"));
+        startTime.clear();
+        startTime.sendKeys(df1.format(startdate.getTime()));
+        WebElement endTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsEndDatePicker"));
+        endTime.clear();
+        endTime.sendKeys(df1.format(enddate.getTime()));
+
+        JavascriptExecutor jse = (JavascriptExecutor) driver;
+        jse.executeScript("document.activeElement.blur();");    //leave focus
+
+        WaitElementLoad(By.xpath("//button[@id='extractBtn']"));
+        driver.findElement(By.xpath("//button[@id='extractBtn']")).click();
+        WaitPageLoad();
+        screenShot();
+
+        driver.findElement(By.xpath("//tr[@data-id='017267']/td[2]/a")).click();
+        WaitPageLoad();
+
+        //KDW003A 勤務報告書
+        WebElement el1 = driver.findElement(By.xpath("//td[contains(.,'" + df2.format(today.getTime()) + "')]"));
+        if ("true".equals(el1.findElements(By.xpath("following::td")).get(1).findElement(By.xpath("label/input")).getAttribute("checked")) ) {
+            el1.findElements(By.xpath("following::td")).get(1).click();
         }
 
-        //承認対象者が存在しません。
-        // if("Msg_916".equals(driver.findElement(By.xpath("//div[@class ='control pre']")).getText())){
-        //     driver.findElement(By.xpath("//button[@class='large']")).click();
-        //     WebElement startTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsStartDatePicker"));
-        //     startTime.clear();
-        //     startTime.sendKeys("2019/12/01");  
-        //     driver.findElement(By.xpath("//body")).click();
-        //     //startTime.wait(700);
-           
-        //     WebElement endTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsEndDatePicker"));
-        //     endTime.clear();
-        //     endTime.sendKeys("2019/12/31"); 
-        //     driver.findElement(By.xpath("//body")).click();
-        //     //endTime.wait(700);
-        //     driver.findElement(By.xpath("//button[@id='extractBtn']")).click();
-        //     WaitPageLoad();
-        // } else{
-        //     screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        //     FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image2.png"));
-        //     driver.findElement(By.xpath("//tr[@data-id='017267']/td[4]/a")).click();
-        //     WaitPageLoad(); 
-        // } 
-        screenShot();
-        driver.findElement(By.xpath("//tr[@data-id='017267']/td[3]/a")).click();
-        WaitPageLoad();   
-        //KDW003A 勤務報告書
-        
-        WebElement el2 = driver.findElement(By.xpath("//td[contains(.,'12/01')]"));
-        if ("true".equals(el2.findElements(By.xpath("following::td")).get(1).findElement(By.xpath("label/input")).getAttribute("checked")) ) {
-            el2.findElements(By.xpath("following::td")).get(1).click();
-        } 
-        
         driver.findElement(By.xpath("//button[@class='proceed']")).click();
         WaitPageLoad();
-        screenShot();         
-        //this.uploadTestLink(430, 97);
-     
+        screenShot();
+
+        //kdw004
+        driver.get(domain + "nts.uk.at.web/view/kdw/004/a/index.xhtml");
+        WaitPageLoad();
+
+        startTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsStartDatePicker"));
+        startTime.clear();
+        startTime.sendKeys(df1.format(startdate.getTime()));
+        endTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsEndDatePicker"));
+        endTime.clear();
+        endTime.sendKeys(df1.format(enddate.getTime()));
+
+        jse.executeScript("document.activeElement.blur();");    //leave focus
+
+        WaitElementLoad(By.xpath("//button[@id='extractBtn']"));
+        driver.findElement(By.xpath("//button[@id='extractBtn']")).click();
+        WaitPageLoad();
+        screenShot();
+
+        this.uploadTestLink(430, 97);
+
     }
 
     @AfterEach

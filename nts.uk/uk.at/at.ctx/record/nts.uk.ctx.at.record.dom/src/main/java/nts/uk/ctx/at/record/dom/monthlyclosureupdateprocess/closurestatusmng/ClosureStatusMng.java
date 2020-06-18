@@ -8,7 +8,7 @@ import nts.uk.ctx.at.record.dom.workrecord.closurestatus.ClosureStatusManagement
 import nts.uk.ctx.at.record.dom.workrecord.closurestatus.ClosureStatusManagementRepository;
 
 /**
- * 
+ *
  * @author HungTT - <<Work>> 締め状態管理
  *
  */
@@ -20,8 +20,12 @@ public class ClosureStatusMng {
 	private ClosureStatusManagementRepository closureSttRepo;
 
 	public void closureStatusManage(AggrPeriodEachActualClosure period, String empId) {
-		ClosureStatusManagement statusMng = new ClosureStatusManagement(period.getYearMonth(), empId,
-				period.getClosureId().value, period.getClosureDate(), period.getPeriod());
+		ClosureStatusManagement statusMng = new ClosureStatusManagement(
+				period.getClosureMonth().yearMonth(),
+				empId,
+				period.getClosureMonth().closureId(),
+				period.getClosureMonth().closureDate(),
+				period.getPeriod());
 		closureSttRepo.add(statusMng);
 	}
 }

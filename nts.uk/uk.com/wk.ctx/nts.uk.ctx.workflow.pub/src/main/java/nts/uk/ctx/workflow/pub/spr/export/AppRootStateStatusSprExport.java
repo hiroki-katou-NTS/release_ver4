@@ -20,8 +20,19 @@ public class AppRootStateStatusSprExport {
 	 */
 	private String employeeID;
 	/**
-	 * 承認状況
+	 * 承認状況 0:"未承認", 1:"承認中", 2:"承認済"
 	 */
 	private Integer dailyConfirmAtr;
 	
+	public boolean isUnapproved() {
+		return dailyConfirmAtr == 0;
+	}
+	
+	public boolean isApproving() {
+		return dailyConfirmAtr == 1;
+	}
+	
+	public boolean isApproved() {
+		return dailyConfirmAtr == 2;
+	}
 }

@@ -2,6 +2,9 @@ package kdw003;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Calendar;
+
 import org.openqa.selenium.*;
 import common.TestRoot;
 
@@ -18,24 +21,20 @@ public class Scenario4Case10 extends TestRoot {
 
     @Test
     public void test() throws Exception {
-
-         //login 017893/Jinjikoi5
-         login("017893", "Jinjikoi5");
-
-        // change closure 1
-        driver.get(domain+ "nts.uk.at.web/view/kmk/012/a/index.xhtml");
-        WaitPageLoad();
-        WaitElementLoad(By.xpath("//td[contains(.,'10日締め')]"));
-        driver.findElement(By.xpath("//td[contains(.,'10日締め')]")).click();
-        driver.findElement(By.id(inpMonth)).click();
-        driver.findElement(By.id(inpMonth)).clear();
-        driver.findElement(By.id(inpMonth)).sendKeys("2019/11");
-        driver.findElement(By.xpath("//body")).click();
-        driver.findElement(By.id(btnsave)).click();
-
-        // click checkbox KDW006C
+        Calendar inputdate = Calendar.getInstance();
+        inputdate.add(Calendar.MONTH, 0);
+        
+        //ログイン（正社員）
+        login("025094", "Jinjikoi5");
+        
+        //処理年月の変更
+        new Kdw003Common().setProcessYearMonth(2, "2020/03");
+        
+        //KDW006C 勤怠項目前準備 - 機能制限
         driver.get(domain + "nts.uk.at.web/view/kdw/006/c/index.xhtml");
         WaitPageLoad();
+        
+        //月の本人確認を利用するになっているか確認
         WebElement a = driver.findElement(By.xpath("//*[@id='checkBox121']"));
         WaitElementLoad(By.xpath("//*[@id='checkBox121']/label/span[1]"));
         if (a.getAttribute("class").indexOf("checked") == -1) {
@@ -46,12 +45,19 @@ public class Scenario4Case10 extends TestRoot {
         }
         driver.findElement(By.xpath("//body")).click();
 
-        // click checkbox KDW006D
+        screenShot();
+
+        //KDW006D 勤怠項目前準備 - 権限別機能制限
         driver.get(domain + "nts.uk.at.web/view/kdw/006/d/index.xhtml");
         WaitPageLoad();
+        
+        //営業
         WaitElementLoad(By.xpath("//*[@id='single-list']/tbody/tr[4]"));
         driver.findElement(By.xpath("//*[@id='single-list']/tbody/tr[4]")).click();
+        
+        WaitElementLoad(By.xpath("//*[@id='grid2']/tbody/tr[8]/td[3]/div/div/label"));
         WebElement b = driver.findElement(By.xpath("//*[@id='grid2']/tbody/tr[8]/td[3]/div/div/label"));
+        //本人締め処理の使用可否
         if (!b.findElement(By.xpath("./input")).isSelected()) {
             b.click();
             driver.findElement(By.id("register-button")).click();
@@ -60,24 +66,36 @@ public class Scenario4Case10 extends TestRoot {
         }
         driver.findElement(By.xpath("//body")).click();
 
-        // go kdw003//4-8 / tháng 9
+        screenShot();
+
+
+        //KDW003A 勤務報告書
         driver.get(domain+"nts.uk.at.web/view/kdw/003/a/index.xhtml");
         WaitPageLoad();
+        
+        //エラー参照ダイアログが起動しているか
         if (driver.findElements(By.xpath("//iframe[@name='window_1']")).size() !=0) {
             driver.switchTo().frame("window_1");
+            WaitPageLoad();
+            
             WaitElementLoad(By.id("dialogClose"));
             driver.findElement(By.id("dialogClose")).click();
-            driver.findElements(By.xpath("//button[contains(@class,'ntsDatePrevButton')]")).get(1).click();
-        } else {
-            driver.findElements(By.xpath("//button[contains(@class,'ntsDatePrevButton')]")).get(1).click();
         }
-        driver.findElements(By.xpath("//button[contains(@class,'ntsDatePrevButton')]")).get(1).click();
+        
+        //前月に変更する
+        WaitElementLoad(By.xpath("/html/body/div[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div/div[1]/button"));
+        driver.findElement(By.xpath("/html/body/div[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div/div[1]/button")).click();
+        driver.findElement(By.xpath("/html/body/div[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div/div[1]/button")).click();
         WaitElementLoad(By.id("btnExtraction"));
         driver.findElement(By.id("btnExtraction")).click();
         WaitPageLoad();
-        screenShotFull();
+
+        screenShot();
 
         this.uploadTestLink(843, 200);
+        
+        //処理年月の変更
+        new Kdw003Common().setProcessYearMonth(2, df3.format(inputdate.getTime()));
     }
 
     @AfterEach

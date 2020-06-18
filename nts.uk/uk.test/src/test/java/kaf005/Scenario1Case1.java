@@ -1,11 +1,15 @@
 package kaf005;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.Calendar;
 import java.util.List;
 
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
-import org.openqa.selenium.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import common.TestRoot;
@@ -102,7 +106,7 @@ public class Scenario1Case1 extends TestRoot {
         WaitPageLoad();
         screenShot();
 
-     //   this.uploadTestLink(4, 1);
+        this.uploadTestLink(4, 1);
     }
 
     @AfterEach

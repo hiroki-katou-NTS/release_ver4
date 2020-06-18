@@ -1,20 +1,17 @@
 package kdw004;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
+import java.util.Calendar;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 
-import common.TestRoot;
+import kdw003.Kdw003Common;
 
-public class Scenario3Case1 extends TestRoot {
+public class Scenario3Case1 extends Kdw003Common {
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -24,31 +21,52 @@ public class Scenario3Case1 extends TestRoot {
 
     @Test
     public void test() throws Exception {
+
         // login申請者
-        driver.get(domain + "nts.uk.com.web/view/ccg/007/d/index.xhtml");
-        WaitPageLoad();
-        driver.findElement(By.id("company-code-select")).click();
-        WaitElementLoad(By.xpath("//li[@data-value='0001']"));
-        driver.findElement(By.xpath("//li[@data-value='0001']")).click();
-        driver.findElement(By.id("password-input")).clear();
-        driver.findElement(By.id("password-input")).sendKeys("Jinjikoi5");
-        driver.findElement(By.id("employee-code-inp")).clear();
-        driver.findElement(By.id("employee-code-inp")).sendKeys("004515");
-        File screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image1.png"));
-        driver.findElement(By.id("login-btn")).click();
+    	login("009173", "Jinjikoi5");
+
+        Calendar inputStartDate = Calendar.getInstance();
+        inputStartDate.set(2020, 4, 1);
+        Calendar inputEndDate = Calendar.getInstance();
+        inputEndDate.set(2020, 4, 31);
+
+        driver.get(domain + "nts.uk.at.web/view/kdw/003/a/index.xhtml");
         WaitPageLoad();
 
-        kmk012("2019/10");
+        driver.findElements(By.xpath("//input[contains(@id,'startInput')]")).get(3).clear();
+        driver.findElements(By.xpath("//input[contains(@id,'startInput')]")).get(3).sendKeys(df1.format(inputStartDate.getTime()));
+        driver.findElements(By.xpath("//input[contains(@id,'endInput')]")).get(3).clear();
+        driver.findElements(By.xpath("//input[contains(@id,'endInput')]")).get(3).sendKeys(df1.format(inputEndDate.getTime()));
+        driver.findElement(By.id("btnExtraction")).click();
+        WaitPageLoad();
+        // Check checkbox
+        if(!selectItemKdw003_1("本人", "05/08(金)").findElement(By.xpath("./label/input")).isSelected()){
+        	driver.findElement(By.xpath("//td[contains(.,'05/08')]")).findElements(By.xpath("following::td")).get(0).click();
+        }
+        if(!selectItemKdw003_1("本人", "05/09(土)").findElement(By.xpath("./label/input")).isSelected()){
+        	driver.findElement(By.xpath("//td[contains(.,'05/09')]")).findElements(By.xpath("following::td")).get(0).click();
+        }
+
+        if(!selectItemKdw003_1("本人", "05/10(日)").findElement(By.xpath("./label/input")).isSelected()){
+        	driver.findElement(By.xpath("//td[contains(.,'05/10')]")).findElements(By.xpath("following::td")).get(0).click();
+        }
+
+        if(!selectItemKdw003_1("本人", "05/11(月)").findElement(By.xpath("./label/input")).isSelected()){
+        	driver.findElement(By.xpath("//td[contains(.,'05/11')]")).findElements(By.xpath("following::td")).get(0).click();
+        }
+        WaitPageLoad();
+        driver.findElement(By.xpath("//button[@class='proceed']")).click();
+
+
+        // login承認者
+    	login("004515", "Jinjikoi5");
 
         // Go to screen Kdw004a
         driver.get(domain + "nts.uk.at.web/view/kdw/004/a/index.xhtml");
+        setKdw004Period(inputStartDate, inputEndDate);
+
         WaitPageLoad();
-
-
-        // tacke a photo
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image2.png"));
+        screenShot();
         Thread.sleep(2000);
 
         // Go to screen Kdw003a
@@ -60,20 +78,18 @@ public class Scenario3Case1 extends TestRoot {
             driver.findElement(By.id("dialogClose")).click();
         }
 
-        // tacke a photo
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image3.png"));
+        screenShot();
 
-        if(!selectItemKdw003_1("承認", "11/08(金)").findElement(By.xpath("./label/input")).isSelected()){
-            selectItemKdw003_1("承認", "11/08(金)").click();
+        if(!selectItemKdw003_1("承認", "05/08(金)").findElement(By.xpath("./label/input")).isSelected()){
+            selectItemKdw003_1("承認", "05/08(金)").click();
         }
 
-        if(!selectItemKdw003_1("承認", "11/09(土)").findElement(By.xpath("./label/input")).isSelected()){
-            selectItemKdw003_1("承認", "11/09(土)").click();
+        if(!selectItemKdw003_1("承認", "05/09(土)").findElement(By.xpath("./label/input")).isSelected()){
+            selectItemKdw003_1("承認", "05/09(土)").click();
         }
 
-        if(!selectItemKdw003_1("承認", "11/10(日)").findElement(By.xpath("./label/input")).isSelected()){
-            selectItemKdw003_1("承認", "11/10(日)").click();
+        if(!selectItemKdw003_1("承認", "05/10(日)").findElement(By.xpath("./label/input")).isSelected()){
+            selectItemKdw003_1("承認", "05/10(日)").click();
         }
 
         WaitElementLoad(By.className("proceed"));
@@ -81,16 +97,12 @@ public class Scenario3Case1 extends TestRoot {
         WaitPageLoad();
         // tacke a photo
         Thread.sleep(2000);
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image4.png"));
-
+        screenShot();
         // Go to screen Kdw004a
         driver.get(domain + "nts.uk.at.web/view/kdw/004/a/index.xhtml");
+        setKdw004Period(inputStartDate, inputEndDate);
         WaitPageLoad();
-
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image5.png"));
-
+        screenShot();
         WaitPageLoad();
         this.uploadTestLink(862, 207);
     }
@@ -102,25 +114,5 @@ public class Scenario3Case1 extends TestRoot {
         if (!"".equals(verificationErrorString)) {
             fail(verificationErrorString);
         }
-    }
-
-    public void kmk012(String date) {
-        // Setting screen kmk012
-        driver.get(domain + "nts.uk.at.web/view/kmk/012/a/index.xhtml");
-        WaitPageLoad();
-
-        // Clear Input Month
-        WaitElementLoad(By.id("inpMonth"));
-        driver.findElement(By.id("inpMonth")).clear();
-
-        // Input into Month
-        WaitElementLoad(By.id("inpMonth"));
-        driver.findElement(By.id("inpMonth")).sendKeys(date);
-        driver.findElement(By.id("contents-right")).click();
-
-        // Click button Save
-        WaitElementLoad(By.id("btn_save"));
-        driver.findElement(By.id("btn_save")).click();
-        WaitPageLoad();
     }
 }

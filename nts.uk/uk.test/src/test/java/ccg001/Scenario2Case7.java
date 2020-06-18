@@ -39,8 +39,8 @@ public class Scenario2Case7 extends TestRoot {
         driver.findElement(By.xpath("//a[contains(.,'詳細検索')]")).click();
         WaitPageLoad();
         driver.findElements(By.xpath("//h3")).get(2).click();
-        Thread.sleep(1000);
-        driver.findElements(By.xpath("//span[contains(@name,'hchk')]")).get(1).click();
+        //Thread.sleep(1000);
+        //driver.findElements(By.xpath("//span[contains(@name,'hchk')]")).get(1).click();
         screenShot();
         driver.findElement(By.id("ccg001-btn-advanced-search")).click();
         WaitPageLoad();

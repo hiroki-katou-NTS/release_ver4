@@ -2,20 +2,15 @@ package ktg029;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.File;
-
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 
-import common.TestRoot;
+import kdw003.Kdw003Common;
 
 
-public class Scenario1Case8 extends TestRoot {
+public class Scenario1Case8 extends Kdw003Common {
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -29,66 +24,31 @@ public class Scenario1Case8 extends TestRoot {
 
  // 1.8  今月の申請締め切り日 - 無しの場合
         // login申請者
-        driver.get(domain + "nts.uk.com.web/view/ccg/007/d/index.xhtml");
-        WaitPageLoad();
-        driver.findElement(By.id("company-code-select")).click();
-        WaitElementLoad(By.xpath("//li[@data-value='0001']"));
-        driver.findElement(By.xpath("//li[@data-value='0001']")).click();
-        driver.findElement(By.id("password-input")).clear();
-        driver.findElement(By.id("password-input")).sendKeys("0");
-        driver.findElement(By.id("employee-code-inp")).clear();
-        driver.findElement(By.id("employee-code-inp")).sendKeys("000001");
-        File screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image2.png"));
-        driver.findElement(By.id("login-btn")).click();
-        WaitPageLoad();
-        
+        login("005517", "Jinjikoi5");
+
         // Go to screen kaf022a
         driver.get(domain + "nts.uk.at.web/view/kaf/022/a/index.xhtml");
         WaitPageLoad();
 
         // Click check box
-        WaitElementLoad(By.id("a4_6"));
-        driver.findElement(By.id("a4_6")).click();
+        if(driver.findElement(By.id("a4_6")).findElement(By.xpath("label/input")).isSelected()) {
+        	WaitElementLoad(By.id("a4_6"));
+        	driver.findElement(By.id("a4_6")).click();
+        	WaitElementLoad(By.className("proceed"));
+        	driver.findElement(By.className("proceed")).click();
+            WaitPageLoad();
+        }
 
-        // login申請者
-        driver.get(domain + "nts.uk.com.web/view/ccg/007/d/index.xhtml");
-        WaitPageLoad();
-        driver.findElement(By.id("company-code-select")).click();
-        WaitElementLoad(By.xpath("//li[@data-value='0001']"));
-        driver.findElement(By.xpath("//li[@data-value='0001']")).click();
-        driver.findElement(By.id("password-input")).clear();
-        driver.findElement(By.id("password-input")).sendKeys("Jinjikoi5");
-        driver.findElement(By.id("employee-code-inp")).clear();
-        driver.findElement(By.id("employee-code-inp")).sendKeys("005517");
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image3.png"));
-        driver.findElement(By.id("login-btn")).click();
-        WaitPageLoad();
+        screenShot();
 
         // Setting screen kmk012
-        driver.get(domain + "nts.uk.at.web/view/kmk/012/a/index.xhtml");
-        WaitPageLoad();
-
-        // Clear Input Month
-        WaitElementLoad(By.id("inpMonth"));
-        driver.findElement(By.id("inpMonth")).clear();
-
-        // Input into Month
-        WaitElementLoad(By.id("inpMonth"));
-        driver.findElement(By.id("inpMonth")).sendKeys("2019/11");
-        driver.findElement(By.id("contents-right")).click();
-
-        // Click button Save
-        WaitElementLoad(By.id("btn_save"));
-        driver.findElement(By.id("btn_save")).click();
+        setProcessYearMonth(1, "2020/05");
 
         driver.get(domain + "nts.uk.com.web/view/ccg/008/a/index.xhtml");
         WaitPageLoad();
 
         // tacke a photo
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image4.png"));
+        screenShot();
 
         WaitPageLoad();
         this.uploadTestLink(548, 130);

@@ -25,6 +25,7 @@ import nts.uk.ctx.workflow.infra.entity.agent.CmmmtAgent;
 import nts.uk.ctx.workflow.infra.entity.agent.CmmmtAgentPK;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class JpaAgentRepository extends JpaRepository implements AgentRepository {
 	private static final String SELECT_ALL;
 	

@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
-import java.awt.Rectangle; 
-import java.awt.Robot; 
+import java.awt.Rectangle;
+import java.awt.Robot;
 
 import br.eti.kinoshita.testlinkjavaapi.constants.*;
 import br.eti.kinoshita.testlinkjavaapi.model.*;
@@ -76,13 +76,13 @@ public class TestRoot {
         }
 
         folder = new File(screenshotPath);
-        if(folder.exists()) FileUtils.cleanDirectory(folder); 
+        if(folder.exists()) FileUtils.cleanDirectory(folder);
         System.setProperty("webdriver.chrome.driver", jarFile.getParent() + File.separator + "chromedriver.exe");
         driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         driver.manage().window().maximize();
         js = (JavascriptExecutor) driver;
-        _wait = new WebDriverWait(driver, 30);
+        _wait = new WebDriverWait(driver, 180);
     }
 
     public void WaitPageLoad() {
@@ -104,7 +104,7 @@ public class TestRoot {
         try {
             Thread.sleep(1000);
             _wait.until(ExpectedConditions.presenceOfElementLocated(locator));
-            _wait.until(d -> ExpectedConditions.elementToBeClickable(d.findElement(locator)));           
+            _wait.until(d -> ExpectedConditions.elementToBeClickable(d.findElement(locator)));
         } catch (Exception e) {
         }
     }
@@ -136,9 +136,9 @@ public class TestRoot {
 
     public void screenShotFull() {
         try {
-            Robot r = new Robot(); 
+            Robot r = new Robot();
             Rectangle capture = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
-            BufferedImage Image = r.createScreenCapture(capture); 
+            BufferedImage Image = r.createScreenCapture(capture);
             ImageIO.write(Image, "png", new File(screenshotPath + "/image" + String.valueOf(imageIndex)  + ".png"));
             imageIndex++;
         } catch (Exception e) {
@@ -146,19 +146,19 @@ public class TestRoot {
         }
     }
 
-    //select item kdw003 個人別 
+    //select item kdw003 個人別
     public WebElement selectItemKdw003_1(String itemName, String date) {
         int xPosition = driver.findElement(By.xpath("//td[.='" + itemName + "']")).getRect().getX() + 1;
         int yPosition = driver.findElement(By.xpath("//td[.='" + date + "']")).getRect().getY() + 1;
         return (WebElement)js.executeScript("return document.elementFromPoint(arguments[0], arguments[1])", xPosition, yPosition);
     }
-    //select item kdw003 個人別 
+    //select item kdw003 個人別
     public WebElement selectItemKdw003_2(String itemName, String date) {
         int xPosition = driver.findElement(By.xpath("//td[.='" + itemName + "']")).getRect().getX() +  driver.findElement(By.xpath("//td[.='" + itemName + "']")).getRect().getWidth()/2 + 5;
         int yPosition = driver.findElement(By.xpath("//td[.='" + date + "']")).getRect().getY() + 20;
         return (WebElement)js.executeScript("return document.elementFromPoint(arguments[0], arguments[1])", xPosition, yPosition);
     }
-    //select item kdw003 日付別 
+    //select item kdw003 日付別
     public WebElement selectItemKdw003_3(String itemName, String empId) {
         int xPosition = driver.findElement(By.xpath("//td[.='" + itemName + "']")).getRect().getX() + 1;
         int yPosition = driver.findElement(By.xpath("(//div[@class='mgrid-fixed']//td[.='" + empId + "'])[1]")).getRect().getY() + 1;
@@ -182,7 +182,7 @@ public class TestRoot {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {
             //TODO: handle exception
-        }        
+        }
         String dbURL = "jdbc:sqlserver://" + dbServer;
         Properties properties = new Properties();
         properties.put("DatabaseName", databaseName);
@@ -194,18 +194,18 @@ public class TestRoot {
             conn = DriverManager.getConnection(dbURL, properties);
             for (String sql:sqls) {
                 statement = conn.prepareStatement(sql);
-                // statement.setString(1, "bill");    
-                statement.executeUpdate();   
-            }      
+                // statement.setString(1, "bill");
+                statement.executeUpdate();
+            }
         } catch (SQLException e) {
             //TODO: handle exception
         } finally {
             try {
                 conn.close();
-                statement.close(); 
+                statement.close();
             } catch (SQLException e) {
                 //TODO: handle exception
-            }                     
+            }
         }
     }
 
@@ -255,7 +255,7 @@ public class TestRoot {
                 byteArray = FileUtils.readFileToByteArray(attachmentFile);
                 fileContent = Base64.getEncoder().encodeToString(byteArray);
                 api.uploadExecutionAttachment(executionId, title, description, fileName, fileType, fileContent);
-                Thread.sleep(1000); 
+                Thread.sleep(1000);
             }
 
         } catch (Exception e) {
@@ -263,5 +263,5 @@ public class TestRoot {
         }
     }
 
-    
+
 }

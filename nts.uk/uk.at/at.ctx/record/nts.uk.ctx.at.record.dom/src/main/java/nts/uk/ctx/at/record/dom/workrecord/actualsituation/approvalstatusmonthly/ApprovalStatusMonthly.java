@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,10 +30,16 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ch
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmInfoResult;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.InformationMonth;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
+import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriod;
+import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriodCacheKey;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.confirmstatusmonthly.AvailabilityAtr;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.confirmstatusmonthly.MonthlyModifyResultDto;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.confirmstatusmonthly.ReleasedAtr;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.identificationstatus.export.CheckIndentityDayConfirm;
+import nts.uk.ctx.at.record.dom.workrecord.approval.daily.ApprovalProgressDaily;
+import nts.uk.ctx.at.record.dom.workrecord.approval.monthly.ApprovalProgressMonthly;
+import nts.uk.ctx.at.record.dom.workrecord.approval.monthly.ApprovalStatusMonthlyAdapter;
+import nts.uk.ctx.at.record.dom.workrecord.approval.monthly.ApprovalSubjectiveMonthlyOnWorkflow;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.ConfirmationMonth;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.ConfirmationMonthRepository;
@@ -46,7 +53,7 @@ import nts.uk.shr.com.time.closure.ClosureMonth;
 
 /**
  * 月の実績の承認状況を取得する : RQ587
- * 
+ *
  * @author tutk
  *
  */
@@ -71,6 +78,9 @@ public class ApprovalStatusMonthly {
 	private ApprovalStatusAdapter approvalStatusAdapter;
 
 	@Inject
+	private ApprovalStatusMonthlyAdapter approvalStatusMonthlyAdapter;
+
+	@Inject
 	private ConfirmationMonthRepository confirmationMonthRepo;
 
 	@Inject
@@ -78,7 +88,7 @@ public class ApprovalStatusMonthly {
 
 	public Optional<ApprovalStatusMonth> getApprovalStatusMonthly(String companyId, String approverId,
 			Integer closureId, List<String> listEmployeeId, YearMonth yearmonthInput,
-			List<MonthlyModifyResultDto> results) {
+			List<MonthlyModifyResultDto> results, Map<ClosurePeriodCacheKey, List<ClosurePeriod>> cachedClosurePeriod) {
 		iFindDataDCRecord.clearAllStateless();
 		// ドメインモデル「承認処理の利用設定」を取得する
 		Optional<ApprovalProcessingUseSetting> optApprovalUse = iFindDataDCRecord.findApprovalByCompanyId(companyId);
@@ -94,7 +104,7 @@ public class ApprovalStatusMonthly {
 		// 承認情報取得処理
 		String employeeLogin = AppContexts.user().employeeId();
 		List<ConfirmInfoResult> listApprovalInfoResult = this.approvalInfoAcquisitionProcess(companyId, employeeLogin,
-				listEmployeeId, true, Optional.empty(), Optional.of(yearmonthInput));
+				listEmployeeId, true, Optional.empty(), Optional.of(yearmonthInput), cachedClosurePeriod);
 		if (listApprovalInfoResult.isEmpty()) {
 			return Optional.empty();
 		}
@@ -106,7 +116,7 @@ public class ApprovalStatusMonthly {
 
 	/**
 	 * 承認情報取得処理
-	 * 
+	 *
 	 * @param companyId
 	 * @param empIdLogin
 	 * @param lstEmpId
@@ -117,7 +127,7 @@ public class ApprovalStatusMonthly {
 	 */
 	private List<ConfirmInfoResult> approvalInfoAcquisitionProcess(String companyId, String empIdLogin,
 			List<String> lstEmpId, boolean isCallBy587, Optional<DatePeriod> optTargetDatePeriod,
-			Optional<YearMonth> optTargetYm) {
+			Optional<YearMonth> optTargetYm, Map<ClosurePeriodCacheKey, List<ClosurePeriod>> cachedClosurePeriod) {
 		// Input「対象年月」「対象期間」をチェックする
 		// Input「対象期間」をチェックする
 		if (optTargetDatePeriod.isPresent()) {
@@ -125,12 +135,12 @@ public class ApprovalStatusMonthly {
 			if (lstEmpId.size() == 1) {
 				// 社員1件の承認状況情報を取得する
 				return approvalStatusInfoEmp.approvalStatusInfoOneEmp(companyId, empIdLogin, lstEmpId.get(0),
-						optTargetDatePeriod, optTargetYm, isCallBy587);
+						optTargetDatePeriod, optTargetYm, isCallBy587, cachedClosurePeriod);
 			}
 			if (lstEmpId.size() > 1) {
 				// 複数社員の承認状況情報を取得する
 				return approvalStatusInfoEmp.approvalStatusInfoMulEmp(companyId, empIdLogin, lstEmpId,
-						optTargetDatePeriod, optTargetYm, isCallBy587);
+						optTargetDatePeriod, optTargetYm, isCallBy587, cachedClosurePeriod);
 			}
 		}
 		// Input「対象年月」をチェックする
@@ -139,12 +149,12 @@ public class ApprovalStatusMonthly {
 			if (lstEmpId.size() == 1) {
 				// 社員1件の承認状況情報を取得する
 				return approvalStatusInfoEmp.approvalStatusInfoOneEmp(companyId, empIdLogin, lstEmpId.get(0),
-						optTargetDatePeriod, optTargetYm, isCallBy587);
+						optTargetDatePeriod, optTargetYm, isCallBy587, cachedClosurePeriod);
 			}
 			if (lstEmpId.size() > 1) {
 				// 複数社員の承認状況情報を取得する
 				return approvalStatusInfoEmp.approvalStatusInfoMulEmp(companyId, empIdLogin, lstEmpId,
-						optTargetDatePeriod, optTargetYm, isCallBy587);
+						optTargetDatePeriod, optTargetYm, isCallBy587, cachedClosurePeriod);
 			}
 		}
 
@@ -161,7 +171,7 @@ public class ApprovalStatusMonthly {
 		List<ApprovalStatusResult> approvalStatusResults = new ArrayList<>();
 		// Input「対象締め」に一致しないInput「社員の実績の承認状況情報．月の情報」を削除する
 		listApprovalInfoResult.forEach(x -> {
-			x.getInformationMonths().removeIf(y -> y.getActualClosure().getClosureId().value != closId.intValue());
+			x.getInformationMonths().removeIf(y -> y.getActualClosure().getClosureMonth().closureId() != closId.intValue());
 		});
 		// 取得している「承認処理の利用設定．日の承認を利用する」をチェックする- k can cho vao vong loop
 		boolean useDayApproverConfirm = approvalUse.getUseDayApproverConfirm() ? true : false;
@@ -173,23 +183,23 @@ public class ApprovalStatusMonthly {
 			ConfirmInfoResult approvalInfoResult = optApprovalInfoResult.get();
 			for (InformationMonth infoMonth : approvalInfoResult.getInformationMonths()) {
 				// 対象締め
-				ClosureId closureId = infoMonth.getActualClosure().getClosureId();
+				ClosureId closureId = ClosureId.valueOf(infoMonth.getActualClosure().getClosureMonth().closureId());
 				// 対象年月
-				YearMonth yearMonth = infoMonth.getActualClosure().getYearMonth();
+				YearMonth yearMonth = infoMonth.getActualClosure().getClosureMonth().yearMonth();
 				// 承認状況
-				Optional<ApproveRootStatusForEmpImport> optApproveRootStatusForEmpImport = infoMonth
-						.getLstApprovalMonthStatus().stream().filter(x -> x.getEmployeeID().equals(employeeId))
+				Optional<ApprovalSubjectiveMonthlyOnWorkflow> optApproveRootStatusForEmpImport = infoMonth
+						.getLstAppRootOfEmpMonth().stream().filter(x -> x.getTargetEmployeeId().equals(employeeId))
 						.findFirst();
 				if (!optApproveRootStatusForEmpImport.isPresent()) {
 					continue;
 				}
-				ApprovalStatusForEmployee normalStatus = optApproveRootStatusForEmpImport.get().getApprovalStatus();
+				ApprovalStatusForEmployee normalStatus = optApproveRootStatusForEmpImport.get().approvalStatusForEmployee();
 
-				List<AppRootSituationMonth> approvalRootSituations = new ArrayList<>();
-				infoMonth.getLstAppRootOfEmpMonth().stream()
-						.forEach(x -> approvalRootSituations.addAll(x.getApprovalRootSituations()));
-				Optional<AppRootSituationMonth> optAppRootSituationMonth = approvalRootSituations.stream()
-						.filter(x -> x.getTargetID().equals(employeeId) && x.getYearMonth().v() == yearMonth.v())
+//				List<AppRootSituationMonth> approvalRootSituations = new ArrayList<>();
+//				infoMonth.getLstAppRootOfEmpMonth().stream()
+//						.forEach(x -> approvalRootSituations.addAll(x.getApprovalRootSituations()));
+				Optional<ApprovalSubjectiveMonthlyOnWorkflow> optAppRootSituationMonth = infoMonth.getLstAppRootOfEmpMonth().stream()
+						.filter(x -> x.getTargetEmployeeId().equals(employeeId) && x.getDate().equals(yearMonth))
 						.findFirst();
 				// 承認状態
 				boolean approvalStatus = false;
@@ -198,19 +208,17 @@ public class ApprovalStatusMonthly {
 				// 解除可否
 				ReleasedAtr whetherToRelease = ReleasedAtr.CAN_NOT_RELEASE;
 				if (optAppRootSituationMonth.isPresent()) {
-					AppRootSituationMonth appRootSituationMonth = optAppRootSituationMonth.get();
+					ApprovalSubjectiveMonthlyOnWorkflow appRootSituationMonth = optAppRootSituationMonth.get();
 					// 承認状態
-					approvalStatus = (appRootSituationMonth.getApprovalStatus()
-							.getApprovalActionByEmpl().value == ApprovalActionByEmpl.APPROVALED.value);
+					approvalStatus = appRootSituationMonth.getSubjective().isApproved();
 					// 実施可否
-					List<Integer> listValueTrue = Arrays.asList(ApproverEmployeeState.COMPLETE.value,
-							ApproverEmployeeState.PHASE_LESS.value, ApproverEmployeeState.PHASE_PASS.value);
-					implementaPropriety = listValueTrue.contains(appRootSituationMonth.getApprovalAtr().value)
-							? AvailabilityAtr.CAN_NOT_RELEASE : AvailabilityAtr.CAN_RELEASE;
+					implementaPropriety = appRootSituationMonth.getSubjective().canExecute()
+							? AvailabilityAtr.CAN_RELEASE
+							: AvailabilityAtr.CAN_NOT_RELEASE;
 					// 解除可否
-					whetherToRelease = infoMonth.getLstAppRootOfEmpMonth().isEmpty() ? ReleasedAtr.CAN_NOT_RELEASE
-							: EnumAdaptor.valueOf(appRootSituationMonth.getApprovalStatus().getReleaseDivision().value,
-									ReleasedAtr.class);
+					whetherToRelease = appRootSituationMonth.getSubjective().canRelease()
+							? ReleasedAtr.CAN_RELEASE
+							: ReleasedAtr.CAN_NOT_RELEASE;
 				}
 
 				// 取得した情報からパラメータ「月の実績の承認状況」を生成する
@@ -230,7 +238,7 @@ public class ApprovalStatusMonthly {
 					approvalInfoResult.getStatusOfEmp().getListPeriod().stream().forEach(period -> {
 						listDateApprove.addAll(period.datesBetween());
 					});
-					List<ApproveRootStatusForEmpImport> lstApprovalDayStatus = approvalInfoResult.getInformationDay()
+					List<ApprovalProgressDaily> lstApprovalDayStatus = approvalInfoResult.getInformationDay()
 							.getLstApprovalDayStatus();
 					// 1件でも「承認中」「未承認」「NULL」の場合
 					if (lstApprovalDayStatus.isEmpty()) {
@@ -238,16 +246,13 @@ public class ApprovalStatusMonthly {
 						// 実施可否：実施できない
 						approvalStatusResult.setImplementaPropriety(AvailabilityAtr.CAN_NOT_RELEASE);
 					}
-					for (ApproveRootStatusForEmpImport approvalDayStatus : lstApprovalDayStatus) {
-						if (listDateApprove.contains(approvalDayStatus.getAppDate()) && (approvalDayStatus
-								.getApprovalStatus().value == ApprovalStatusForEmployee.UNAPPROVED.value
-								|| approvalDayStatus
-										.getApprovalStatus().value == ApprovalStatusForEmployee.DURING_APPROVAL.value)) {
-							// パラメータ「月の実績の承認状況」をセットする
-							// 実施可否：実施できない
-							approvalStatusResult.setImplementaPropriety(AvailabilityAtr.CAN_NOT_RELEASE);
-							break;
-						}
+					boolean exists = lstApprovalDayStatus.stream()
+						.filter(ads -> listDateApprove.contains(ads.getDate()))
+						.anyMatch(ads -> ads.isUnapproved() || ads.isApproving());
+					if(exists) {
+						// パラメータ「月の実績の承認状況」をセットする
+						// 実施可否：実施できない
+						approvalStatusResult.setImplementaPropriety(AvailabilityAtr.CAN_NOT_RELEASE);
 					}
 				}
 
@@ -308,15 +313,15 @@ public class ApprovalStatusMonthly {
 		}
 
 		// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する : RQ462
-		List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
-				.getApprovalByListEmplAndListApprovalRecordDateNew(workPeriod, new ClosureMonth(yearMonth, closureId, closureDate), Arrays.asList(employeeId));
+		ClosureMonth cm = new ClosureMonth(yearMonth, closureId, closureDate);
+		List<ApprovalProgressMonthly> lstApprovalStatus = approvalStatusMonthlyAdapter
+				.getProgress(Arrays.asList(employeeId), cm, workPeriod); // 2 : 月別確認
+//		List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
+//				.getApprovalByListEmplAndListApprovalRecordDateNew(workPeriod, new ClosureMonth(yearMonth, closureId, closureDate), Arrays.asList(employeeId));
 		if (lstApprovalStatus.isEmpty())
 			return Optional.empty();
 
 		// 対応するImported「基準社員の承認対象者」を取得する RQ463
-		// ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport =
-		// approvalStatusAdapter.getApprovalRootOfEmloyeeNew(datePeriod.end(),
-		// datePeriod.end(), approverId, companyId, 2); // 2 : 月別確認
 		// Change 463(call 133) by 534 for Tú bro - if have bug, Tú will fix,
 		// don't call Phong
 		AppRootOfEmpMonthImport approvalRootOfEmloyee = this.approvalStatusAdapter.getApprovalEmpStatusMonth(
@@ -355,7 +360,7 @@ public class ApprovalStatusMonthly {
 		}
 
 		// ・承認状況：取得した「承認対象者の承認状況．承認状況」
-		approvalStatusResult.setNormalStatus(lstApprovalStatus.get(0).getApprovalStatus());
+		approvalStatusResult.setNormalStatus(lstApprovalStatus.get(0).approvalStatusForEmployee());
 		// ドメインモデル「本人確認処理の利用設定」を取得する
 		Optional<IdentityProcessUseSet> identityProcessUseSet = identityProcessUseSetRepo.findByKey(companyId);
 		// 取得した「承認処理の利用設定．日の承認者確認を利用する」をチェックする

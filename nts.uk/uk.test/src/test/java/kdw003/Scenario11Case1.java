@@ -1,9 +1,25 @@
 package kdw003;
 
-import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-import org.openqa.selenium.*;
 
+import java.util.Calendar;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
+/**
+ * シナリオ内変更：
+ *  システム日を含む月に処理月を変更
+ *
+ * 前提：
+ * 社員091636でログイン、日別実績の修正が見られる
+ * システム日を含む月の実績がある、本人未確認、エラーアラーム無し
+ * システム日前日が平日
+ * @throws Exception
+ */
 public class Scenario11Case1 extends Kdw003Common {
     private Integer i = 1;
 
@@ -16,23 +32,47 @@ public class Scenario11Case1 extends Kdw003Common {
     @Test
     public void test() throws Exception {
         // login申請者
+        login("091636", "Jinjikoi5");	//Scenario11で使用する・申請者・フレ社員
 
-        login("016209", "Jinjikoi5");
+        Calendar yesterday = Calendar.getInstance();
+        yesterday.add(Calendar.DATE, -1);
+
+        Calendar startdate = Calendar.getInstance();
+        startdate.set(yesterday.get(Calendar.YEAR), yesterday.get(Calendar.MONTH), 1);
+
+        Calendar enddate = Calendar.getInstance();
+        enddate.set(yesterday.get(Calendar.YEAR), yesterday.get(Calendar.MONTH) + 1, 1);
+        enddate.add(Calendar.DATE, -1);
 
         //kmk012 change closure 1
-        driver.get(domain+ "nts.uk.at.web/view/kmk/012/a/index.xhtml");
-        WaitPageLoad();
-        driver.findElement(By.id("inpMonth")).click();
-        driver.findElement(By.id("inpMonth")).clear();
-        WaitElementLoad(By.id("inpMonth"));
-        driver.findElement(By.id("inpMonth")).sendKeys("2019/11");
-        driver.findElement(By.xpath("//body")).click();
-        WaitElementLoad(By.id("btn_save"));
-        driver.findElement(By.id("btn_save")).click();
+        setProcessYearMonth(1, df3.format(yesterday.getTime()));
 
-        showScreen003();
-        if (checkedBox(2, 0)) {
-            clickCheckBox(2, 0);
+//        // Go to screen kaf022a
+//        driver.get(domain + "nts.uk.at.web/view/kaf/022/a/index.xhtml");
+//        WaitPageLoad();
+//
+//        // Click check box
+//        if(driver.findElement(By.id("a4_6")).findElement(By.xpath("label/input")).isSelected()) {
+//        	WaitElementLoad(By.id("a4_6"));
+//        	driver.findElement(By.id("a4_6")).click();
+//        }
+//
+//        js.executeScript("$('.tab-content-1').scrollTop(900)");
+//        if(driver.findElement(By.xpath("//table[@id='fixed-table-a7']/tbody/tr[1]/td[2]/div/label/input")).isSelected()) {
+//        	WaitElementLoad(By.xpath("//table[@id='fixed-table-a7']/tbody/tr[1]/td[2]/div"));
+//        	driver.findElement(By.xpath("//table[@id='fixed-table-a7']/tbody/tr[1]/td[2]/div")).click();
+//        }
+//    	WaitElementLoad(By.className("proceed"));
+//    	driver.findElement(By.className("proceed")).click();
+//        WaitPageLoad();
+
+        showScreen003(startdate, enddate);
+
+        if((yesterday.get(Calendar.DAY_OF_MONTH)  + 1) >= 15) {
+        	js.executeScript("$('.mgrid-free').scrollTop(400)");
+        }
+        if (checkedBox(yesterday.get(Calendar.DAY_OF_MONTH) + 1, 0)) {
+            clickCheckBox(yesterday.get(Calendar.DAY_OF_MONTH) + 1, 0);
             driver.findElement(By.xpath("//div[@id='function-content']//button[1]")).click();
 
             WaitPageLoad();
@@ -48,7 +88,7 @@ public class Scenario11Case1 extends Kdw003Common {
 
         WaitPageLoad();
         driver.findElement(By.id("inputdate")).clear();
-        driver.findElement(By.id("inputdate")).sendKeys("2019/11/01");
+        driver.findElement(By.id("inputdate")).sendKeys(df1.format(yesterday.getTime()));
 
         driver.findElement(By.id("inpStartTime1")).click();
         WaitPageLoad();
@@ -70,20 +110,22 @@ public class Scenario11Case1 extends Kdw003Common {
 
         WaitElementLoad(By.xpath("//div[@id='functions-area']/button[1]"));
         driver.findElement(By.xpath("//div[@id='functions-area']/button[1]")).click();
-        WaitPageLoad();
+        Thread.sleep(1000);
         screenShot();
 
-        showScreen003();
+        showScreen003(startdate, enddate);
         WaitPageLoad();
         js.executeScript("$('.mgrid-free').scrollLeft(2000)");
-        js.executeScript("$('.mgrid-free').scrollTop(0)");
+        if((yesterday.get(Calendar.DAY_OF_MONTH)  + 1) >= 15) {
+        	js.executeScript("$('.mgrid-free').scrollTop(400)");
+        }
         WaitPageLoad();
         screenShot();
 
         this.uploadTestLink(1150, 277);
     }
 
-    public void showScreen003() {
+    public void showScreen003(Calendar startdate, Calendar enddate) {
         driver.get(domain + "nts.uk.at.web/view/kdw/003/a/index.xhtml");
         WaitPageLoad();
 
@@ -92,12 +134,12 @@ public class Scenario11Case1 extends Kdw003Common {
         driver.findElement(By.xpath("//div[@id = 'daterangepicker']//div[contains(@class,'ntsStartDate')]//input[1]"))
                 .clear();
         driver.findElement(By.xpath("//div[@id = 'daterangepicker']//div[contains(@class,'ntsStartDate')]//input[1]"))
-                .sendKeys("2019/11/01");
+        		.sendKeys(df1.format(startdate.getTime()));
 
         driver.findElement(By.xpath("//div[@id = 'daterangepicker']//div[contains(@class,'ntsEndDate')]//input[1]"))
                 .clear();
         driver.findElement(By.xpath("//div[@id = 'daterangepicker']//div[contains(@class,'ntsEndDate')]//input[1]"))
-                .sendKeys("2019/11/30");
+        		.sendKeys(df1.format(enddate.getTime()));
         WaitPageLoad();
         driver.findElement(By.xpath("//button[@id = 'btnExtraction']")).click();
 

@@ -32,23 +32,30 @@ public class Kmw003Common extends TestRoot{
         return domain + link;
     }
 
-    public void setValueGrid(int rowNumber, int columnNumber, String value){
-        if(value.isEmpty()){
-            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber+ "]/td[" +columnNumber + "]")).get(0).click();
-            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber+ "]/td[" +columnNumber + "]")).get(0).click();
-            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber+ "]/td[" +columnNumber + "]"+"/.//input")).get(0).clear();
-        }else{
-            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber+ "]/td[" +columnNumber + "]")).get(0).click();
-            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber+ "]/td[" +columnNumber + "]")).get(0).sendKeys(value);
+    public void setValueGrid(int rowNumber, int columnNumber, String value) throws InterruptedException{
+    	WaitElementLoad(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber+ "]/td[" +columnNumber + "]"));
+        driver.findElement(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber+ "]/td[" +columnNumber + "]")).click();
+        driver.findElement(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber+ "]/td[" +columnNumber + "]")).click();
+        driver.findElement(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber+ "]/td[" +columnNumber + "]"+"/.//input")).clear();
+
+        if(!value.isEmpty()){
+            Thread.sleep(2000);
+            driver.findElement(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber+ "]/td[" +columnNumber + "]/div/input")).sendKeys(value);
+            Thread.sleep(2000);
         }
         driver.findElement(By.xpath("//body")).click();
+        WaitElementLoad(By.id("function-content"));
+        driver.findElement(By.id("function-content")).click();
+        WaitPageLoad();
     }
 
 
-    public void setValueInput(String id, String value){
+    public void setValueInput(String id, String value) throws InterruptedException{
         driver.findElement(By.id(id)).click();
         driver.findElement(By.id(id)).clear();
+        Thread.sleep(2000);
         driver.findElement(By.id(id)).sendKeys(value);
+        Thread.sleep(2000);
         driver.findElement(By.xpath("//body")).click();
     }
 

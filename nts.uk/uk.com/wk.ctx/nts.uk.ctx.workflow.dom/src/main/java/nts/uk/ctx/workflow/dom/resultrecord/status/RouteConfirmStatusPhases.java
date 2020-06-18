@@ -147,6 +147,30 @@ public class RouteConfirmStatusPhases {
 	}
 	
 	/**
+	 * まだ何も承認されていないか
+	 * @return
+	 */
+	public boolean isUnapproved() {
+		return phases.stream().noneMatch(p -> p.hasApproved());
+	}
+	
+	/**
+	 * 部分的に承認されているか
+	 * @return
+	 */
+	public boolean isApproving() {
+		return !isUnapproved() && !isApproved();
+	}
+	
+	/**
+	 * すべて承認済みか
+	 * @return
+	 */
+	public boolean isApproved() {
+		return phases.stream().allMatch(p -> p.hasApproved());
+	}
+	
+	/**
 	 * 承認中フェーズのコレクション
 	 */
 	@RequiredArgsConstructor

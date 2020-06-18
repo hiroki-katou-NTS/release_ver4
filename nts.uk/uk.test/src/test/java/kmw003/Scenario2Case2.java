@@ -1,9 +1,15 @@
 package kmw003;
-import java.io.File;
-import org.junit.jupiter.api.*;
-import org.apache.commons.io.FileUtils;
 import static org.junit.jupiter.api.Assertions.*;
-import org.openqa.selenium.*;
+
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 
 public class Scenario2Case2 extends Kmw003Common {
     @BeforeEach
@@ -23,7 +29,7 @@ public class Scenario2Case2 extends Kmw003Common {
         //login
         login(screenshotFile, employeeCode, password);
         WaitPageLoad();
-        
+
         //set kmk012
         driver.get(kmk012);
         WaitPageLoad();
@@ -48,8 +54,8 @@ public class Scenario2Case2 extends Kmw003Common {
         //change sheet
         // WaitElementLoad(By.xpath("//li[@class ='mgrid-sheet-button ui-state-default']"));
         // driver.findElements(By.xpath("//li[@class ='mgrid-sheet-button ui-state-default']")).get(0).click();
-        setValueGrid(2, 8, "3:21"); 
-        setValueGrid(2, 1, "4:56");
+        setValueGrid(4, 2, "3:21");
+        setValueGrid(5, 2, "4:56");
         driver.findElement(By.xpath("//button[@class = 'proceed']")).click();
         WaitPageLoad();
         WaitElementLoad(By.xpath("//button[@class = 'large']"));
@@ -71,5 +77,5 @@ public class Scenario2Case2 extends Kmw003Common {
             fail(verificationErrorString);
         }
     }
-    
+
 }

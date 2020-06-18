@@ -1,6 +1,7 @@
 package nts.uk.screen.at.app.monthlyperformance.correction.dto;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.shared.app.find.scherec.monthlyattditem.ControlOfMonthlyDto;
 import nts.uk.ctx.at.shared.dom.monthlyattditem.MonthlyAttendanceItemAtr;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.Constraint;
@@ -46,11 +48,11 @@ public class MPHeaderDto {
 	private List<MPHeaderDto> group;
 
 	private Constraint constraint;
-	
+
 	private String headerCssClass;
 
 	private Boolean grant;
-	
+
 	private String columnCssClass;
 
 	private static final String ADD_CHARACTER = "A";
@@ -71,7 +73,7 @@ public class MPHeaderDto {
 		this.group = new ArrayList<>();
 		this.grant = false;
 	}
-	
+
 	public MPHeaderDto(String headerText, String key, String dataType, String width, String color, boolean hidden,
 			String ntsControl, Boolean changedByOther, Boolean changedByYou, String headerCssClass) {
 		super();
@@ -88,7 +90,7 @@ public class MPHeaderDto {
 		this.headerCssClass = headerCssClass;
 		this.grant = false;
 	}
-	
+
 	public MPHeaderDto(String headerText, String key, String dataType, String width, String color, boolean hidden,
 			String ntsControl, String ntsType, String onChange, Boolean changedByOther, Boolean changedByYou) {
 		super();
@@ -140,6 +142,32 @@ public class MPHeaderDto {
 		lstHeader.add(new MPHeaderDto(TextResource.localize("KMW003_28"), "dailyperformace", "String", "85px", "",
 				false, "Button", true, true));
 		return lstHeader;
+	}
+
+	public static List<MPHeaderDto> GenerateFixedVisibleHeader(
+			MonthlyPerformanceCorrectionDto screenDto, ApprovalProcessingUseSetting approvalProcessingUseSetting) {
+		List<MPHeaderDto> results = GenerateFixedHeader();
+
+		//G7 G8 G9 hidden column identitfy, approval, dailyconfirm
+		for (Iterator<MPHeaderDto> iter = results.listIterator(); iter.hasNext(); ) {
+			MPHeaderDto mpHeaderDto = iter.next();
+			if ("identify".equals(mpHeaderDto.getKey())
+					&& screenDto.getIdentityProcess().getUseMonthSelfCK() == 0) {
+		        iter.remove();
+		        continue;
+		    }
+			if ("approval".equals(mpHeaderDto.getKey())
+					&& approvalProcessingUseSetting.getUseMonthApproverConfirm() == false) {
+				iter.remove();
+				continue;
+			}
+			if ("dailyconfirm".equals(mpHeaderDto.getKey())
+					&& screenDto.getDailySelfChkDispAtr() == 0) {
+		        iter.remove();
+		        continue;
+		    }
+		}
+		return results;
 	}
 
 	public void setHeaderText(MPAttendanceItem param) {
@@ -219,7 +247,7 @@ public class MPHeaderDto {
 		if (null != ctrOfMonthlyDto) {
 			dto.setColor(ctrOfMonthlyDto.getHeaderBgColorOfMonthlyPer());
 		}
-		
+
 		setAlignData(dto, attendanceAtr);
 		return dto;
 	}
@@ -246,12 +274,12 @@ public class MPHeaderDto {
 			dto.setGrant(true);
 		}
 	}
-	
+
 	private static boolean isRequired(PAttendanceItem item){
 		if(MPText.ITEM_CODE_LINK.contains(item.getId())) return true;
 		return false;
 	}
-	
+
 	private static void setAlignData(MPHeaderDto dto, int attendanceAtr) {
 		switch (MonthlyAttendanceItemAtr.valueOf(attendanceAtr)) {
 		case TIME:

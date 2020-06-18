@@ -101,7 +101,7 @@ public class MonthlyPerformanceDisplay {
 	/** 勤務種別の月別実績の修正のフォーマット */
 	@Inject
 	MonthlyRecordWorkTypeFinder monthlyRecordWorkTypeFinder;
-	
+
 	@Inject
 	BusinessTypeSortedMonRepository businessTypeSortedMonRepository;
 	// @Inject
@@ -113,28 +113,29 @@ public class MonthlyPerformanceDisplay {
 	private MonthlyPerformanceCheck monthlyCheck;
 	@Inject
 	private AttendanceItemNameAdapter attendanceItemNameAdapter;
-	
+
 	@Inject
 	private MonthlyPerformanceReload mpReload;
-	
+
 	@Inject
 	private ApprovalProcessingUseSettingRepository approvalProcessingUseSettingRepo;
-	
+
 	@Inject
 	private MonthlyPerformanceCorrectionProcessor correctionProcessor;
-	
+
 	private static final String KMW003_SELECT_FORMATCODE = "KMW003_SELECT_FORMATCODE";
 
 	/**
 	 * 表示フォーマットの取得
-	 * 
+	 *
 	 * @param lstEmployees:
 	 *            社員一覧：List＜社員ID＞
 	 * @param formatCodes:
 	 *            使用するフォーマットコード：月別実績フォーマットコード 表示する項目一覧
 	 */
 	public void getDisplayFormat(List<String> lstEmployeeIds, SettingUnitType unitType,
-			MonthlyPerformanceCorrectionDto screenDto, List<MonthlyModifyResultDto> monthlyResults) {
+			MonthlyPerformanceCorrectionDto screenDto, List<MonthlyModifyResultDto> monthlyResults,
+			List<EmployeeDailyPerError> cachedErrorData) {
 		// 会社ID：ログイン会社に一致する
 		String cId = AppContexts.user().companyId();
 		// ロールID：ログイン社員の就業ロールに一致する
@@ -174,7 +175,7 @@ public class MonthlyPerformanceDisplay {
 		// 取得したドメインモデル「権限別月次項目制御」でパラメータ「表示する項目一覧」をしぼり込む
 		// Filter param 「表示する項目一覧」 by domain 「権限別月次項目制御」
 		screenDto.setAuthDto(monthlyItemAuthDto);
-		
+
 		List<PSheet> listSheet = new ArrayList<>();
 		if (monthlyItemAuthDto != null) {
 			for (PSheet sheet : param.getSheets()) {
@@ -185,7 +186,7 @@ public class MonthlyPerformanceDisplay {
 							.collect(Collectors.toMap(PAttendanceItem::getId, x -> x, (x, y) -> x)));
 				}
 			}
-		} 
+		}
 //		else {
 //			for (PSheet sheet2 : param.getSheets()) {
 //				if (sheet2.getDisplayItems() != null && sheet2.getDisplayItems().size() > 0)
@@ -193,7 +194,7 @@ public class MonthlyPerformanceDisplay {
 //							.collect(Collectors.toMap(PAttendanceItem::getId, x -> x, (x, y) -> x)));
 //			}
 //		}
-		
+
 		// set lai sheet
 		param.setSheets(listSheet);
 
@@ -204,7 +205,7 @@ public class MonthlyPerformanceDisplay {
 			List<MonthlyAttendanceItemDto> lstAttendanceData = repo.findByAttendanceItemId(cId, attdanceIds);
 			if(lstAttendanceData.size() > 0){
 				lstAttendanceData.sort((t1, t2) -> t1.getDisplayNumber() - t2.getDisplayNumber());
-				
+
 				List<Integer> mItemId = lstAttendanceData.stream().map(c -> c.getAttendanceItemId()).collect(Collectors.toList());
 				attdanceIds.removeAll(mItemId);
 				attdanceIds.forEach(c -> lstAtdItemUnique.remove(c));
@@ -225,18 +226,19 @@ public class MonthlyPerformanceDisplay {
 		} else {
 			param.setLstAtdItemUnique(lstAtdItemUnique);
 		}
-		
+
 		// アルゴリズム「ロック状態をチェックする」を実行する -- lock data
 		List<MonthlyPerformaceLockStatus> lstLockStatus = checkLockStatus(cId, lstEmployeeIds,
 				screenDto.getProcessDate(), screenDto.getClosureId(),
-				new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), param.getInitScreenMode(), screenDto.getLstAffComHist(), monthlyResults);
+				new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), param.getInitScreenMode(), screenDto.getLstAffComHist(), monthlyResults,
+				cachedErrorData);
 		param.setLstLockStatus(lstLockStatus);
 	}
 
 	/**
 	 * アルゴリズム「社員の権限に対応する表示項目を取得する」を実行する (Lấy các item hiển thị ứng với quyền
 	 * employee)
-	 * 
+	 *
 	 * @param cId
 	 * @param formatCodes
 	 * @param correctionOfMonthly
@@ -289,13 +291,13 @@ public class MonthlyPerformanceDisplay {
 								displayTimeItemDto.setColumnWidthTable(optinal.get().getColumnWidthTable());
 							} else {
 								displayTimeItemDto.setColumnWidthTable(100);
-							}							
+							}
 						}
 					}
-				}				
+				}
 			}
 		}
-		
+
 //		if (lstMPformats.isEmpty()) {
 //			// 対応するドメインモデル「月別実績のグリッドの列幅」を取得する
 //			lstMPformats = getColumnWidtgByMonthly(cId);
@@ -337,7 +339,7 @@ public class MonthlyPerformanceDisplay {
 	/**
 	 * 社員の勤務種別に対応する表示項目を取得する (Lấy các item hiển thị ứng với loại đi làm của
 	 * employee)
-	 * 
+	 *
 	 * @return
 	 */
 	private void getDisplayItemBussiness(String cId, List<String> lstEmployeeId, DateRange dateRange,
@@ -395,7 +397,7 @@ public class MonthlyPerformanceDisplay {
 								displayTimeItemDto.setColumnWidthTable(optinal.get().getColumnWidthTable());
 							} else {
 								displayTimeItemDto.setColumnWidthTable(100);
-							}							
+							}
 						}
 					}
 				}
@@ -440,7 +442,7 @@ public class MonthlyPerformanceDisplay {
 			});
 			// xoa nhung column trung nhau
 			displayItems = displayItemsTmp.stream().distinct().collect(Collectors.toList());
-			
+
 			pSheet.setDisplayItems(displayItems);
 			resultSheets.add(pSheet);
 		}
@@ -467,7 +469,7 @@ public class MonthlyPerformanceDisplay {
 		}
 
 		List<Integer> attItemIdsNew = attItemIds.stream().distinct().collect(Collectors.toList());
-		
+
 		List<PSheet> resultSheetsNew = new ArrayList<>();
 
 		for (PSheet pSheet : resultSheets){
@@ -481,14 +483,14 @@ public class MonthlyPerformanceDisplay {
 			PSheet pSheetNew = new PSheet(pSheet.getSheetNo(), pSheet.getSheetName(), displayItems);
 			resultSheetsNew.add(pSheetNew);
 		}
-		
+
 		// 表示する項目一覧
 		param.setSheets(resultSheetsNew);
 	}
 
 	/**
 	 * 対応するドメインモデル「月別実績のグリッドの列幅」を取得する
-	 * 
+	 *
 	 * @param cId
 	 * @return 表示する項目一覧
 	 */
@@ -512,7 +514,7 @@ public class MonthlyPerformanceDisplay {
 
 	/**
 	 * ロック状態をチェックする
-	 * 
+	 *
 	 * @param empIds
 	 *            社員一覧：List＜社員ID＞
 	 * @param processDateYM
@@ -521,30 +523,31 @@ public class MonthlyPerformanceDisplay {
 	 *            締めID：締めID
 	 * @param dateRange
 	 *            締め期間：期間
-	 * 
+	 *
 	 *            ロック状態一覧：List＜月の実績のロック状態＞
 	 */
-	
+
 	@Inject
 	private SharedAffJobtitleHisAdapter affJobTitleAdapter;
-	
+
 	@Inject
 	private IdentityProcessRepository identityProcessRepo;
-	
+
 	@Inject
 	private IdentificationRepository identificationRepository;
-	
-	@Inject 
+
+	@Inject
 	private EmployeeDailyPerErrorRepository employeeDailyPerErrorRepo;
-	
-	@Inject 
+
+	@Inject
 	private ApprovalProcessRepository approvalRepo;
-	
+
 	@Inject
 	private ErrorAlarmWorkRecordRepository errorAlarmWorkRecordRepository;
-	
+
 	public List<MonthlyPerformaceLockStatus> checkLockStatus(String cid, List<String> empIds, Integer processDateYM,
-			Integer closureId, DatePeriod closureTime, int intScreenMode, List<AffCompanyHistImport> lstAffComHist, List<MonthlyModifyResultDto> monthlyResults) {
+			Integer closureId, DatePeriod closureTime, int intScreenMode, List<AffCompanyHistImport> lstAffComHist, List<MonthlyModifyResultDto> monthlyResults,
+			List<EmployeeDailyPerError> cachedErrorData) {
 		List<MonthlyPerformaceLockStatus> monthlyLockStatusLst = new ArrayList<MonthlyPerformaceLockStatus>();
 		// ロック解除モード の場合
 		if (intScreenMode == 1) {
@@ -559,9 +562,9 @@ public class MonthlyPerformanceDisplay {
 		}
 		// 「List＜所属職場履歴項目＞」の件数ループしてください
 		MonthlyPerformaceLockStatus monthlyLockStatus = null;
-		
+
 		List<SharedAffJobTitleHisImport> listShareAff = affJobTitleAdapter.findAffJobTitleHisByListSid(empIds, closureTime.end());
-		
+
 		Optional<IdentityProcess> identityOp = identityProcessRepo.getIdentityProcessById(cid);
 		boolean checkIdentityOp = true;
 		//対応するドメインモデル「本人確認処理の利用設定」を取得する
@@ -571,19 +574,19 @@ public class MonthlyPerformanceDisplay {
 				checkIdentityOp = false;
 			}
 		}
-		
+
 		List<Identification> listIdentification = identificationRepository.findByListEmployeeID(empIds, closureTime.start(), closureTime.end());
-		
+
 		Optional<ApprovalProcess> approvalProcOp = approvalRepo.getApprovalProcessById(cid);
-		
+
 		for (AffAtWorkplaceImport affWorkplaceImport : affWorkplaceLst) {
-			
+
 			Optional<AffCompanyHistImport> affInHist = lstAffComHist.stream()
 					.filter(x -> x.getEmployeeId().equals(affWorkplaceImport.getEmployeeId())).findFirst();
 
 			List<DatePeriod> periodInHist = affInHist.isPresent() ? affInHist.get().getLstAffComHistItem().stream()
 					.map(x -> x.getDatePeriod()).collect(Collectors.toList()) : new ArrayList<>();
-			
+
 			// EAP chua sua, a Tuan giai thich la:
 			// lay dateperiod theo data thuc te luu trong DB, k lay theo data tu
 			// man hinh truyen xuong
@@ -592,7 +595,7 @@ public class MonthlyPerformanceDisplay {
 				continue;
 			}
 			DatePeriod workDatePeriod = optMonthlyModifyResultDto.get().getWorkDatePeriod();
-			
+
 			List<GeneralDate> lstDateCheck = mpReload.mergeDatePeriod(workDatePeriod, periodInHist);
 			List<Identification> listIdenByEmpID = new ArrayList<>();
 			for(Identification iden : listIdentification) {
@@ -600,8 +603,18 @@ public class MonthlyPerformanceDisplay {
 					listIdenByEmpID.add(iden);
 				}
 			}
-			
-			List<EmployeeDailyPerError> listEmployeeDailyPerError =  employeeDailyPerErrorRepo.findsWithLeftJoin(Arrays.asList(affWorkplaceImport.getEmployeeId()), workDatePeriod);
+
+			List<EmployeeDailyPerError> listEmployeeDailyPerError = new ArrayList<>();
+			if (cachedErrorData != null && cachedErrorData.size() > 0) {
+				listEmployeeDailyPerError = cachedErrorData.stream()
+						.filter(cache -> affWorkplaceImport.getEmployeeId().contains(cache.getEmployeeID()) && workDatePeriod.contains(cache.getDate()))
+						.collect(Collectors.toList());
+			}
+			if (listEmployeeDailyPerError.isEmpty()) {
+				listEmployeeDailyPerError =  employeeDailyPerErrorRepo.finds(Arrays.asList(affWorkplaceImport.getEmployeeId()), workDatePeriod);
+				cachedErrorData.addAll(listEmployeeDailyPerError);
+			}
+
 			boolean checkExistRecordErrorListDate = false;
 			for (EmployeeDailyPerError employeeDailyPerError : listEmployeeDailyPerError) {
 				// 対応するドメインモデル「勤務実績のエラーアラーム」を取得する
@@ -613,7 +626,7 @@ public class MonthlyPerformanceDisplay {
 					break;
 				}
 			}
-			
+
 			// 月の実績の状況を取得する
 			AcquireActualStatus param = new AcquireActualStatus(cid, affWorkplaceImport.getEmployeeId(), processDateYM,
 					closureId, closureTime.end(), workDatePeriod, affWorkplaceImport.getWorkplaceId());
@@ -658,7 +671,7 @@ public class MonthlyPerformanceDisplay {
 
 	/**
 	 * 過去実績の修正ロック
-	 * 
+	 *
 	 * @param processDateYM
 	 * @param closureId
 	 * @param actualTime

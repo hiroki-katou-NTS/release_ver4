@@ -21,6 +21,7 @@ import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.GetClosurePeriod;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.identificationstatus.export.CheckIndentityDayConfirm;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.ConfirmationMonth;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.ConfirmationMonthRepository;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.ctx.at.shared.pub.workrule.closure.PresentClosingPeriodExport;
 import nts.uk.ctx.at.shared.pub.workrule.closure.ShClosurePub;
 import nts.uk.shr.com.context.AppContexts;
@@ -46,7 +47,7 @@ public class CheckIndentityMonth {
 
 	@Inject
 	private CheckIndentityDayConfirm checkIndentityDayConfirm;
-	
+
 	@Inject
 	private ShClosurePub shClosurePub;
 
@@ -65,7 +66,7 @@ public class CheckIndentityMonth {
 				|| clsPeriodOpt.get().getClosureEndDate().before(param.getDateRefer())) {
 			return new IndentityMonthResult(false, false, true);
 		}
-		
+
 
 		// 集計期間
 		List<ClosurePeriod> closurePeriods = getClosurePeriod.get(param.companyId, param.employeeId, clsPeriodOpt.get().getClosureEndDate(),
@@ -78,7 +79,7 @@ public class CheckIndentityMonth {
 //		ClosurePeriod closurePeriodOldest = pairClosure.getRight();
 		//「対象締め」に対応する締め期間が取得できているかチェックする
 		AggrPeriodEachActualClosure closurePeriodOldest = closurePeriods.stream().flatMap(x -> x.getAggrPeriods().stream())
-				.filter(x -> x.getClosureId().value == param.getClosureId()).findFirst()
+				.filter(x -> x.getClosureMonth().closureId() == param.getClosureId()).findFirst()
 				.orElse(null);
 		DatePeriod datePeriodOldest = closurePeriodOldest == null ? null : closurePeriodOldest.getPeriod();
 		if(datePeriodOldest == null) {
@@ -86,9 +87,9 @@ public class CheckIndentityMonth {
 		}
 		// 月の本人確認を取得する
 		Optional<ConfirmationMonth> optCMonth = confirmationMonthRepository.findByKey(param.companyId, param.employeeId,
-				closurePeriodOldest.getClosureId(),
-				closurePeriodOldest.getClosureDate(),
-				closurePeriodOldest.getYearMonth());
+				ClosureId.valueOf(closurePeriodOldest.getClosureMonth().closureId()),
+				closurePeriodOldest.getClosureMonth().closureDate(),
+				closurePeriodOldest.getClosureMonth().yearMonth());
 		// 取得できたかチェックする
 		if (optCMonth.isPresent()) {
 			// A2_6 hide, A2_7 show
@@ -124,5 +125,5 @@ public class CheckIndentityMonth {
 		// A2_6 show, A2_7 hide
 		return new IndentityMonthResult(true, checkIndentityDay, false);
 	}
-	
+
 }

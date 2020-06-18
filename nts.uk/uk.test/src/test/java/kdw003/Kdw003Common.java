@@ -3,6 +3,7 @@ package kdw003;
 import java.util.Calendar;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 
 import common.TestRoot;
@@ -21,21 +22,14 @@ public class Kdw003Common extends TestRoot {
 
     public void setValueGrid(int rowNumber, int columnNumber, String value) {
         if (value.isEmpty()) {
-            driver.findElements(
-                    By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]"))
-                    .get(0).click();
-            driver.findElements(
-                    By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]"))
-                    .get(0).click();
-            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td["
-                    + columnNumber + "]" + "/.//input")).get(0).clear();
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]")).get(0).click();
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]")).get(0).click();
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]" + "/.//input")).get(0).clear();
         } else {
-            driver.findElements(
-                    By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]"))
-                    .get(0).click();
-            driver.findElements(
-                    By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]"))
-                    .get(0).sendKeys(value);
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]")).get(0).click();
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]")).get(0).click();
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]" + "/.//input")).get(0).clear();
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]/.//input")).get(0).sendKeys(value);
         }
         driver.findElement(By.xpath("//body")).click();
     }
@@ -68,6 +62,7 @@ public class Kdw003Common extends TestRoot {
      * rowNumber is row number of checkbox + 1 columnNumber 0 -> 1
      */
     public void clickCheckBox(int rowNumber, int columnNumber) {
+    	WaitElementLoad(By.xpath("//table[@class ='mgrid-fixed-table']/tbody/tr[" + rowNumber + "]/.//span[@class = 'box']"));
         driver.findElements(
                 By.xpath("//table[@class ='mgrid-fixed-table']/tbody/tr[" + rowNumber + "]/.//span[@class = 'box']"))
                 .get(columnNumber).click();
@@ -152,4 +147,51 @@ public class Kdw003Common extends TestRoot {
         driver.findElement(By.id("btnExtraction")).click();
         WaitPageLoad();
     }
+
+    public void setProcessYearMonth(int closureId, String yearMonth) {
+      //KMK012A 処理年月の設定
+      driver.get(domain + "nts.uk.at.web/view/kmk/012/a/index.xhtml");
+
+      WaitPageLoad();
+      WebElement clsId = driver.findElement(By.xpath("//tr[@data-id = '" + closureId + "']"));
+
+      WaitPageLoad();
+      clsId.click();
+
+      WaitElementLoad(By.id("inpMonth"));
+      driver.findElement(By.id("inpMonth")).click();
+
+      WaitElementLoad(By.id("inpMonth"));
+      driver.findElement(By.id("inpMonth")).clear();
+
+      WaitElementLoad(By.id("inpMonth"));
+      driver.findElement(By.id("inpMonth")).sendKeys(yearMonth);
+
+      driver.findElement(By.xpath("//body")).click();
+
+      WaitElementLoad(By.id("btn_save"));
+      driver.findElement(By.id("btn_save")).click();
+
+      WaitElementLoad(By.xpath("//button[@class ='large']"));
+      driver.findElement(By.xpath("//button[@class ='large']")).click();
+
+      screenShot();
+
+    }
+
+    public void setKdw004Period(Calendar startdate, Calendar enddate) {
+        WebElement startTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsStartDatePicker"));
+        startTime.clear();
+        startTime.sendKeys(df1.format(startdate.getTime()));
+        WebElement endTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsEndDatePicker"));
+        endTime.clear();
+        endTime.sendKeys(df1.format(enddate.getTime()));
+
+        JavascriptExecutor jse = (JavascriptExecutor) driver;
+        jse.executeScript("document.activeElement.blur();");    //leave focus
+
+        WaitElementLoad(By.xpath("//button[@id='extractBtn']"));
+        driver.findElement(By.xpath("//button[@id='extractBtn']")).click();
+        WaitPageLoad();
+	}
 }

@@ -19,8 +19,8 @@ public class Scenario1Case4 extends TestRoot {
         //login
         login("020937", "Jinjikoi5");
 
-        //open cps001
-        driver.get(domain + "nts.uk.com.web/view/cps/001/a/index.xhtml");
+        //open kdr001
+        driver.get(domain + "nts.uk.at.web/view/kdr/001/a/index.xhtml");
         WaitPageLoad();
         driver.findElement(By.id("ccg001-btn-search-drawer")).click();
         WaitElementLoad(By.xpath("//a[contains(.,'詳細検索')]"));
