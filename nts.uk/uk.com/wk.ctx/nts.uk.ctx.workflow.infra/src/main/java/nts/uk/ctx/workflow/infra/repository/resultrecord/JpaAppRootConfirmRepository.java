@@ -181,39 +181,19 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 
 	@Override
 	public void update(AppRootConfirm appRootConfirm) {
-		// 日次の場合
-		if (appRootConfirm.getRootType().value == 1) {
-			this.commandProxy().update(WwfdtApvRootConfirmDaily.fromDomain(appRootConfirm));
-			WwfdtApvPhaseConfirmDaily.fromDomain(appRootConfirm).forEach(p -> {
-				this.commandProxy().update(p);
-			});
-			WwfdtApvFrameConfirmDaily.fromDomain(appRootConfirm).forEach(f -> {
-				this.commandProxy().update(f);
-			});
-		}
-		// 月次の場合
-		else {
-			this.commandProxy().update(WwfdtApvRootConfirmMonthly.fromDomain(appRootConfirm));
-			WwfdtApvPhaseConfirmMonthly.fromDomain(appRootConfirm).forEach(p -> {
-				this.commandProxy().update(p);
-			});
-			WwfdtApvFrameConfirmMonthly.fromDomain(appRootConfirm).forEach(f -> {
-				this.commandProxy().update(f);
-			});
-		}
+		delete(appRootConfirm);
+		insert(appRootConfirm);
 	}
 
 	private static final List<String> DELETE_DAILY_TABLES = Arrays.asList(
 			"delete from WWFDT_DAY_APV_RT_CONFIRM",
 			"delete from WWFDT_DAY_APV_PH_CONFIRM",
-			"delete from WWFDT_DAY_APV_FR_CONFIRM",
-			"delete from WWFDT_DAY_APV_AP_CONFIRM"
+			"delete from WWFDT_DAY_APV_FR_CONFIRM"
 	);
 	private static final List<String> DELETE_MONTHLY_TABLES = Arrays.asList(
 			"delete from WWFDT_MON_APV_RT_CONFIRM",
 			"delete from WWFDT_MON_APV_PH_CONFIRM",
-			"delete from WWFDT_MON_APV_FR_CONFIRM",
-			"delete from WWFDT_MON_APV_AP_CONFIRM"
+			"delete from WWFDT_MON_APV_FR_CONFIRM"
 	);
 	
 	
@@ -227,8 +207,8 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 
 	private void delete(List<String> targetTables, String rootID) {
 		targetTables.forEach(table ->{
-			String sql = table + " where ROOT_ID = @rootId "; 
-			jdbcProxy().query(sql).paramString("rootId", rootID);				
+            String sql = table + " where ROOT_ID = @rootID ";
+            new NtsStatement(sql, this.jdbcProxy()).paramString("rootID", rootID).execute();           
 		});
 	}
 
@@ -247,9 +227,9 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	}
 
 	private void deleteAppRootConfirm(List<String> targetTables, AppRootConfirm confirm) {
-		targetTables.forEach(ts ->{
-			String sql = ts + " where ROOT_ID = @rootID";
-			jdbcProxy().query(sql).paramString("rootId", confirm.getRootID());
+        targetTables.forEach(table ->{
+            String sql = table + " where ROOT_ID = @rootID ";
+            new NtsStatement(sql, this.jdbcProxy()).paramString("rootID", confirm.getRootID()).execute();
 		});
 	}
 
