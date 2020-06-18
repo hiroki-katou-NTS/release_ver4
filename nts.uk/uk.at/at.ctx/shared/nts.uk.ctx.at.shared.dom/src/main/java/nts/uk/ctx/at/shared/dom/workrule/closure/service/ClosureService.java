@@ -7,11 +7,9 @@ package nts.uk.ctx.at.shared.dom.workrule.closure.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
-import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureInfo;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 

@@ -21,4 +21,8 @@ public class ClosureDateExport {
 	public ClosureDate toClosureDate() {
 		return new ClosureDate(this.closureDay, this.lastDayOfMonth);
 	}
+
+	public static ClosureDateExport from(ClosureDate closureDate) {
+		return new ClosureDateExport(closureDate.getClosureDay().v(), closureDate.getLastDayOfMonth());
+	}
 }

@@ -26,6 +26,7 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.ctx.at.shared.pub.workrule.closure.ClosureDateExport;
 import nts.uk.ctx.at.shared.pub.workrule.closure.PresentClosingPeriodExport;
 import nts.uk.ctx.at.shared.pub.workrule.closure.ShClosurePub;
+import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
@@ -66,10 +67,15 @@ public class ShClosurePubImpl implements ShClosurePub {
 		YearMonth processingYm = closure.getClosureMonth().getProcessingYm();
 
 		DatePeriod closurePeriod = closureService.getClosurePeriod(closureId, processingYm);
+		
+		ClosureDate closureDate = closure.getHistoryByYearMonth(processingYm).get().getClosureDate();
 
 		// Return
-		return Optional.of(PresentClosingPeriodExport.builder().processingYm(processingYm)
-				.closureStartDate(closurePeriod.start()).closureEndDate(closurePeriod.end())
+		return Optional.of(PresentClosingPeriodExport.builder()
+				.processingYm(processingYm)
+				.closureStartDate(closurePeriod.start())
+				.closureEndDate(closurePeriod.end())
+				.closureDate(ClosureDateExport.from(closureDate))
 				.build());
 	}
 
