@@ -1,5 +1,7 @@
 package nts.uk.ctx.workflow.infra.repository.resultrecord;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +12,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+
+import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
@@ -193,13 +197,10 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		}
 		// 月次の場合
 		else {
-			this.commandProxy().update(WwfdtApvRootConfirmMonthly.fromDomain(appRootConfirm));
-			WwfdtApvPhaseConfirmMonthly.fromDomain(appRootConfirm).forEach(p -> {
-				this.commandProxy().update(p);
-			});
-			WwfdtApvFrameConfirmMonthly.fromDomain(appRootConfirm).forEach(f -> {
-				this.commandProxy().update(f);
-			});
+			//レスポンス対応により@oneTomanyを削除したことに伴い単純なupdateではphase,frameが消せなくなった
+			//対処としてdelete insertに変更
+			delete(appRootConfirm);
+			insert(appRootConfirm);
 		}
 	}
 
@@ -212,8 +213,7 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	private static final List<String> DELETE_MONTHLY_TABLES = Arrays.asList(
 			"delete from WWFDT_MON_APV_RT_CONFIRM",
 			"delete from WWFDT_MON_APV_PH_CONFIRM",
-			"delete from WWFDT_MON_APV_FR_CONFIRM",
-			"delete from WWFDT_MON_APV_AP_CONFIRM"
+			"delete from WWFDT_MON_APV_FR_CONFIRM"
 	);
 	
 	
@@ -227,8 +227,8 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 
 	private void delete(List<String> targetTables, String rootID) {
 		targetTables.forEach(table ->{
-			String sql = table + " where ROOT_ID = @rootId "; 
-			jdbcProxy().query(sql).paramString("rootId", rootID);				
+			String sql = table + " where ROOT_ID = @rootID ";
+			new NtsStatement(sql, this.jdbcProxy()).paramString("rootID", rootID).execute();
 		});
 	}
 
@@ -247,9 +247,9 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	}
 
 	private void deleteAppRootConfirm(List<String> targetTables, AppRootConfirm confirm) {
-		targetTables.forEach(ts ->{
-			String sql = ts + " where ROOT_ID = @rootID";
-			jdbcProxy().query(sql).paramString("rootId", confirm.getRootID());
+		targetTables.forEach(table ->{
+			String sql = table + " where ROOT_ID = @rootID ";
+			new NtsStatement(sql, this.jdbcProxy()).paramString("rootID", confirm.getRootID()).execute();
 		});
 	}
 
@@ -432,17 +432,16 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		return NtsStatement.In.split(employeeIDLst, employeeIDs -> {
 			
 			NtsStatement stmt = jdbcProxy().query(sql.toString());
-			stmt.paramString("sids", employeeIDs);
+			stmt = stmt.paramString("sids", employeeIDs);
 			
 			for (int i = 0; i < closureMonths.size(); i++) {
-				stmt.paramInt("yearMonth" + i, closureMonths.get(i).yearMonth().v());
-				stmt.paramInt("closureId" + i, closureMonths.get(i).closureId());
-				stmt.paramInt("closureDay" + i, closureMonths.get(i).closureDate().getClosureDay().v());
-				stmt.paramInt("isLastDay" + i, closureMonths.get(i).closureDate().getLastDayOfMonth() ? 1 : 0);
+				stmt = stmt.paramInt("yearMonth" + i, closureMonths.get(i).yearMonth().v())
+						   .paramInt("closureId" + i, closureMonths.get(i).closureId())
+						   .paramInt("closureDay" + i, closureMonths.get(i).closureDate().getClosureDay().v())
+						   .paramInt("isLastDay" + i, closureMonths.get(i).closureDate().getLastDayOfMonth() ? 1 : 0);
 			}
 			
-			return toDomain(jdbcProxy().query(sql.toString())
-					.getList(rec -> createFullJoinAppRootConfirmMonthly(rec)));
+			return toDomain(stmt.getList(rec -> createFullJoinAppRootConfirmMonthly(rec)));
 		});
 	}
 
