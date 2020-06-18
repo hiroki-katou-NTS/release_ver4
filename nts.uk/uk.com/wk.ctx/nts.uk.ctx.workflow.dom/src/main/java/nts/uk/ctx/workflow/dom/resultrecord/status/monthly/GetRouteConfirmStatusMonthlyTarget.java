@@ -18,7 +18,7 @@ public class GetRouteConfirmStatusMonthlyTarget {
 		val instanceApprover = require.getAppRootInstancesMonthly(targetEmployeeId, closureMonth);
 		val confirm = require.getAppRootConfirmsMonthly(targetEmployeeId, closureMonth);
 
-		if (!instanceApprover.isEmpty() || !confirm.isPresent()) {
+		if (instanceApprover.isEmpty() || !confirm.isPresent()) {
 			return Collections.emptyList();
 		}
 

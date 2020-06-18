@@ -28,7 +28,7 @@ public class RouteConfirmStatusDaily extends RouteConfirmStatus<GeneralDate> {
 		String targetEmployeeId = confirm.getEmployeeID();
 		val targetDate = confirm.getRecordDate();
 		val phases = RouteConfirmStatusPhases.create(confirm.getListAppPhase(), instance.getListAppPhase());
-		val progress = RouteConfirmProgress.of(phases.isApproved(), phases.isUnapproved());
+		val progress = RouteConfirmProgress.of(phases.isUnapproved(), phases.isApproved());
 		
 		return new RouteConfirmStatusDaily(targetEmployeeId, targetDate, progress, phases);
 	}

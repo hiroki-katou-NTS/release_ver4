@@ -28,7 +28,7 @@ public class RouteConfirmStatusMonthly extends RouteConfirmStatus<ClosureMonth> 
 		String targetEmployeeId = confirm.getEmployeeID();
 		val targetMonth = confirm.getClosureMonth();
 		val phases = RouteConfirmStatusPhases.create(confirm.getListAppPhase(), instance.getListAppPhase());
-		val progress = RouteConfirmProgress.of(phases.isApproved(), phases.isUnapproved());
+		val progress = RouteConfirmProgress.of(phases.isUnapproved(), phases.isApproved());
 		
 		return new RouteConfirmStatusMonthly(targetEmployeeId, targetMonth, progress, phases);
 	}
