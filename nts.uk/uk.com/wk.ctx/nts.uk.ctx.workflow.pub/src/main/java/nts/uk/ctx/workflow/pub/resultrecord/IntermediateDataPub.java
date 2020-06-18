@@ -1,6 +1,5 @@
 package nts.uk.ctx.workflow.pub.resultrecord;
 
-import java.util.Arrays;
 import java.util.List;
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
@@ -38,7 +37,7 @@ public interface IntermediateDataPub {
 	 * @param rootType ルート種類（日別確認／月別確認）
 	 * @return 承認ルートの状況
 	 */
-	public Request113Export getAppRootStatusByEmpPeriod(List<String> employeeIDs, DatePeriod period, Integer rootType) throws BusinessException;
+	//public Request113Export getAppRootStatusByEmpPeriod(List<String> employeeIDs, DatePeriod period, Integer rootType) throws BusinessException;
 
 	public Request113Export getDailyAppRootStatus(List<String> employeeIDs, DatePeriod period) throws BusinessException;
 
@@ -72,7 +71,7 @@ public interface IntermediateDataPub {
 	 * @param rootType
 	 * @return
 	 */
-	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, Integer rootType);
+	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period);
 	
 	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsPeriodV2(List<String> employeeIDLst, DatePeriod period, Integer rootType);
 	

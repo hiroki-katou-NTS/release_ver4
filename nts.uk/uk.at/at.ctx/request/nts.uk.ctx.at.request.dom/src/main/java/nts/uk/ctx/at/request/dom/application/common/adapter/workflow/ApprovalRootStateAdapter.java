@@ -16,6 +16,7 @@ import nts.uk.ctx.at.request.dom.application.common.adapter.workflow.dto.Approve
 import nts.uk.ctx.at.request.dom.application.common.adapter.workflow.dto.ApproverPersonImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workflow.dto.ApproverRemandImport;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 public interface ApprovalRootStateAdapter {
 	/**
@@ -27,7 +28,12 @@ public interface ApprovalRootStateAdapter {
 	 * @param rootType
 	 * @return
 	 */
-	public List<ApproveRootStatusForEmpImPort> getApprovalByEmplAndDate(GeneralDate startDate, GeneralDate endDate, String employeeID,String companyID,Integer rootType)
+	public List<ApproveRootStatusForEmpImPort> getDailyApprovalByEmplAndDate(
+			GeneralDate startDate, GeneralDate endDate, String employeeID, String companyID)
+		throws BusinessException;
+
+	public List<ApproveRootStatusForEmpImPort> getMonthlyApprovalByEmpl(
+			GeneralDate startDate, GeneralDate endDate, String employeeID, String companyID, ClosureMonth closureMonth)
 		throws BusinessException;
 	
 	public Map<String,List<ApprovalPhaseStateImport_New>> getApprovalRootContents(List<String> appIDs,String companyID);

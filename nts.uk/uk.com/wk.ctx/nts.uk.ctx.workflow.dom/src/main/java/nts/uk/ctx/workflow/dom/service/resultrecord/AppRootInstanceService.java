@@ -27,7 +27,7 @@ public interface AppRootInstanceService {
 	 * @param rootType ルート種類（日別確認／月別確認）
 	 * @return 承認ルートの状況
 	 */
-	public Request113Output getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType);
+	//spublic Request113Output getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType);
 	
 	public Request113Output getDailyAppRootStatus(List<String> employeeIDLst, DatePeriod period);
 

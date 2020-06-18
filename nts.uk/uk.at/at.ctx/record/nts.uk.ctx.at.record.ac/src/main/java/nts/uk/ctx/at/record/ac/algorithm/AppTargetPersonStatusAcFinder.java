@@ -45,8 +45,8 @@ public class AppTargetPersonStatusAcFinder implements AppTargetPersonStatusAdapt
 	}
 
 	@Override
-	public List<StateConfirm> appTargetPersonStatus(String employeeID, DatePeriod date, Integer routeType) {
-		List<AppRootStateStatusSprExport> listState=intermediateDataPub.getAppRootStatusByEmpPeriod(Arrays.asList(employeeID), date, routeType).getAppRootStateStatusLst();
+	public List<StateConfirm> appTargetPersonStatus(String employeeID, DatePeriod date) {
+		List<AppRootStateStatusSprExport> listState=intermediateDataPub.getDailyAppRootStatus(Arrays.asList(employeeID), date).getAppRootStateStatusLst();
 		if(!CollectionUtil.isEmpty(listState)) {
 			return listState.stream().map(c->convertToStateConfirms(c)).collect(Collectors.toList());
 		}
@@ -54,8 +54,8 @@ public class AppTargetPersonStatusAcFinder implements AppTargetPersonStatusAdapt
 	}
 
 	@Override
-	public List<StateConfirm> appTargetPersonStatus(List<String> employeeID, DatePeriod date, Integer routeType) {
-		List<AppRootStateStatusSprExport> listState = intermediateDataPub.getAppRootStatusByEmpsPeriod(employeeID, date, routeType);
+	public List<StateConfirm> appTargetPersonStatus(List<String> employeeID, DatePeriod date, Integer rootType) {
+		List<AppRootStateStatusSprExport> listState = intermediateDataPub.getAppRootStatusByEmpsPeriod(employeeID, date, rootType);
 		if (!CollectionUtil.isEmpty(listState)) {
 			return listState.stream().map(c -> convertToStateConfirms(c)).collect(Collectors.toList());
 		}

@@ -14,7 +14,6 @@ import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.collection.CollectionUtil;
-import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriod;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.PrePostAtr;
@@ -51,7 +50,6 @@ import nts.uk.ctx.at.request.dom.setting.request.application.common.AllowAtr;
 import nts.uk.ctx.at.request.dom.setting.request.application.common.CheckMethod;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
-import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.shr.com.time.closure.ClosureMonth;
 
@@ -344,7 +342,7 @@ public class NewBeforeRegisterImpl_New implements NewBeforeRegister_New {
 		if (!appLimitSetting.getCanAppAchievementConfirm()) {
 			List<ApproveRootStatusForEmpImPort> approveRootStatus = Collections.emptyList();
 			try {
-				approveRootStatus = this.approvalRootStateAdapter.getApprovalByEmplAndDate(appDate, appDate, employeeID, companyID, 1);
+				approveRootStatus = this.approvalRootStateAdapter.getDailyApprovalByEmplAndDate(appDate, appDate, employeeID, companyID);
 			} catch (Exception e) {
 				approveRootStatus = Collections.emptyList();
 			}
@@ -404,8 +402,8 @@ public class NewBeforeRegisterImpl_New implements NewBeforeRegister_New {
 			// 「Imported(申請承認)「実績確定状態」．月別実績が確認済)
 			List<ApproveRootStatusForEmpImPort> approveRootStatus = Collections.emptyList();
 			try {
-				ClosureMonth closurePeriod = rqClosureAdapter.getClosureById(companyID, closureEmployment.get().getClosureId()).get().toClosureMonth();
-				approveRootStatus = this.approvalRootStateAdapter.getApprovalByEmplAndDate(appDate, appDate, employeeID, companyID, 2);
+				ClosureMonth closureMonth = rqClosureAdapter.getClosureById(companyID, closureEmployment.get().getClosureId()).get().toClosureMonth();
+				approveRootStatus = this.approvalRootStateAdapter.getMonthlyApprovalByEmpl(appDate, appDate, employeeID, companyID, closureMonth);
 			} catch (Exception e) {
 				approveRootStatus = Collections.emptyList();
 			}
