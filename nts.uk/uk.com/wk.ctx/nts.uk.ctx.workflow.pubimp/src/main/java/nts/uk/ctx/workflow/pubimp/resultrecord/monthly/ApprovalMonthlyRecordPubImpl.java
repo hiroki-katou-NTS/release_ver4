@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -105,7 +104,7 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 						.filter(instance -> instance.getEmployeeID().equals(targetEmployeeId))
 						.collect(Collectors.toList());
 				if (!dataInstance.containsKey(targetEmployeeId)) {
-					Map<DatePeriod, List<AppRootInstance>> data = new TreeMap<DatePeriod, List<AppRootInstance>>() {{ 
+					Map<DatePeriod, List<AppRootInstance>> data = new HashMap<DatePeriod, List<AppRootInstance>>() {{ 
 						put (period, approuteInstance); }};
 						dataInstance.put (targetEmployeeId, data); 
 				}
@@ -124,7 +123,7 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 			Map<String, Map<ClosureMonth, AppRootConfirm>> dataConfirm = new HashMap<String, Map<ClosureMonth, AppRootConfirm>>();
 			for (AppRootConfirm approuteConfirm : approuteConfirmlist) {
 				if (!dataConfirm.containsKey(approuteConfirm.getEmployeeID())) {
-					Map<ClosureMonth, AppRootConfirm> data = new TreeMap<ClosureMonth, AppRootConfirm>() {{ 
+					Map<ClosureMonth, AppRootConfirm> data = new HashMap<ClosureMonth, AppRootConfirm>() {{ 
 						put (closureMonth, approuteConfirm); }};
 					dataConfirm.put (approuteConfirm.getEmployeeID(), data); 
 				}
@@ -223,7 +222,7 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 						.filter(instance -> instance.getEmployeeID().equals(targetEmployeeId))
 						.collect(Collectors.toList());
 				if (!dataInstance.containsKey(targetEmployeeId)) {
-					Map<ClosureMonth, List<AppRootInstance>> data = new TreeMap<ClosureMonth, List<AppRootInstance>>() {{ 
+					Map<ClosureMonth, List<AppRootInstance>> data = new HashMap<ClosureMonth, List<AppRootInstance>>() {{ 
 						put (closureMonth, approuteInstance); }};
 						dataInstance.put (targetEmployeeId, data); 
 				}
@@ -242,7 +241,7 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 			Map<String, Map<ClosureMonth, AppRootConfirm>> dataConfirm = new HashMap<String, Map<ClosureMonth, AppRootConfirm>>();
 			for (AppRootConfirm approuteConfirm : approuteConfirmlist) {
 				if (!dataConfirm.containsKey(approuteConfirm.getEmployeeID())) {
-					Map<ClosureMonth, AppRootConfirm> data = new TreeMap<ClosureMonth, AppRootConfirm>() {{ 
+					Map<ClosureMonth, AppRootConfirm> data = new HashMap<ClosureMonth, AppRootConfirm>() {{ 
 						put (closureMonth, approuteConfirm); }};
 					dataConfirm.put (approuteConfirm.getEmployeeID(), data); 
 				}
