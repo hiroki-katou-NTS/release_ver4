@@ -67,9 +67,9 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 	private SprAppRootStatePub sprPub;
 	@Override
 	public List<ApproveRootStatusForEmpImport> getApprovalByEmplAndDate(GeneralDate startDate, GeneralDate endDate,
-			List<String> employeeIDs, String companyID, Integer rootType) {
+			List<String> employeeIDs, String companyID) {
 		
-		return intermediateDataPub.getAppRootStatusByEmpsPeriod(employeeIDs, new DatePeriod(startDate, endDate), rootType)
+		return intermediateDataPub.getAppRootStatusByEmpsPeriod(employeeIDs, new DatePeriod(startDate, endDate))
 				.stream()
 				.map((pub) -> new ApproveRootStatusForEmpImport(pub.getEmployeeID(), pub.getDate(),
 						EnumAdaptor.valueOf(pub.getDailyConfirmAtr(), ApprovalStatusForEmployee.class)))
@@ -110,17 +110,6 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 		} else {
 			return null;
 		}
-	}
-
-	@Override
-	public List<ApproveRootStatusForEmpImport> getApprovalByListEmplAndListApprovalRecordDate(
-			GeneralDate startDate, GeneralDate endDate,
-			List<String> employeeIDs, String companyID, Integer rootType) {
-		return intermediateDataPub
-				.getAppRootStatusByEmpsPeriod(employeeIDs, new DatePeriod(startDate, endDate), rootType).stream()
-				.map((pub) -> new ApproveRootStatusForEmpImport(pub.getEmployeeID(), pub.getDate(),
-						EnumAdaptor.valueOf(pub.getDailyConfirmAtr(), ApprovalStatusForEmployee.class)))
-				.collect(Collectors.toList());
 	}
 
 	@Override

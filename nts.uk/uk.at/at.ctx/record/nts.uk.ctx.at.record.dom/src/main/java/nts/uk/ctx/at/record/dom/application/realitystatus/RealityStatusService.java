@@ -369,7 +369,7 @@ public class RealityStatusService {
 		// // Request list 113
 		// imported（ワークフロー）「承認ルート状況」を取得する
 		List<ApproveRootStatusForEmpImport> listApproval = approvalStatusAdapter.getApprovalByEmplAndDate(startDate,
-				endDate, sId, cid, 1);
+				endDate, sId, cid);
 		// 承認ルートの状況
 		for (ApproveRootStatusForEmpImport approval : listApproval) {
 			DailyConfirmOutput dailyConfirm;

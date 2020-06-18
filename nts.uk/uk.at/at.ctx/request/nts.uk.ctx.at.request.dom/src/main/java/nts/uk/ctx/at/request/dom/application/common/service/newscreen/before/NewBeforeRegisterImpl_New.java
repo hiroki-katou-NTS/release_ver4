@@ -342,7 +342,7 @@ public class NewBeforeRegisterImpl_New implements NewBeforeRegister_New {
 		if (!appLimitSetting.getCanAppAchievementConfirm()) {
 			List<ApproveRootStatusForEmpImPort> approveRootStatus = Collections.emptyList();
 			try {
-				approveRootStatus = this.approvalRootStateAdapter.getApprovalByEmplAndDate(appDate, appDate, employeeID, companyID, 1);
+				approveRootStatus = this.approvalRootStateAdapter.getDailyApprovalByEmplAndDate(appDate, appDate, employeeID, companyID);
 			} catch (Exception e) {
 				approveRootStatus = Collections.emptyList();
 			}
@@ -402,8 +402,8 @@ public class NewBeforeRegisterImpl_New implements NewBeforeRegister_New {
 			// 「Imported(申請承認)「実績確定状態」．月別実績が確認済)
 			List<ApproveRootStatusForEmpImPort> approveRootStatus = Collections.emptyList();
 			try {
-				ClosureMonth closurePeriod = rqClosureAdapter.getClosureById(companyID, closureEmployment.get().getClosureId()).get().toClosureMonth();
-				approveRootStatus = this.approvalRootStateAdapter.getApprovalByEmplAndDate(appDate, appDate, employeeID, companyID, 2);
+				ClosureMonth closureMonth = rqClosureAdapter.getClosureById(companyID, closureEmployment.get().getClosureId()).get().toClosureMonth();
+				approveRootStatus = this.approvalRootStateAdapter.getMonthlyApprovalByEmpl(appDate, appDate, employeeID, companyID, closureMonth);
 			} catch (Exception e) {
 				approveRootStatus = Collections.emptyList();
 			}

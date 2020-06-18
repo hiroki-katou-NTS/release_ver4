@@ -45,6 +45,8 @@ import nts.uk.ctx.workflow.pub.service.export.ApprovalRootContentExport;
 import nts.uk.ctx.workflow.pub.service.export.ApproverApprovedExport;
 import nts.uk.ctx.workflow.pub.service.export.ApproverPersonExportNew;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
+
 /**
  * 
  * @author Doan Duy Hung
@@ -52,147 +54,141 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  */
 @RequestScoped
 public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
-	
+
 	@Inject
 	private ApprovalRootStatePub approvalRootStatePub;
-	
+
 	@Inject
 	private IntermediateDataPub intermediateDataPub;
-	
+
 	@Inject
 	private IMailDestinationPub iMailDestinationPub;
-	
+
 	@Override
-	public Map<String,List<ApprovalPhaseStateImport_New>> getApprovalRootContents(List<String> appIDs, String companyID) {
-		Map<String,List<ApprovalPhaseStateImport_New>> approvalPhaseImport_NewMap = new LinkedHashMap<>();
-		Map<String,List<ApprovalPhaseStateExport>> approvalRootContentExports = approvalRootStatePub.getApprovalRoots(appIDs, companyID);
-		for(Map.Entry<String,List<ApprovalPhaseStateExport>> approvalRootContentExport : approvalRootContentExports.entrySet()){
-					
-			List<ApprovalPhaseStateImport_New> appRootContentImport_News =	approvalRootContentExport.getValue().stream()
-						.map(x -> {
-							return new ApprovalPhaseStateImport_New(
-									x.getPhaseOrder(), 
-									EnumAdaptor.valueOf(x.getApprovalAtr().value, ApprovalBehaviorAtrImport_New.class),
-									x.getListApprovalFrame().stream()
-									.map(y -> {
-										return new ApprovalFrameImport_New(
-												y.getPhaseOrder(), 
-												y.getFrameOrder(), 
-												EnumAdaptor.valueOf(y.getApprovalAtr().value, ApprovalBehaviorAtrImport_New.class),
-												y.getListApprover().stream().map(z -> 
-													new ApproverStateImport_New(
-															z.getApproverID(), 
-															z.getApproverName(), 
-															z.getRepresenterID(),
-															z.getRepresenterName(),
-															"", ""))
-													.collect(Collectors.toList()), 
-												y.getApproverID(), 
-												y.getApproverName(),"",
-												y.getRepresenterID(),
-												y.getRepresenterName(),"",
-												y.getApprovalReason(), 
-												y.getConfirmAtr(),
-												y.getApprovalDate());
-									}).collect(Collectors.toList()));
-						}).collect(Collectors.toList());
+	public Map<String, List<ApprovalPhaseStateImport_New>> getApprovalRootContents(List<String> appIDs,
+			String companyID) {
+		Map<String, List<ApprovalPhaseStateImport_New>> approvalPhaseImport_NewMap = new LinkedHashMap<>();
+		Map<String, List<ApprovalPhaseStateExport>> approvalRootContentExports = approvalRootStatePub
+				.getApprovalRoots(appIDs, companyID);
+		for (Map.Entry<String, List<ApprovalPhaseStateExport>> approvalRootContentExport : approvalRootContentExports
+				.entrySet()) {
+
+			List<ApprovalPhaseStateImport_New> appRootContentImport_News = approvalRootContentExport.getValue().stream()
+					.map(x -> {
+						return new ApprovalPhaseStateImport_New(x.getPhaseOrder(),
+								EnumAdaptor.valueOf(x.getApprovalAtr().value, ApprovalBehaviorAtrImport_New.class),
+								x.getListApprovalFrame().stream().map(y -> {
+									return new ApprovalFrameImport_New(y.getPhaseOrder(), y.getFrameOrder(),
+											EnumAdaptor.valueOf(y.getApprovalAtr().value,
+													ApprovalBehaviorAtrImport_New.class),
+											y.getListApprover().stream()
+													.map(z -> new ApproverStateImport_New(z.getApproverID(),
+															z.getApproverName(), z.getRepresenterID(),
+															z.getRepresenterName(), "", ""))
+													.collect(Collectors.toList()),
+											y.getApproverID(), y.getApproverName(), "", y.getRepresenterID(),
+											y.getRepresenterName(), "", y.getApprovalReason(), y.getConfirmAtr(),
+											y.getApprovalDate());
+								}).collect(Collectors.toList()));
+					}).collect(Collectors.toList());
 			approvalPhaseImport_NewMap.put(approvalRootContentExport.getKey(), appRootContentImport_News);
 		}
 		return approvalPhaseImport_NewMap;
 	}
-	
+
 	public MailDestinationCache createMailDestinationCache(String companyID) {
 
 		return new MailDestinationCache(
 				sid -> this.iMailDestinationPub.getEmpEmailAddress(companyID, Arrays.asList(sid), 6));
 	}
-	
+
 	@Override
-	public ApprovalRootContentImport_New getApprovalRootContent(
-			String companyID, String employeeID, Integer appTypeValue, GeneralDate appDate, String appID, Boolean isCreate,
+	public ApprovalRootContentImport_New getApprovalRootContent(String companyID, String employeeID,
+			Integer appTypeValue, GeneralDate appDate, String appID, Boolean isCreate,
 			MailDestinationCache mailDestCache) {
-		ApprovalRootContentExport approvalRootContentExport = approvalRootStatePub.getApprovalRoot(companyID, employeeID, appTypeValue, appDate, appID, isCreate);
-		
-		return new ApprovalRootContentImport_New(
-					new ApprovalRootStateImport_New(
-						approvalRootContentExport.getApprovalRootState().getListApprovalPhaseState().stream()
-						.map(x -> {
-							return new ApprovalPhaseStateImport_New(
-									x.getPhaseOrder(), 
-									EnumAdaptor.valueOf(x.getApprovalAtr().value, ApprovalBehaviorAtrImport_New.class),
-									x.getListApprovalFrame().stream()
-									.map(y -> {
-										String approverPhaseMail = "";
-										String representerPhaseMail = "";
-										if(Strings.isNotBlank(y.getApproverID())){
-											List<MailDestination> approverPhaseDest = mailDestCache.get(y.getApproverID());
-											if(!CollectionUtil.isEmpty(approverPhaseDest)){
-												List<OutGoingMail> approverPhaseOuts = approverPhaseDest.get(0).getOutGoingMails();
-												if(!CollectionUtil.isEmpty(approverPhaseOuts)){
-													approverPhaseMail = Strings.isNotBlank(approverPhaseOuts.get(0).getEmailAddress())
-															? approverPhaseOuts.get(0).getEmailAddress() : "";
+		ApprovalRootContentExport approvalRootContentExport = approvalRootStatePub.getApprovalRoot(companyID,
+				employeeID, appTypeValue, appDate, appID, isCreate);
+
+		return new ApprovalRootContentImport_New(new ApprovalRootStateImport_New(
+				approvalRootContentExport.getApprovalRootState().getListApprovalPhaseState().stream().map(x -> {
+					return new ApprovalPhaseStateImport_New(x.getPhaseOrder(),
+							EnumAdaptor.valueOf(x.getApprovalAtr().value, ApprovalBehaviorAtrImport_New.class),
+							x.getListApprovalFrame().stream().map(y -> {
+								String approverPhaseMail = "";
+								String representerPhaseMail = "";
+								if (Strings.isNotBlank(y.getApproverID())) {
+									List<MailDestination> approverPhaseDest = mailDestCache.get(y.getApproverID());
+									if (!CollectionUtil.isEmpty(approverPhaseDest)) {
+										List<OutGoingMail> approverPhaseOuts = approverPhaseDest.get(0)
+												.getOutGoingMails();
+										if (!CollectionUtil.isEmpty(approverPhaseOuts)) {
+											approverPhaseMail = Strings
+													.isNotBlank(approverPhaseOuts.get(0).getEmailAddress())
+															? approverPhaseOuts.get(0).getEmailAddress()
+															: "";
+										}
+									}
+								}
+								if (Strings.isNotBlank(y.getRepresenterID())) {
+									List<MailDestination> representerPhaseDest = mailDestCache
+											.get(y.getRepresenterID());
+									if (!CollectionUtil.isEmpty(representerPhaseDest)) {
+										List<OutGoingMail> representerPhaseOuts = representerPhaseDest.get(0)
+												.getOutGoingMails();
+										if (!CollectionUtil.isEmpty(representerPhaseOuts)) {
+											representerPhaseMail = Strings
+													.isNotBlank(representerPhaseOuts.get(0).getEmailAddress())
+															? representerPhaseOuts.get(0).getEmailAddress()
+															: "";
+										}
+									}
+								}
+								return new ApprovalFrameImport_New(y.getPhaseOrder(), y.getFrameOrder(),
+										EnumAdaptor.valueOf(y.getApprovalAtr().value,
+												ApprovalBehaviorAtrImport_New.class),
+										y.getListApprover().stream().map(z -> {
+											String approverMail = "";
+											String representerMail = "";
+											List<MailDestination> approverDest = mailDestCache.get(z.getApproverID());
+											if (!CollectionUtil.isEmpty(approverDest)) {
+												List<OutGoingMail> approverOuts = approverDest.get(0)
+														.getOutGoingMails();
+												if (!CollectionUtil.isEmpty(approverOuts)) {
+													approverMail = Strings
+															.isNotBlank(approverOuts.get(0).getEmailAddress())
+																	? approverOuts.get(0).getEmailAddress()
+																	: "";
 												}
 											}
-										}
-										if(Strings.isNotBlank(y.getRepresenterID())){
-											List<MailDestination> representerPhaseDest = mailDestCache.get(y.getRepresenterID());
-											if(!CollectionUtil.isEmpty(representerPhaseDest)){
-												List<OutGoingMail> representerPhaseOuts = representerPhaseDest.get(0).getOutGoingMails();
-												if(!CollectionUtil.isEmpty(representerPhaseOuts)){
-													representerPhaseMail = Strings.isNotBlank(representerPhaseOuts.get(0).getEmailAddress())
-															? representerPhaseOuts.get(0).getEmailAddress() : "";
+											if (Strings.isNotBlank(z.getRepresenterID())) {
+												List<MailDestination> representerDest = mailDestCache
+														.get(z.getRepresenterID());
+												if (!CollectionUtil.isEmpty(representerDest)) {
+													List<OutGoingMail> representerOuts = representerDest.get(0)
+															.getOutGoingMails();
+													if (!CollectionUtil.isEmpty(representerOuts)) {
+														representerMail = Strings
+																.isNotBlank(representerOuts.get(0).getEmailAddress())
+																		? representerOuts.get(0).getEmailAddress()
+																		: "";
+													}
 												}
 											}
-										}
-										return new ApprovalFrameImport_New(
-												y.getPhaseOrder(), 
-												y.getFrameOrder(), 
-												EnumAdaptor.valueOf(y.getApprovalAtr().value, ApprovalBehaviorAtrImport_New.class),
-												y.getListApprover().stream().map(z -> {
-													String approverMail = "";
-													String representerMail = "";
-													List<MailDestination> approverDest = mailDestCache.get(z.getApproverID());
-													if(!CollectionUtil.isEmpty(approverDest)){
-														List<OutGoingMail> approverOuts = approverDest.get(0).getOutGoingMails();
-														if(!CollectionUtil.isEmpty(approverOuts)){
-															approverMail = Strings.isNotBlank(approverOuts.get(0).getEmailAddress())
-																	? approverOuts.get(0).getEmailAddress() : "";
-														}
-													}
-													if(Strings.isNotBlank(z.getRepresenterID())){
-														List<MailDestination> representerDest = mailDestCache.get(z.getRepresenterID());
-														if(!CollectionUtil.isEmpty(representerDest)){
-															List<OutGoingMail> representerOuts = representerDest.get(0).getOutGoingMails();
-															if(!CollectionUtil.isEmpty(representerOuts)){
-																representerMail = Strings.isNotBlank(representerOuts.get(0).getEmailAddress())
-																		? representerOuts.get(0).getEmailAddress() : "";
-															}
-														}
-													}
-													return new ApproverStateImport_New(
-															z.getApproverID(), 
-															z.getApproverName(), 
-															z.getRepresenterID(),
-															z.getRepresenterName(),
-															approverMail,
-															representerMail);})
-													.collect(Collectors.toList()), 
-												y.getApproverID(), 
-												y.getApproverName(),
-												approverPhaseMail,
-												y.getRepresenterID(),
-												y.getRepresenterName(),
-												representerPhaseMail,
-												y.getApprovalReason(), 
-												y.getConfirmAtr(),
-												y.getApprovalDate());
-									}).collect(Collectors.toList()));
-						}).collect(Collectors.toList())),
-					EnumAdaptor.valueOf(approvalRootContentExport.getErrorFlag().value, ErrorFlagImport.class));
+											return new ApproverStateImport_New(z.getApproverID(), z.getApproverName(),
+													z.getRepresenterID(), z.getRepresenterName(), approverMail,
+													representerMail);
+										}).collect(Collectors.toList()), y.getApproverID(), y.getApproverName(),
+										approverPhaseMail, y.getRepresenterID(), y.getRepresenterName(),
+										representerPhaseMail, y.getApprovalReason(), y.getConfirmAtr(),
+										y.getApprovalDate());
+							}).collect(Collectors.toList()));
+				}).collect(Collectors.toList())),
+				EnumAdaptor.valueOf(approvalRootContentExport.getErrorFlag().value, ErrorFlagImport.class));
 	}
 
 	@Override
-	public void insertByAppType(String companyID, String employeeID, Integer appTypeValue, GeneralDate appDate, String appID, GeneralDate baseDate) {
+	public void insertByAppType(String companyID, String employeeID, Integer appTypeValue, GeneralDate appDate,
+			String appID, GeneralDate baseDate) {
 
 		approvalRootStatePub.insertAppRootType(companyID, employeeID, appTypeValue, appDate, appID, 0, baseDate);
 
@@ -203,8 +199,8 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 			Integer approvalPhaseStateNumber, Boolean isCreate, String employeeID, Integer appTypeValue,
 			GeneralDate appDate) {
 
-		return approvalRootStatePub.getNextApprovalPhaseStateMailList(companyID, rootStateID, 
-				approvalPhaseStateNumber, isCreate, employeeID, appTypeValue, appDate, 0);
+		return approvalRootStatePub.getNextApprovalPhaseStateMailList(companyID, rootStateID, approvalPhaseStateNumber,
+				isCreate, employeeID, appTypeValue, appDate, 0);
 
 	}
 
@@ -212,7 +208,8 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 	public Integer doApprove(String companyID, String rootStateID, String employeeID, Boolean isCreate,
 			Integer appTypeValue, GeneralDate appDate, String memo) {
 
-		return approvalRootStatePub.doApprove(companyID, rootStateID, employeeID, isCreate, appTypeValue, appDate, memo, 0);
+		return approvalRootStatePub.doApprove(companyID, rootStateID, employeeID, isCreate, appTypeValue, appDate, memo,
+				0);
 
 	}
 
@@ -221,7 +218,8 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 			Integer appTypeValue, GeneralDate appDate) {
 		// TODO Auto-generated method stub
 
-		return approvalRootStatePub.isApproveAllComplete(companyID, rootStateID, employeeID, isCreate, appTypeValue, appDate, 0);
+		return approvalRootStatePub.isApproveAllComplete(companyID, rootStateID, employeeID, isCreate, appTypeValue,
+				appDate, 0);
 
 	}
 
@@ -235,10 +233,9 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 	@Override
 	public ApproverApprovedImport_New getApproverApproved(String rootStateID) {
 		ApproverApprovedExport approverApprovedExport = approvalRootStatePub.getApproverApproved(rootStateID, 0);
-		return new ApproverApprovedImport_New(
-				approverApprovedExport.getListApproverWithFlagOutput().stream()
-					.map(x -> new ApproverWithFlagImport_New(x.getEmployeeID(), x.getAgentFlag())).collect(Collectors.toList()), 
-				approverApprovedExport.getListApprover());
+		return new ApproverApprovedImport_New(approverApprovedExport.getListApproverWithFlagOutput().stream()
+				.map(x -> new ApproverWithFlagImport_New(x.getEmployeeID(), x.getAgentFlag()))
+				.collect(Collectors.toList()), approverApprovedExport.getListApprover());
 
 	}
 
@@ -247,22 +244,17 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 		// TODO Auto-generated method stub
 		return convertAgentPubImport(approvalRootStatePub.getApprovalAgentInfor(companyID, approver));
 	}
-	
+
 	private AgentPubImport convertAgentPubImport(AgentPubExport agentPubExport) {
-		return new AgentPubImport(
-				agentPubExport.getListApproverAndRepresenterSID().stream()
+		return new AgentPubImport(agentPubExport.getListApproverAndRepresenterSID().stream()
 				.map(x -> this.covertApproverImport(x)).collect(Collectors.toList()),
-				agentPubExport.getListRepresenterSID(),
-				agentPubExport.isFlag()
-				);
-		
+				agentPubExport.getListRepresenterSID(), agentPubExport.isFlag());
+
 	}
-	
+
 	private ApproverRepresenterImport covertApproverImport(ApproverRepresenterExport approverRepresenterExport) {
-		return new  ApproverRepresenterImport(
-				approverRepresenterExport.getApprover(),
-				new RepresenterInformationImport(approverRepresenterExport.getRepresenter().getValue()) 
-				);
+		return new ApproverRepresenterImport(approverRepresenterExport.getApprover(),
+				new RepresenterInformationImport(approverRepresenterExport.getRepresenter().getValue()));
 	}
 
 	@Override
@@ -294,10 +286,10 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 	@Override
 	public ApproverPersonImport judgmentTargetPersonCanApprove(String companyID, String rootStateID,
 			String employeeID) {
-		ApproverPersonExportNew approverPersonExport = approvalRootStatePub.judgmentTargetPersonCanApprove(companyID, rootStateID, employeeID, 0);
-		return new ApproverPersonImport(
-				approverPersonExport.getAuthorFlag(), 
-				EnumAdaptor.valueOf(approverPersonExport.getApprovalAtr().value, ApprovalBehaviorAtrImport_New.class), 
+		ApproverPersonExportNew approverPersonExport = approvalRootStatePub.judgmentTargetPersonCanApprove(companyID,
+				rootStateID, employeeID, 0);
+		return new ApproverPersonImport(approverPersonExport.getAuthorFlag(),
+				EnumAdaptor.valueOf(approverPersonExport.getApprovalAtr().value, ApprovalBehaviorAtrImport_New.class),
 				approverPersonExport.getExpirationAgentFlag());
 	}
 
@@ -310,76 +302,88 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 	public void doRemandForApplicant(String companyID, String rootStateID) {
 		approvalRootStatePub.doRemandForApplicant(companyID, rootStateID, 0);
 	}
+
 	// request list 113
 	@Override
-	public List<ApproveRootStatusForEmpImPort> getApprovalByEmplAndDate(GeneralDate startDate, GeneralDate endDate,
-			String employeeID, String companyID, Integer rootType) throws BusinessException {
-		return intermediateDataPub.getAppRootStatusByEmpPeriod(Arrays.asList(employeeID), new DatePeriod(startDate, endDate), rootType)
-				.getAppRootStateStatusLst()
-				.stream().map(x -> new ApproveRootStatusForEmpImPort(
-						x.getEmployeeID(), 
-						x.getDate(), 
-						EnumAdaptor.valueOf(x.getDailyConfirmAtr(),ApprovalStatusForEmployeeImport.class))).collect(Collectors.toList());
+	public List<ApproveRootStatusForEmpImPort> getDailyApprovalByEmplAndDate(GeneralDate startDate, GeneralDate endDate,
+			String employeeID, String companyID) throws BusinessException {
+		return intermediateDataPub
+				.getDailyAppRootStatus(Arrays.asList(employeeID), new DatePeriod(startDate, endDate))
+				.getAppRootStateStatusLst().stream()
+				.map(x -> new ApproveRootStatusForEmpImPort(x.getEmployeeID(), x.getDate(),
+						EnumAdaptor.valueOf(x.getDailyConfirmAtr(), ApprovalStatusForEmployeeImport.class)))
+				.collect(Collectors.toList());
 	}
+
+	// request list 113
+	@Override
+	public List<ApproveRootStatusForEmpImPort> getMonthlyApprovalByEmpl(GeneralDate startDate, GeneralDate endDate,
+			String employeeID, String companyID, ClosureMonth closureMonth) throws BusinessException {
+		return intermediateDataPub
+				.getMonthlyAppRootStatus(Arrays.asList(employeeID), new DatePeriod(startDate, endDate), closureMonth)
+				.getAppRootStateStatusLst().stream()
+				.map(x -> new ApproveRootStatusForEmpImPort(x.getEmployeeID(), x.getDate(),
+						EnumAdaptor.valueOf(x.getDailyConfirmAtr(), ApprovalStatusForEmployeeImport.class)))
+				.collect(Collectors.toList());
+	}
+
 	@Override
 	public List<String> getApproverFromPhase(String appID) {
 //		return approvalRootStatePub.getApproverFromPhase(appID);
 		return null;
 	}
+
 	@Override
 	public List<ApproverRemandImport> getListApproverRemand(String appID) {
 		return null;
 	}
+
 	@Override
 	public Boolean isApproveApprovalPhaseStateComplete(String companyID, String rootStateID, Integer phaseNumber) {
 		return approvalRootStatePub.isApproveApprovalPhaseStateComplete(companyID, rootStateID, phaseNumber);
 	}
+
 	@Override
 	public List<ApproveRootStatusForEmpImPort> getAppRootStatusByEmpPeriodMonth(String employeeID, DatePeriod period) {
 		return Collections.emptyList();
-		/*return intermediateDataPub.getAppRootStatusByEmpPeriodMonth(employeeID, period)
-				.stream().map(x -> new ApproveRootStatusForEmpImPort(
-						x.getEmployeeID(), 
-						x.getDate(), 
-						EnumAdaptor.valueOf(x.getDailyConfirmAtr(),ApprovalStatusForEmployeeImport.class))).collect(Collectors.toList());*/
+		/*
+		 * return intermediateDataPub.getAppRootStatusByEmpPeriodMonth(employeeID,
+		 * period) .stream().map(x -> new ApproveRootStatusForEmpImPort(
+		 * x.getEmployeeID(), x.getDate(),
+		 * EnumAdaptor.valueOf(x.getDailyConfirmAtr(),ApprovalStatusForEmployeeImport.
+		 * class))).collect(Collectors.toList());
+		 */
 	}
+
 	@Override
-	public Map<String,List<ApprovalPhaseStateImport_New>> getApprovalRootContentCMM045(String companyID,
-			List<String> lstAgent, DatePeriod period, boolean unapprovalStatus, boolean approvalStatus, boolean denialStatus, 
-			boolean agentApprovalStatus, boolean remandStatus, boolean cancelStatus) {
-		Map<String,List<ApprovalPhaseStateImport_New>> approvalPhaseImport_NewMap = new LinkedHashMap<>();
-		Map<String,List<ApprovalPhaseStateExport>> approvalRootContentExports = approvalRootStatePub.getApprovalRootCMM045(companyID, lstAgent, period,
-				unapprovalStatus, approvalStatus, denialStatus, agentApprovalStatus, remandStatus, cancelStatus);
-		for(Map.Entry<String,List<ApprovalPhaseStateExport>> approvalRootContentExport : approvalRootContentExports.entrySet()){
-					
-			List<ApprovalPhaseStateImport_New> appRootContentImport_News =	approvalRootContentExport.getValue().stream()
-						.map(x -> {
-							return new ApprovalPhaseStateImport_New(
-									x.getPhaseOrder(), 
-									EnumAdaptor.valueOf(x.getApprovalAtr().value, ApprovalBehaviorAtrImport_New.class),
-									x.getListApprovalFrame().stream()
-									.map(y -> {
-										return new ApprovalFrameImport_New(
-												y.getPhaseOrder(), 
-												y.getFrameOrder(), 
-												EnumAdaptor.valueOf(y.getApprovalAtr().value, ApprovalBehaviorAtrImport_New.class),
-												y.getListApprover().stream().map(z -> 
-													new ApproverStateImport_New(
-															z.getApproverID(), 
-															z.getApproverName(), 
-															z.getRepresenterID(),
-															z.getRepresenterName(),
-															"", ""))
-													.collect(Collectors.toList()), 
-												y.getApproverID(), 
-												y.getApproverName(),"",
-												y.getRepresenterID(),
-												y.getRepresenterName(),"",
-												y.getApprovalReason(),
-												y.getConfirmAtr(),
-												y.getApprovalDate());
-									}).collect(Collectors.toList()));
-						}).collect(Collectors.toList());
+	public Map<String, List<ApprovalPhaseStateImport_New>> getApprovalRootContentCMM045(String companyID,
+			List<String> lstAgent, DatePeriod period, boolean unapprovalStatus, boolean approvalStatus,
+			boolean denialStatus, boolean agentApprovalStatus, boolean remandStatus, boolean cancelStatus) {
+		Map<String, List<ApprovalPhaseStateImport_New>> approvalPhaseImport_NewMap = new LinkedHashMap<>();
+		Map<String, List<ApprovalPhaseStateExport>> approvalRootContentExports = approvalRootStatePub
+				.getApprovalRootCMM045(companyID, lstAgent, period, unapprovalStatus, approvalStatus, denialStatus,
+						agentApprovalStatus, remandStatus, cancelStatus);
+		for (Map.Entry<String, List<ApprovalPhaseStateExport>> approvalRootContentExport : approvalRootContentExports
+				.entrySet()) {
+
+			List<ApprovalPhaseStateImport_New> appRootContentImport_News = approvalRootContentExport.getValue().stream()
+					.map(x -> {
+						return new ApprovalPhaseStateImport_New(x.getPhaseOrder(),
+								EnumAdaptor.valueOf(x.getApprovalAtr().value, ApprovalBehaviorAtrImport_New.class),
+								x.getListApprovalFrame().stream().map(y -> {
+									return new ApprovalFrameImport_New(y.getPhaseOrder(), y.getFrameOrder(),
+											EnumAdaptor.valueOf(y.getApprovalAtr().value,
+													ApprovalBehaviorAtrImport_New.class),
+											y.getListApprover().stream()
+													.map(z -> new ApproverStateImport_New(z.getApproverID(),
+															z.getApproverName(), z.getRepresenterID(),
+															z.getRepresenterName(), "", ""))
+													.collect(Collectors.toList()),
+											y.getApproverID(), y.getApproverName(), "", y.getRepresenterID(),
+											y.getRepresenterName(), "", y.getApprovalReason(), y.getConfirmAtr(),
+											y.getApprovalDate());
+								}).collect(Collectors.toList()));
+					}).collect(Collectors.toList());
 			approvalPhaseImport_NewMap.put(approvalRootContentExport.getKey(), appRootContentImport_News);
 		}
 		return approvalPhaseImport_NewMap;
