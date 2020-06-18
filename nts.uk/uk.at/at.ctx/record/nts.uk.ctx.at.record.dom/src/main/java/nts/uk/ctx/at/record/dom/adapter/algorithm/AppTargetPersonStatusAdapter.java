@@ -10,7 +10,7 @@ public interface AppTargetPersonStatusAdapter {
 	public List<StateConfirm> appTargetPersonStatus(String employeeID, GeneralDate startDate, GeneralDate endDate,
 			int routeType);
 
-	public List<StateConfirm> appTargetPersonStatus(String employeeID, DatePeriod date, Integer routeType);
+	public List<StateConfirm> appTargetPersonStatus(String employeeID, DatePeriod date);
 
-	public List<StateConfirm> appTargetPersonStatus(List<String> employeeID, DatePeriod date, Integer routeType);
+	public List<StateConfirm> appTargetPersonStatus(List<String> employeeID, DatePeriod date);
 }

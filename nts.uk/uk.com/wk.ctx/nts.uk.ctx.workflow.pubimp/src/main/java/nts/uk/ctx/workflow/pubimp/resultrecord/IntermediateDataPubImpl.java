@@ -109,16 +109,6 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	@Inject
 	private EmployeeAdapter employeeAdapter;
 
-	@Override
-	public Request113Export getAppRootStatusByEmpPeriod(List<String> employeeIDLst, DatePeriod period, Integer rootType) throws BusinessException {
-		Request113Output result = appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class));
-		return new Request113Export(
-				result.getAppRootStatusLst().stream()
-					.map(x -> new AppRootStateStatusSprExport(x.getDate(), x.getEmployeeID(), x.getDailyConfirmAtr().value)).collect(Collectors.toList()), 
-				result.isErrorFlg(), 
-				result.getErrorMsgID(), 
-				result.getEmpLst());
-	}
 
 	@Override
 	public Request113Export getDailyAppRootStatus(List<String> employeeIDLst, DatePeriod period) throws BusinessException {
@@ -162,9 +152,8 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	}
 
 	@Override
-	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period,
-			Integer rootType) {
-		return appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, RecordRootType.of(rootType)).getAppRootStatusLst()
+	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period) {
+		return appRootInstanceService.getDailyAppRootStatus(employeeIDLst, period).getAppRootStatusLst()
 			.stream().map(x -> convertStatusFromDomain(x)).collect(Collectors.toList());
 	}
 	

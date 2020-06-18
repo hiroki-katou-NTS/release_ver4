@@ -81,48 +81,6 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	private AppRootConfirmQueryRepository confirmQueryRepository;
 	
 	
-	@Override
-	public Request113Output getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType) {
-		// レスポンス改善版
-		final AppRootIntermForQuery.List interms;
-		// 日次の場合
-		if(rootType==RecordRootType.CONFIRM_WORK_BY_DAY){
-			interms = confirmQueryRepository.queryIntermDaily(employeeIDLst, period);
-		} 
-		// 月次の場合
-		else {
-			interms = confirmQueryRepository.queryIntermMonthly(employeeIDLst, period);
-		}
-		
-		final AppRootRecordConfirmForQuery.List confirms;
-		// 日次の場合
-		if(rootType==RecordRootType.CONFIRM_WORK_BY_DAY){
-			confirms = confirmQueryRepository.queryConfirmDaily(employeeIDLst, period);
-		} 
-		// 月次の場合
-		else {
-			throw new RuntimeException("月次には対応しない");
-		}
-
-		List<ApprovalRootStateStatus> appRootStatusLst = new ArrayList<ApprovalRootStateStatus>();
-		List<String> errorEmployeeIds = new ArrayList<String>();
-		for (String employeeId : employeeIDLst) {
-			val result = confirms.aggregate(period, employeeId, interms);
-			
-			if (result.isError()) {
-				errorEmployeeIds.add(employeeId);
-				continue;
-			}
-			
-			appRootStatusLst.addAll(result.getResults());
-		};
-		
-		return new Request113Output(
-				appRootStatusLst,
-				!errorEmployeeIds.isEmpty(),
-				!errorEmployeeIds.isEmpty() ? "Msg_1430" : "",
-				errorEmployeeIds);
-	}
 
 	@Override
 	public Request113Output getDailyAppRootStatus(List<String> employeeIDLst, DatePeriod period) {

@@ -3,11 +3,8 @@
  */
 package nts.uk.ctx.at.record.dom.adapter.workflow.service;
 
-import java.util.Arrays;
 import java.util.List;
-
 import org.apache.commons.lang3.tuple.Pair;
-
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootOfEmpMonthImport;
@@ -29,11 +26,11 @@ import nts.uk.shr.com.time.closure.ClosureMonth;
 public interface ApprovalStatusAdapter {
 	
 	default List<ApproveRootStatusForEmpImport> getApprovalByEmplAndDate(
-			GeneralDate startDate, GeneralDate endDate, String employeeID,String companyID,Integer rootType) {
-		return this.getApprovalByEmplAndDate(startDate, endDate, Arrays.asList(employeeID), companyID, rootType);
+			GeneralDate startDate, GeneralDate endDate, String employeeID,String companyID) {
+		return this.getApprovalByEmplAndDate(startDate, endDate, employeeID, companyID);
 	}
 	
-	List<ApproveRootStatusForEmpImport> getApprovalByEmplAndDate(GeneralDate startDate, GeneralDate endDate, List<String> employeeID,String companyID,Integer rootType); 
+	List<ApproveRootStatusForEmpImport> getApprovalByEmplAndDate(GeneralDate startDate, GeneralDate endDate, List<String> employeeID,String companyID); 
 	
 	/**
 	 * <=>RequestList133
@@ -69,16 +66,6 @@ public interface ApprovalStatusAdapter {
 	 * @return
 	 */
 	ApprovalRootOfEmployeeImport getDailyApprovalStatus(String approverId, List<String> targetEmployeeIds, DatePeriod period);
-	
-	/**
-	 * <=>RequestList229
-	 * @param approvalRecordDates
-	 * @param employeeID
-	 * @param rootType
-	 * @return
-	 */
-	List<ApproveRootStatusForEmpImport> getApprovalByListEmplAndListApprovalRecordDate(GeneralDate startDate, GeneralDate endDate,
-			List<String> employeeIDs, String companyID, Integer rootType);
 	
 	/**
 	 * RequestList356
