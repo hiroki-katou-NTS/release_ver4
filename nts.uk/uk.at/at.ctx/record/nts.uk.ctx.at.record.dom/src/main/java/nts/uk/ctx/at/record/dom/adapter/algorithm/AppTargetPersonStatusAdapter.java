@@ -12,5 +12,5 @@ public interface AppTargetPersonStatusAdapter {
 
 	public List<StateConfirm> appTargetPersonStatus(String employeeID, DatePeriod date);
 
-	public List<StateConfirm> appTargetPersonStatus(List<String> employeeID, DatePeriod date, Integer rootType);
+	public List<StateConfirm> appTargetPersonStatus(List<String> employeeID, DatePeriod date);
 }

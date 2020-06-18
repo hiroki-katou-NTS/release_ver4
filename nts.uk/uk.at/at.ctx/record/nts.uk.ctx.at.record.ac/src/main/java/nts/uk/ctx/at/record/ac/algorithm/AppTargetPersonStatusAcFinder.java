@@ -54,8 +54,8 @@ public class AppTargetPersonStatusAcFinder implements AppTargetPersonStatusAdapt
 	}
 
 	@Override
-	public List<StateConfirm> appTargetPersonStatus(List<String> employeeID, DatePeriod date, Integer rootType) {
-		List<AppRootStateStatusSprExport> listState = intermediateDataPub.getAppRootStatusByEmpsPeriod(employeeID, date, rootType);
+	public List<StateConfirm> appTargetPersonStatus(List<String> employeeID, DatePeriod date) {
+		List<AppRootStateStatusSprExport> listState = intermediateDataPub.getAppRootStatusByEmpsPeriod(employeeID, date);
 		if (!CollectionUtil.isEmpty(listState)) {
 			return listState.stream().map(c -> convertToStateConfirms(c)).collect(Collectors.toList());
 		}

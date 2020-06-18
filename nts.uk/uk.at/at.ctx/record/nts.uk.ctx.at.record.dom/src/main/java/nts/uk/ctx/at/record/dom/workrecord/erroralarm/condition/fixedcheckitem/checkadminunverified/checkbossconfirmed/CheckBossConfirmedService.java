@@ -45,7 +45,7 @@ public class CheckBossConfirmedService {
 
 	public List<StateConfirm> checkBossConfirmed(List<String> employeeID, DatePeriod datePeriod) {
 		try {
-			return appTargetPersonStatusAdapter.appTargetPersonStatus(employeeID, datePeriod, 1);
+			return appTargetPersonStatusAdapter.appTargetPersonStatus(employeeID, datePeriod);
 		} catch (BusinessException e) {
 			throw new BusinessException("Msg_1430", "承認者");
 		}
