@@ -43,7 +43,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 						rs.getString("CID"), 
 						rs.getString("APP_ID"), 
 						rs.getString("EMPLOYEE_ID"), 
-						GeneralDate.fromString(rs.getString("APP_DATE"), "yyyy-MM-dd HH:mm:ss"), 
+						rs.getGeneralDate("APP_DATE"), 
 						rs.getInt("PHASE_ORDER"), 
 						rs.getInt("APP_PHASE_ATR"), 
 						rs.getInt("APPROVAL_FORM"), 
@@ -52,7 +52,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 						rs.getInt("CONFIRM_ATR"), 
 						rs.getString("APPROVER_ID"), 
 						rs.getString("REPRESENTER_ID"), 
-						GeneralDate.fromString(rs.getString("APPROVAL_DATE"), "yyyy-MM-dd HH:mm:ss"), 
+						rs.getGeneralDate("APPROVAL_DATE"),
 						rs.getString("APPROVAL_REASON"), 
 						rs.getString("APPROVER_CHILD_ID"));
 	}

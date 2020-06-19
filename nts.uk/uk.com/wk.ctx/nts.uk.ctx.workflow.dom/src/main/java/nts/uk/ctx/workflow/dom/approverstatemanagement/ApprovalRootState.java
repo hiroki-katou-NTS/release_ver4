@@ -2,7 +2,9 @@ package nts.uk.ctx.workflow.dom.approverstatemanagement;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.util.Strings;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,6 +40,7 @@ public class ApprovalRootState extends AggregateRoot {
 	public static ApprovalRootState createFromFirst(String companyID, String appID, String employeeID, GeneralDate date, ApprovalRootState approvalRootState){
 		if(Strings.isBlank(approvalRootState.getRootStateID())){
 			return ApprovalRootState.builder()
+					.CompanyID(companyID)
 					.rootStateID(appID)
 					.approvalRecordDate(date)
 					.employeeID(employeeID)
