@@ -195,7 +195,7 @@ public class ConfirmStatusInfoEmp {
 				.forEach(c -> {
 					Set<String> e = aggrPeriods.get(c);
 					if (e == null || e.isEmpty()) {
-						e = new HashSet<String>() {{ add(employeeId); }};
+						e = new HashSet<String>(Arrays.asList(employeeId));
 					} else {
 						e.add(employeeId);
 					}
@@ -282,7 +282,8 @@ public class ConfirmStatusInfoEmp {
 
 				DatePeriod dateMax = groupByDateEmpExportEmpList.entrySet().stream()
 					.filter(es -> es.getValue().contains(employeeId))
-					.findFirst().get().getKey();
+					.map(es -> es.getKey())
+					.findFirst().orElse(null);
 
 				ConfirmInfoResult result = ConfirmInfoResult.builder()
 						.employeeId(employeeId)

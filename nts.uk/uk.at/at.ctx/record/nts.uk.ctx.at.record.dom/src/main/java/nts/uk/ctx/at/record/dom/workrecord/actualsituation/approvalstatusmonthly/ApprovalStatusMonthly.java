@@ -199,7 +199,7 @@ public class ApprovalStatusMonthly {
 //				infoMonth.getLstAppRootOfEmpMonth().stream()
 //						.forEach(x -> approvalRootSituations.addAll(x.getApprovalRootSituations()));
 				Optional<ApprovalSubjectiveMonthlyOnWorkflow> optAppRootSituationMonth = infoMonth.getLstAppRootOfEmpMonth().stream()
-						.filter(x -> x.getTargetEmployeeId().equals(employeeId) && x.getDate().equals(yearMonth))
+						.filter(x -> x.getTargetEmployeeId().equals(employeeId) && x.getDate().yearMonth().equals(yearMonth))
 						.findFirst();
 				// 承認状態
 				boolean approvalStatus = false;
