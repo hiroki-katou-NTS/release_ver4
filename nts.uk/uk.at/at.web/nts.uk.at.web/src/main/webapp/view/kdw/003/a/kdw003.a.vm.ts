@@ -1122,11 +1122,12 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             if (self.displayFormat() == 0) {
                 if (!_.isEmpty(self.shareObject()) && self.shareObject().initClock != null) {
                     dataParent["employeeId"] = self.shareObject().initClock.employeeId;
-                    dataParent["dateRange"] = { startDate: self.shareObject().initClock.dateSpr.utc(), endDate: self.shareObject().initClock.dateSpr.utc() };
+                    //dataParent["dateRange"] = { startDate: self.shareObject().initClock.dateSpr.utc(), endDate: self.shareObject().initClock.dateSpr.utc() };
                 } else {
                     dataParent["employeeId"] = dataSource.length > 0 ? dataSource[0].employeeId : null;
-                    dataParent["dateRange"] = dataSource.length > 0 ? { startDate: dataSource[0].dateDetail, endDate: dataSource[dataSource.length - 1].dateDetail } : null;
+                    //dataParent["dateRange"] = dataSource.length > 0 ? { startDate: dataSource[0].dateDetail, endDate: dataSource[dataSource.length - 1].dateDetail } : null;
                 }
+                dataParent["dateRange"] = dataSource.length > 0 ? { startDate: dataSource[0].dateDetail, endDate: dataSource[dataSource.length - 1].dateDetail } : null;
                 dataParent["monthValue"] = self.valueUpdateMonth;
             } else {
                 dataParent["dateRange"] = dataSource.length > 0 ? { startDate: dataSource[0].dateDetail, endDate: dataSource[0].dateDetail } : null;
@@ -2461,6 +2462,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             }
             self.flagCalculation = false;
             self.listErrorMonth = [];
+            self.shareObject(new ShareObject());
             character.restore("characterKdw003a").done((obj: Characteristics) => {
                 self.characteristics.employeeId = __viewContext.user.employeeId;
                 self.characteristics.companyId = __viewContext.user.companyId;
