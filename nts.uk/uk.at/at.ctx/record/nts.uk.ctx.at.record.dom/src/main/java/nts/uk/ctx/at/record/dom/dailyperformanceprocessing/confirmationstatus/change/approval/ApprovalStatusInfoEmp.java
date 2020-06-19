@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.c
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -126,11 +127,11 @@ public class ApprovalStatusInfoEmp {
 //		ApprovalRootOfEmployeeImport approvalRootDaily = approvalStatusAdapter.getDailyApprovalStatus(empTarget,
 //				Arrays.asList(employeeId), dateEmpExport);
 
-		ApprovalSubjectiveDailyOnWorkflow approvalRootDaily = null;
+		List<ApprovalSubjectiveDailyOnWorkflow> approvalRootDaily = Collections.emptyList();
 		if (!isCallBy587) {
 			// [No.595]対象者を指定して承認状況を取得する
 			approvalRootDaily = approvalStatusDailyAdapter.getSubjective(empTarget,
-				Arrays.asList(employeeId), dateEmpExport).stream().findFirst().orElse(null);
+				Arrays.asList(employeeId), dateEmpExport);
 		}
 		// [No.26]社員、期間に一致する申請を取得する
 		List<ApplicationRecordImport> lstApplication = applicationRecordAdapter
@@ -169,7 +170,7 @@ public class ApprovalStatusInfoEmp {
 				}).collect(Collectors.toList());
 
 		return Arrays.asList(ConfirmInfoResult.builder().employeeId(employeeId).period(dateMax)
-				.informationDay(new InformationDay(indentities, lstApprovalDayStatus, Arrays.asList(approvalRootDaily)))
+				.informationDay(new InformationDay(indentities, lstApprovalDayStatus, approvalRootDaily))
 				.lstApplication(lstApplication).lstOut(lstOut).statusOfEmp(statusOfEmps.get(0))
 				.informationMonths(inforMonths).build());
 
@@ -223,31 +224,7 @@ public class ApprovalStatusInfoEmp {
 				});
 		}
 
-		List<InformationMonth> inforMonths = new ArrayList<>();
-		for (AggrPeriodEachActualClosure mergePeriodClr : aggrPeriods.keySet()) {
-			List<String> emplist = new ArrayList<>(aggrPeriods.get(mergePeriodClr));
-			List<ConfirmationMonth> lstConfirmMonth = confirmationMonthRepository.findBySomeProperty(
-					emplist, mergePeriodClr.getClosureMonth());
-
-			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
-			List<ApprovalProgressMonthly> lstApprovalMonthStatus = approvalStatusMonthlyAdapter
-					.getProgress(emplist, mergePeriodClr.getClosureMonth(), mergePeriodClr.getPeriod());
-
-			// [No.534](中間データ版)承認状況を取得する （月別）
-			List<ApprovalSubjectiveMonthlyOnWorkflow> appRootOfEmpMonth = null;
-			if (isCallBy587) {
-				appRootOfEmpMonth = approvalStatusMonthlyAdapter.getSubjective(
-					empTarget, employeeIds, mergePeriodClr.getClosureMonth(), mergePeriodClr.getPeriod());
-			}
-
-			for (String employeeId : emplist) {
-				inforMonths.add(new InformationMonth(
-						mergePeriodClr,
-						lstConfirmMonth.stream().filter(cm -> employeeId.equals(cm.getEmployeeId())).collect(Collectors.toList()),
-						lstApprovalMonthStatus.stream().filter(ams -> employeeId.equals(ams.getEmployeeId())).collect(Collectors.toList()),
-						appRootOfEmpMonth));
-			}
-		}
+		List<InformationMonth> inforMonths = extracted(empTarget, employeeIds, isCallBy587, aggrPeriods);
 
 		Map<DatePeriod, Set<String>> groupByDateEmpExportEmpList = new HashMap<>();
 		Map<String, List<StatusOfEmployeeExport>> statusOfEmps = new HashMap<>();
@@ -328,6 +305,36 @@ public class ApprovalStatusInfoEmp {
 			}
 		}
 		return results;
+	}
+
+	private List<InformationMonth> extracted(String empTarget, List<String> employeeIds, boolean isCallBy587,
+			Map<AggrPeriodEachActualClosure, Set<String>> aggrPeriods) {
+		List<InformationMonth> inforMonths = new ArrayList<>();
+		for (AggrPeriodEachActualClosure mergePeriodClr : aggrPeriods.keySet()) {
+			List<String> emplist = new ArrayList<>(aggrPeriods.get(mergePeriodClr));
+			List<ConfirmationMonth> lstConfirmMonth = confirmationMonthRepository.findBySomeProperty(
+					emplist, mergePeriodClr.getClosureMonth());
+
+			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
+			List<ApprovalProgressMonthly> lstApprovalMonthStatus = approvalStatusMonthlyAdapter
+					.getProgress(emplist, mergePeriodClr.getClosureMonth(), mergePeriodClr.getPeriod());
+
+			// [No.534](中間データ版)承認状況を取得する （月別）
+			List<ApprovalSubjectiveMonthlyOnWorkflow> appRootOfEmpMonth = null;
+			if (isCallBy587) {
+				appRootOfEmpMonth = approvalStatusMonthlyAdapter.getSubjective(
+					empTarget, employeeIds, mergePeriodClr.getClosureMonth(), mergePeriodClr.getPeriod());
+			}
+
+			for (String employeeId : emplist) {
+				inforMonths.add(new InformationMonth(
+						mergePeriodClr,
+						lstConfirmMonth.stream().filter(cm -> employeeId.equals(cm.getEmployeeId())).collect(Collectors.toList()),
+						lstApprovalMonthStatus.stream().filter(ams -> employeeId.equals(ams.getEmployeeId())).collect(Collectors.toList()),
+						appRootOfEmpMonth));
+			}
+		}
+		return inforMonths;
 	}
 
 	public List<ConfirmInfoResult> approvalStatusInfoMulEmp(String companyId, String empTarget,
