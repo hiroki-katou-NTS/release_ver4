@@ -202,7 +202,8 @@ public class ApprovalStatusActualDayChange {
 			Map<Pair<String, GeneralDate>, ApprovalSubjectiveDailyOnWorkflow> mapApprovalRoot) {
 		return datas.stream().map(x -> {
 			val data = mapApprovalRoot.get(Pair.of(x.getEmployeeId(), x.getDate()));
-			x.setPermissionChecked(data.getSubjective().canExecute());
+			val dataCompleteApproval = (data == null) ? false : data.getSubjective().canExecute();
+			x.setPermissionChecked(dataCompleteApproval);
 			return x;
 		}).collect(Collectors.toList());
 	}
