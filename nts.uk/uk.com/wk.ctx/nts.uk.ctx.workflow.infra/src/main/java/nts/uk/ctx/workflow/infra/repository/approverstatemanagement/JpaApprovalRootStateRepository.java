@@ -21,13 +21,11 @@ import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalPhaseState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootStateRepository;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApproverState;
-import nts.uk.ctx.workflow.dom.resultrecord.AppPhaseConfirm;
 import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.FullJoinAppApvState;
 import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvApproverState;
 import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvFrameState;
 import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvPhaseState;
 import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvRootState;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.FullJoinAppRootConfirm;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -157,6 +155,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		WwfdtAppApvApproverState.fromDomain(approvalRootState).forEach(a -> {
 			this.commandProxy().insert(a);
 		});
+		this.getEntityManager().flush();
 	}
 
 
@@ -172,6 +171,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		WwfdtAppApvApproverState.fromDomain(approvalRootState).forEach(a -> {
 			this.commandProxy().update(a);
 		});
+		this.getEntityManager().flush();
 	}
 	
 	private static List<String> DELETE_TABLE = Arrays.asList(
