@@ -22,5 +22,5 @@ public interface ExecutionLogRepository {
 			GeneralDateTime dailyCalculateStartTime, GeneralDateTime dailyCalculateEndTime,
 			GeneralDateTime reflectApprovalStartTime, GeneralDateTime reflectApprovalEndTime,
 			GeneralDateTime monthlyAggregateStartTime, GeneralDateTime monthlyAggregateEndTime,
-			int stopped, int type);
+			int stopped);
 }

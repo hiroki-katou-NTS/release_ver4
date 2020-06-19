@@ -132,6 +132,8 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 			logsMap.put(executionLog.getExecutionContent(), executionLog);
 		}
 		
+		//0: daily, 1: calculate, 2: approval, 3: monthly
+		List<Integer> interrupts = new ArrayList<>();
 		// 日別実績の作成　実行
 		if (logsMap.containsKey(ExecutionContent.DAILY_CREATION)
 				&& finalStatus == ProcessState.SUCCESS) {
@@ -159,7 +161,8 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 			
 			this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, dailyCreateEndTime, 
 					dailyCreateStartTime, dailyCreateEndTime, null, null, 
-					null, null, null, null, 0, 0);
+					null, null, null, null, 0);
+			interrupts.add(0);
 			//***** ↑
 		}
 		
@@ -182,7 +185,8 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 			
 			this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, dailyCalculateEndTime, 
 					null, null, dailyCalculateStartTime, dailyCalculateEndTime, 
-					null, null, null, null, 0, 1);		
+					null, null, null, null, 0);
+			interrupts.add(1);
 		}
 
 		//承認反映
@@ -208,7 +212,8 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 			
 			this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, reflectApprovalEndTime, 
 					null, null, null, null, 
-					reflectApprovalStartTime, reflectApprovalEndTime, null, null, 0, 2);	
+					reflectApprovalStartTime, reflectApprovalEndTime, null, null, 0);
+			interrupts.add(2);
 		}
 		
 		// 月別実績の集計　実行
@@ -228,7 +233,8 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 			
 			this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, monthlyAggregateEndTime, 
 					null, null, null, null, 
-					null, null, monthlyAggregateStatus, monthlyAggregateEndTime, 0, 3);	
+					null, null, monthlyAggregateStatus, monthlyAggregateEndTime, 0);
+			interrupts.add(3);
 		}
 		
 		//***** ↑
@@ -236,6 +242,27 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 		// ドメインモデル「就業計算と修正実行ログ」を更新する
 		// 就業計算と集計実行ログ．実行状況　←　実行中止
 		if (finalStatus == ProcessState.INTERRUPTION) {
+			GeneralDateTime time = GeneralDateTime.now();
+			if(!interrupts.isEmpty() && interrupts.stream().allMatch(i->i!=0)) {
+				this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, time, 
+						time, time, null, null, 
+						null, null, null, null, 0);
+			}
+			if(!interrupts.isEmpty() && interrupts.stream().allMatch(i->i!=1)) {
+				this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, time, 
+						null, null, time, time, 
+						null, null, null, null, 0);
+			}
+			if(!interrupts.isEmpty() && interrupts.stream().allMatch(i->i!=2)) {
+				this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, time, 
+						null, null, null, null, 
+						time, time, null, null, 0);
+			}
+			if(!interrupts.isEmpty() && interrupts.stream().allMatch(i->i!=3)) {
+				this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, time, 
+						null, null, null, null, 
+						null, null, time, time, 0);
+			}
 			this.empCalAndSumExeLogRepository.updateStatus(empCalAndSumExecLogID, ExeStateOfCalAndSum.STOPPING.value);
 			dataSetter.setData("endTime", GeneralDateTime.now().toString());
 			asyncContext.finishedAsCancelled();

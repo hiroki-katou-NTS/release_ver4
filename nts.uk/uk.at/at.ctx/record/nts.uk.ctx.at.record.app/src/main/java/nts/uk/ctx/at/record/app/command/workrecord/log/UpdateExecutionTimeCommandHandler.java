@@ -58,7 +58,7 @@ public class UpdateExecutionTimeCommandHandler extends CommandHandler<UpdateExec
 
 		this.executionLogRepository.updateExecutionDate(command.getEmpCalAndSumExecLogID(), startDate, endDate,
 				dailyCreateStartTime, dailyCreateEndTime, dailyCalculateStartTime, dailyCalculateEndTime,
-				reflectApprovalStartTime, reflectApprovalEndTime, monthlyAggregateStartTime, monthlyAggregateEndTime, command.getStopped(), 4);
+				reflectApprovalStartTime, reflectApprovalEndTime, monthlyAggregateStartTime, monthlyAggregateEndTime, command.getStopped());
 	}
 
 }
