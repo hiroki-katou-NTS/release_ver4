@@ -22,6 +22,7 @@ import nts.arc.layer.app.cache.DateHistoryCache;
 import nts.arc.layer.app.cache.KeyDateHistoryCache;
 import nts.arc.layer.app.cache.NestedMapCache;
 import nts.arc.time.GeneralDate;
+import nts.gul.collection.ListHashMap;
 import nts.uk.ctx.workflow.dom.agent.AgentRepository;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirmRepository;
@@ -235,8 +236,6 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 	
 	class RequireGetApprovalProgressTarget implements GetRouteConfirmStatusDailyTarget.Require {
 
-		private final String companyId = AppContexts.user().companyId();
-
 		private KeyDateHistoryCache<String, AppRootInstance> cacheInstance;
 		private NestedMapCache<String, GeneralDate, AppRootConfirm> cacheConfirm;
 		
@@ -252,14 +251,13 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceDailyByTarget(
 					targetEmployeeIds, period).stream().collect(Collectors.toList());
 
-			Map<String, List<DateHistoryCache.Entry<AppRootInstance>>> dataInstance = new HashMap<>();
+			//Map<String, List<DateHistoryCache.Entry<AppRootInstance>>> dataInstance = new HashMap<>();
+			ListHashMap<String, DateHistoryCache.Entry<AppRootInstance>> dataInstance = new ListHashMap<>();
+			
 			for (AppRootInstance approuteInstance : approuteInstancelist) {
-				if (!dataInstance.containsKey(approuteInstance.getEmployeeID())) {
-					dataInstance.put(approuteInstance.getEmployeeID(), Arrays.asList(DateHistoryCache.Entry.of(period, approuteInstance)));
-				}
-				else {
-					dataInstance.get(approuteInstance.getEmployeeID()).add(DateHistoryCache.Entry.of(period, approuteInstance));
-				}
+				dataInstance.addElement(
+						approuteInstance.getEmployeeID(),
+						DateHistoryCache.Entry.of(period, approuteInstance));
 			}
 			
 			cacheInstance = KeyDateHistoryCache.loaded(dataInstance);
