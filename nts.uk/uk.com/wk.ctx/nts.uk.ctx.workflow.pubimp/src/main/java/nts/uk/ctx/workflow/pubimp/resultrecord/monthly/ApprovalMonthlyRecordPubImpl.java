@@ -104,9 +104,9 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 						.filter(instance -> instance.getEmployeeID().equals(targetEmployeeId))
 						.collect(Collectors.toList());
 				if (!dataInstance.containsKey(targetEmployeeId)) {
-					Map<DatePeriod, List<AppRootInstance>> data = new HashMap<DatePeriod, List<AppRootInstance>>() {{ 
-						put (period, approuteInstance); }};
-						dataInstance.put (targetEmployeeId, data); 
+					Map<DatePeriod, List<AppRootInstance>> data = new HashMap<DatePeriod, List<AppRootInstance>>();
+					data.put (period, approuteInstance);
+					dataInstance.put (targetEmployeeId, data); 
 				}
 				else {
 					dataInstance.get(targetEmployeeId).put(period, approuteInstance);
@@ -123,8 +123,8 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 			Map<String, Map<ClosureMonth, AppRootConfirm>> dataConfirm = new HashMap<String, Map<ClosureMonth, AppRootConfirm>>();
 			for (AppRootConfirm approuteConfirm : approuteConfirmlist) {
 				if (!dataConfirm.containsKey(approuteConfirm.getEmployeeID())) {
-					Map<ClosureMonth, AppRootConfirm> data = new HashMap<ClosureMonth, AppRootConfirm>() {{ 
-						put (closureMonth, approuteConfirm); }};
+					Map<ClosureMonth, AppRootConfirm> data = new HashMap<ClosureMonth, AppRootConfirm>();
+					data.put (closureMonth, approuteConfirm);
 					dataConfirm.put (approuteConfirm.getEmployeeID(), data); 
 				}
 				else {
@@ -222,9 +222,9 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 						.filter(instance -> instance.getEmployeeID().equals(targetEmployeeId))
 						.collect(Collectors.toList());
 				if (!dataInstance.containsKey(targetEmployeeId)) {
-					Map<ClosureMonth, List<AppRootInstance>> data = new HashMap<ClosureMonth, List<AppRootInstance>>() {{ 
-						put (closureMonth, approuteInstance); }};
-						dataInstance.put (targetEmployeeId, data); 
+					Map<ClosureMonth, List<AppRootInstance>> data = new HashMap<ClosureMonth, List<AppRootInstance>>();
+					data.put (closureMonth, approuteInstance);
+					dataInstance.put (targetEmployeeId, data); 
 				}
 				else {
 					dataInstance.get(targetEmployeeId).put(closureMonth, approuteInstance);
@@ -241,8 +241,8 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 			Map<String, Map<ClosureMonth, AppRootConfirm>> dataConfirm = new HashMap<String, Map<ClosureMonth, AppRootConfirm>>();
 			for (AppRootConfirm approuteConfirm : approuteConfirmlist) {
 				if (!dataConfirm.containsKey(approuteConfirm.getEmployeeID())) {
-					Map<ClosureMonth, AppRootConfirm> data = new HashMap<ClosureMonth, AppRootConfirm>() {{ 
-						put (closureMonth, approuteConfirm); }};
+					Map<ClosureMonth, AppRootConfirm> data = new HashMap<ClosureMonth, AppRootConfirm>(); 
+					data.put (closureMonth, approuteConfirm);
 					dataConfirm.put (approuteConfirm.getEmployeeID(), data); 
 				}
 				else {
