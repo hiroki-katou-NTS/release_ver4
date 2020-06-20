@@ -4,9 +4,11 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import nts.arc.time.GeneralDate;
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ObjectShare {
 	private Boolean changePeriodAtr;// 期間を変更する có cho thay đổi khoảng thời gian hay không
 	private Boolean errorRefStartAtr; // エラー参照を起動する có hiện mode lỗi hay ko
