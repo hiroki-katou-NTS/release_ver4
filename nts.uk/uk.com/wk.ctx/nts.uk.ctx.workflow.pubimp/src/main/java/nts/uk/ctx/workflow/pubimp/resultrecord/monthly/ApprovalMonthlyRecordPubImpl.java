@@ -53,7 +53,7 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 	public List<MonthlySubjectiveStatus> getSubjectiveStatus(
 			String approverEmployeeId, List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period) {
 		
-		val require = new RequireGetSubjectiveStatus(approverEmployeeId, targetEmployeeIds, closureMonth, period);
+		val require = new RequireGetSubjectiveStatus(targetEmployeeIds, closureMonth, period);
 		
 		List<MonthlySubjectiveStatus> results = new ArrayList<>();
 		for (String targetEmployeeId : targetEmployeeIds) {
@@ -93,8 +93,7 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 		public RequireGetSubjectiveStatus(List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period) {
 			//cacheInstance読み込み
 			// 対象者の月別実績の承認ルートを取得する（期間）
-			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(
-					targetEmployeeIds, period).stream().collect(Collectors.toList());
+			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(targetEmployeeIds, period);
 
 			Map<String, Map<DatePeriod, List<AppRootInstance>>> dataInstance = new HashMap<String, Map<DatePeriod, List<AppRootInstance>>>();
 
@@ -210,8 +209,7 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 		public RequireGetTargetStatus(List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period) {
 			//cacheInstance読み込み
 			// 対象者の月別実績の承認ルートを取得する（期間）
-			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(
-					targetEmployeeIds, period).stream().collect(Collectors.toList());
+			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(targetEmployeeIds, period);
 
 			Map<String, Map<ClosureMonth, List<AppRootInstance>>> dataInstance = new HashMap<String, Map<ClosureMonth, List<AppRootInstance>>>();
 			for (String targetEmployeeId : targetEmployeeIds) {

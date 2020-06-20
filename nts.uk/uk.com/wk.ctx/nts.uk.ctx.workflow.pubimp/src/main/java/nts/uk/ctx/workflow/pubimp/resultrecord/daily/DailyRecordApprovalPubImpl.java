@@ -122,14 +122,11 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 					approverEmployeeId, targetEmployeeIds, period).stream()
 						.collect(Collectors.toList());
 
-			Map<String, List<DateHistoryCache.Entry<AppRootInstance>>> dataInstance = new HashMap<>();
+			ListHashMap<String, DateHistoryCache.Entry<AppRootInstance>> dataInstance = new ListHashMap<>();
 			for (AppRootInstance approuteInstance : approuteInstancelist) {
-				if (!dataInstance.containsKey(approuteInstance.getEmployeeID())) {
-					dataInstance.put(approuteInstance.getEmployeeID(), Arrays.asList(DateHistoryCache.Entry.of(period, approuteInstance)));
-				}
-				else {
-					dataInstance.get(approuteInstance.getEmployeeID()).add(DateHistoryCache.Entry.of(period, approuteInstance));
-				}
+					dataInstance.addElement(
+							approuteInstance.getEmployeeID(),
+							DateHistoryCache.Entry.of(approuteInstance.getDatePeriod(), approuteInstance));
 			}
 			
 			cacheInstance = KeyDateHistoryCache.loaded(dataInstance);
@@ -257,7 +254,7 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 			for (AppRootInstance approuteInstance : approuteInstancelist) {
 				dataInstance.addElement(
 						approuteInstance.getEmployeeID(),
-						DateHistoryCache.Entry.of(period, approuteInstance));
+						DateHistoryCache.Entry.of(approuteInstance.getDatePeriod(), approuteInstance));
 			}
 			
 			cacheInstance = KeyDateHistoryCache.loaded(dataInstance);
