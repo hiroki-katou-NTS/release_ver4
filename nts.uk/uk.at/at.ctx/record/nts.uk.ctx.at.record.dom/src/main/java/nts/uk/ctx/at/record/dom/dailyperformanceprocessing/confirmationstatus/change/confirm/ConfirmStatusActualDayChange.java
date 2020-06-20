@@ -145,7 +145,7 @@ public class ConfirmStatusActualDayChange {
 									&& x.getDate().beforeOrEquals(mergePeriod.end())))
 											? approvalStatusMonth
 											: null;
-							if (value != null && value.isUnapproved())
+							if (value != null && !value.isUnapproved())
 								return true;
 							else
 								return false;
