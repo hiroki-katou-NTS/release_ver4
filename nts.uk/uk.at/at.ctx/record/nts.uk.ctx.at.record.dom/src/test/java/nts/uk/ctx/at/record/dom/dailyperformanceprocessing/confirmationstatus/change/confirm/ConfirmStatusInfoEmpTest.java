@@ -72,7 +72,7 @@ public class ConfirmStatusInfoEmpTest {
 	@Test
 	public void testConfirmStatusInfoOneEmp_yearmonth() {
 
-		val result = this.targetClass.confirmStatusInfoOneEmp(cid, employeeIds.get(0), Optional.empty(), yearMonth, cache);
+		val result = this.targetClass.confirmStatusInfoOneEmp(employeeIds.get(0), Optional.empty(), yearMonth, cache);
 
 		assertThat(cache.isEmpty(), is(false));
 		assertThat(cache.get(cachekey), is(Arrays.asList(cm.defaultPeriod())));
@@ -83,7 +83,7 @@ public class ConfirmStatusInfoEmpTest {
 	@Test
 	public void testConfirmStatusInfoOneEmp_period() {
 
-		val result = this.targetClass.confirmStatusInfoOneEmp(cid, employeeIds.get(0), opPeriod, Optional.empty(), cache);
+		val result = this.targetClass.confirmStatusInfoOneEmp(employeeIds.get(0), opPeriod, Optional.empty(), cache);
 
 		assertThat(cache.isEmpty(), is(false));
 		assertThat(cache.get(cachekey), is(Arrays.asList(cm.defaultPeriod())));
@@ -93,7 +93,7 @@ public class ConfirmStatusInfoEmpTest {
 
 	@Test
 	public void testConfirmStatusInfoMulEmp_yearmonth() {
-		val result = this.targetClass.confirmStatusInfoMulEmp(cid, employeeIds, Optional.empty(), yearMonth, cache);
+		val result = this.targetClass.confirmStatusInfoMulEmp(employeeIds, Optional.empty(), yearMonth, cache);
 
 		assertThat(cache.isEmpty(), is(false));
 		assertThat(cache.get(cachekey), is(Arrays.asList(cm.defaultPeriod())));
@@ -102,7 +102,7 @@ public class ConfirmStatusInfoEmpTest {
 
 	@Test
 	public void testConfirmStatusInfoMulEmp_period() {
-		val result = this.targetClass.confirmStatusInfoMulEmp(cid, employeeIds, opPeriod, Optional.empty(), cache);
+		val result = this.targetClass.confirmStatusInfoMulEmp(employeeIds, opPeriod, Optional.empty(), cache);
 
 		assertThat(cache.isEmpty(), is(false));
 		assertThat(cache.get(cachekey), is(Arrays.asList(cm.defaultPeriod())));
@@ -111,7 +111,7 @@ public class ConfirmStatusInfoEmpTest {
 
 	@Test
 	public void testConfirmStatusInfoMulEmp_unuseCache() {
-		val result = this.targetClass.confirmStatusInfoMulEmp(cid, employeeIds, opPeriod, yearMonth);
+		val result = this.targetClass.confirmStatusInfoMulEmp(employeeIds, opPeriod, yearMonth);
 		
 		assertThat(result.isEmpty(), is(false));
 	}

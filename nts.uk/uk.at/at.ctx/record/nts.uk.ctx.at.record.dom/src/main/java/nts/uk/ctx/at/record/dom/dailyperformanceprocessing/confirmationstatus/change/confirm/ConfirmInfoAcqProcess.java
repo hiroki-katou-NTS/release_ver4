@@ -34,9 +34,9 @@ public class ConfirmInfoAcqProcess {
 	public List<ConfirmInfoResult> getConfirmInfoAcp(String companyId, List<String> employeeIds,
 			Optional<DatePeriod> periodOpt, Optional<YearMonth> yearMonthOpt, Map<ClosurePeriodCacheKey, List<ClosurePeriod>> cachedClosurePeriod) {
 		if (employeeIds.size() == 1) {
-			return confirmStatusInfoEmp.confirmStatusInfoOneEmp(companyId, employeeIds.get(0), periodOpt, yearMonthOpt, cachedClosurePeriod);
+			return confirmStatusInfoEmp.confirmStatusInfoOneEmp(employeeIds.get(0), periodOpt, yearMonthOpt, cachedClosurePeriod);
 		} else {
-			return confirmStatusInfoEmp.confirmStatusInfoMulEmp(companyId, employeeIds, periodOpt, yearMonthOpt, cachedClosurePeriod);
+			return confirmStatusInfoEmp.confirmStatusInfoMulEmp(employeeIds, periodOpt, yearMonthOpt, cachedClosurePeriod);
 		}
 	}
 

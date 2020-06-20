@@ -48,7 +48,7 @@ public class ConfirmInfoAcqProcessTest {
 		employeeIds = Collections.emptyList();
 		new Expectations() {
 	        {
-	        	confirmStatusInfoEmp.confirmStatusInfoMulEmp(cid, employeeIds, opPeriod, yearMonth, cache);
+	        	confirmStatusInfoEmp.confirmStatusInfoMulEmp(employeeIds, opPeriod, yearMonth, cache);
 	            result = Arrays.asList(new ConfirmInfoResult());
 	        }
 	    };
@@ -64,7 +64,7 @@ public class ConfirmInfoAcqProcessTest {
 		
 		new Expectations() {
 	        {
-	        	confirmStatusInfoEmp.confirmStatusInfoOneEmp(cid, employeeIds.get(0), opPeriod, yearMonth, cache);
+	        	confirmStatusInfoEmp.confirmStatusInfoOneEmp(employeeIds.get(0), opPeriod, yearMonth, cache);
 	        	result = Arrays.asList(new ConfirmInfoResult());
 	        }
 	    };
@@ -80,7 +80,7 @@ public class ConfirmInfoAcqProcessTest {
 		
 		new Expectations() {
 	        {
-	        	confirmStatusInfoEmp.confirmStatusInfoMulEmp(cid, employeeIds, opPeriod, yearMonth, cache);
+	        	confirmStatusInfoEmp.confirmStatusInfoMulEmp(employeeIds, opPeriod, yearMonth, cache);
 	        	result = Arrays.asList(new ConfirmInfoResult());
 	        }
 	    };
