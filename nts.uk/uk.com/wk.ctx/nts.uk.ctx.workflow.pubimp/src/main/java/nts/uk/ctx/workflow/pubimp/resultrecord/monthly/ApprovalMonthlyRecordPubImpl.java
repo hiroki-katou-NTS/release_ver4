@@ -90,12 +90,11 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 		private NestedMapCache<String, DatePeriod, List<AppRootInstance>> cacheInstance;
 		private NestedMapCache<String, ClosureMonth, AppRootConfirm> cacheConfirm;
 		
-		public RequireGetSubjectiveStatus(String approverEmployeeId, List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period) {
+		public RequireGetSubjectiveStatus(List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period) {
 			//cacheInstance読み込み
-			// 承認者の月別実績の承認ルートを取得する（対象者指定）（期間）
-			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceMonthlyByApproverTarget(
-					approverEmployeeId, targetEmployeeIds, closureMonth.defaultPeriod()).stream()
-						.collect(Collectors.toList());
+			// 対象者の月別実績の承認ルートを取得する（期間）
+			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(
+					targetEmployeeIds, period).stream().collect(Collectors.toList());
 
 			Map<String, Map<DatePeriod, List<AppRootInstance>>> dataInstance = new HashMap<String, Map<DatePeriod, List<AppRootInstance>>>();
 
@@ -204,8 +203,6 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 	}
 	
 	public class RequireGetTargetStatus implements GetRouteConfirmStatusMonthlyTarget.Require {
-
-		private final String companyId = AppContexts.user().companyId();
 
 		private NestedMapCache<String, ClosureMonth, List<AppRootInstance>> cacheInstance;
 		private NestedMapCache<String, ClosureMonth, AppRootConfirm> cacheConfirm;
