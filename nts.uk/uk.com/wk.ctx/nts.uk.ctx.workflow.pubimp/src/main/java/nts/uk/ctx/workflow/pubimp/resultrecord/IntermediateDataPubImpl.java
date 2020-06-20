@@ -604,7 +604,7 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 		appRootInstanceLst.forEach(appRootInstance -> {
 			// 対象日の就業実績確認状態を取得する
 			Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmDaily(appRootInstance.getEmployeeID(), date);
-			if(!!opAppRootConfirm.isPresent()){
+			if(!opAppRootConfirm.isPresent()){
 				return;
 			}
 			AppRootConfirm appRootConfirm = opAppRootConfirm.get();
