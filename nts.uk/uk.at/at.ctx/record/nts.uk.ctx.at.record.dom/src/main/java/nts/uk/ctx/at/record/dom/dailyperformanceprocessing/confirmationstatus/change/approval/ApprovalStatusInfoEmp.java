@@ -320,7 +320,7 @@ public class ApprovalStatusInfoEmp {
 					.getProgress(emplist, mergePeriodClr.getClosureMonth(), mergePeriodClr.getPeriod());
 
 			// [No.534](中間データ版)承認状況を取得する （月別）
-			List<ApprovalSubjectiveMonthlyOnWorkflow> appRootOfEmpMonth = null;
+			List<ApprovalSubjectiveMonthlyOnWorkflow> appRootOfEmpMonth = Collections.emptyList();
 			if (isCallBy587) {
 				appRootOfEmpMonth = approvalStatusMonthlyAdapter.getSubjective(
 					empTarget, employeeIds, mergePeriodClr.getClosureMonth(), mergePeriodClr.getPeriod());

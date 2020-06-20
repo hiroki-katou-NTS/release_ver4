@@ -432,8 +432,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 			throw new BusinessException("Msg_873");
 		}
 
-		DatePeriod datePeriod = null;
-		datePeriod = new DatePeriod(screenDto.getSelectedActualTime().getStartDate(), screenDto.getSelectedActualTime().getEndDate());
+		DatePeriod datePeriod = new DatePeriod(screenDto.getSelectedActualTime().getStartDate(), screenDto.getSelectedActualTime().getEndDate());
 		// 取得している「承認処理の利用設定．月の承認者確認を利用する」をチェックする
 
 		// アルゴリズム「ログイン社員の承認対象者の取得」を実行する
