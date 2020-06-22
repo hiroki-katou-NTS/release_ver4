@@ -13,7 +13,6 @@ import javax.ejb.TransactionAttributeType;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
-import nts.arc.layer.infra.data.database.DatabaseProduct;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
@@ -282,28 +281,11 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
 
-	private static final String FIND_DAY_CONFIRM_SQL 
-			= " select rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.RECORD_DATE, "
-					+ " ph.PHASE_ORDER, ph.APP_PHASE_ATR, "
-					+ " fr.FRAME_ORDER, fr.APPROVER_ID, fr.REPRESENTER_ID, fr.APPROVAL_DATE "
-			+ " from WWFDT_DAY_APV_RT_CONFIRM as rt" 
-			+ " left join WWFDT_DAY_APV_PH_CONFIRM as ph"
-			+ " with (index(WWFDI_DAY_APV_PH_CONFIRM)) " 
-			+ " on rt.ROOT_ID = ph.ROOT_ID"
-			+ " left join WWFDT_DAY_APV_FR_CONFIRM as fr" 
-			+ " with (index(WWFDI_DAY_APV_FR_CONFIRM)) "
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	private List<AppRootConfirm> internalQueryDaily(List<String> employeeIDLst, DatePeriod period) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_DAY_CONFIRM_SQL);
-		} else {
-			sql.append(FIND_DAY_CONFIRM);
-		}
+		sql.append(FIND_DAY_CONFIRM);
 		sql.append(" where rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and rt.RECORD_DATE between @startDate and @endDate");
 		
@@ -350,12 +332,7 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	@Override
 	public List<AppRootConfirm> findAppRootConfirmMonthly(List<String> employeeIDLst, YearMonth yearMonth) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_MON_CONFIRM_SQL);
-		} else {
-			sql.append(FIND_MON_CONFIRM);
-		}
+		sql.append(FIND_MON_CONFIRM);
 		sql.append(" and rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and rt.YEARMONTH in @yearmonth ");
 
@@ -379,28 +356,11 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
 
-	private static final String FIND_MON_CONFIRM_SQL 
-			= " select rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.YEARMONTH, rt.CLOSURE_ID, rt.CLOSURE_DAY, rt.LAST_DAY_FLG, "
-					+ " ph.PHASE_ORDER, ph.APP_PHASE_ATR, "
-					+ " fr.FRAME_ORDER, fr.APPROVER_ID, fr.REPRESENTER_ID, fr.APPROVAL_DATE "
-			+ " from WWFDT_MON_APV_RT_CONFIRM as rt" 
-			+ " left join WWFDT_MON_APV_PH_CONFIRM as ph"
-			+ " with (index(WWFDI_MON_APV_PH_CONFIRM)) " 
-			+ " on rt.ROOT_ID = ph.ROOT_ID"
-			+ " left join WWFDT_MON_APV_FR_CONFIRM as fr" 
-			+ " with (index(WWFDI_MON_APV_FR_CONFIRM)) "
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	private List<AppRootConfirm> internalQueryMonthly(List<String> employeeIDLst, List<ClosureMonth> closureMonths) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_MON_CONFIRM_SQL);
-		} else {
-			sql.append(FIND_MON_CONFIRM);
-		}
+		sql.append(FIND_MON_CONFIRM);
 		sql.append(" where rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and (");
 		for (int i = 0; i < closureMonths.size(); i++) {
