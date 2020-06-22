@@ -288,7 +288,7 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 				this.monthError.errorProcForOptimisticLock(dataSetter, employeeId, empCalAndSumExecLogID, datePeriod.end());
 				aggrPeriod.setHappendOptimistLockError(true);
 				status.getOutAggrPeriod().add(aggrPeriod);
-				continue;
+				return status;
 			}
 			
 			// 状態を確認する
@@ -326,6 +326,7 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 				}
 				this.monthError.errorProcForOptimisticLock(dataSetter, employeeId, empCalAndSumExecLogID, datePeriod.end());
 				aggrPeriod.setHappendOptimistLockError(true);
+				return status;
 			}
 			finally {
 				status.getOutAggrPeriod().add(aggrPeriod);
