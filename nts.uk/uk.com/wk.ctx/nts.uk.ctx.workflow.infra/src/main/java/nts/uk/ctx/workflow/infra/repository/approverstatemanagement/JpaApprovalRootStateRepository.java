@@ -238,12 +238,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	public Optional<ApprovalRootState> findByID(String appID) {
 		List<ApprovalRootState> listAppRootState = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_APP_STATE_SQL);
-		} else {
-			sql.append(FIND_APP_STATE);
-		}
+		sql.append(FIND_APP_STATE);
 		sql.append(" where rt.APP_ID = @appId ");
 		
 		listAppRootState = toDomain(new NtsStatement(sql.toString(), this.jdbcProxy())
@@ -259,12 +254,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	@Override
 	public List<ApprovalPhaseState> findAppApvMaxPhaseStateByID(String appID) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_APP_STATE_SQL);
-		} else {
-			sql.append(FIND_APP_STATE);
-		}
+		sql.append(FIND_APP_STATE);
 		sql.append(" where rt.APP_ID = @appId ");
 		sql.append(" and ph.APP_PHASE_ATR = 1 "); 
 		sql.append(" order by ph.PHASE_ORDER desc ");
