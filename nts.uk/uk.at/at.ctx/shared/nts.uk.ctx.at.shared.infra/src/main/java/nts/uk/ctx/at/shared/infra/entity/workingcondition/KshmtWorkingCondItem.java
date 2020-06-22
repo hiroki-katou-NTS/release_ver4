@@ -22,6 +22,7 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 /**
@@ -121,6 +122,10 @@ public class KshmtWorkingCondItem extends UkJpaEntity implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<KshmtPersonalDayOfWeek> kshmtPersonalDayOfWeeks;
 
+	
+	public static final JpaEntityMapper<KshmtWorkingCondItem> MAPPER = new JpaEntityMapper<>(KshmtWorkingCondItem.class); 
+	
+	
 	/**
 	 * Instantiates a new kshmt working cond item.
 	 */

@@ -20,6 +20,7 @@ import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import nts.arc.layer.infra.data.entity.type.GeneralDateToDBConverter;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.arc.time.GeneralDate;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
@@ -63,6 +64,9 @@ public class KshmtWorkingCond extends UkJpaEntity implements Serializable {
 			@JoinColumn(name = "HIST_ID", referencedColumnName = "HIST_ID", insertable = false, updatable = false) })
 	private KshmtWorkingCondItem kshmtWorkingCondItem;
 
+	
+	public static final JpaEntityMapper<KshmtWorkingCond> MAPPER = new JpaEntityMapper<>(KshmtWorkingCond.class);
+	
 	/**
 	 * Instantiates a new kshmt working cond.
 	 */

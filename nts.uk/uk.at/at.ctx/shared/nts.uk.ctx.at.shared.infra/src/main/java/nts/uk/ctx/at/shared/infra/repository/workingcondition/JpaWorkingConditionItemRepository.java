@@ -188,48 +188,92 @@ public class JpaWorkingConditionItemRepository extends JpaRepository
 	public Optional<WorkingConditionItem> getBySidAndStandardDate(String employeeId,
 			GeneralDate baseDate) {
 
-		// get entity manager
-		EntityManager em = this.getEntityManager();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-
-		CriteriaQuery<KshmtWorkingCondItem> cq = criteriaBuilder
-				.createQuery(KshmtWorkingCondItem.class);
-
-		// root data
-		Root<KshmtWorkingCondItem> root = cq.from(KshmtWorkingCondItem.class);
-
-		// select root
-		cq.select(root);
-
-		// add where
-		List<Predicate> lstpredicateWhere = new ArrayList<>();
-
-		// equal
-		lstpredicateWhere
-				.add(criteriaBuilder.equal(root.get(KshmtWorkingCondItem_.sid), employeeId));
-		lstpredicateWhere.add(criteriaBuilder.lessThanOrEqualTo(
-				root.get(KshmtWorkingCondItem_.kshmtWorkingCond).get(KshmtWorkingCond_.strD),
-				baseDate));
-		lstpredicateWhere.add(criteriaBuilder.greaterThanOrEqualTo(
-				root.get(KshmtWorkingCondItem_.kshmtWorkingCond).get(KshmtWorkingCond_.endD),
-				baseDate));
-
-		// set where to SQL
-		cq.where(lstpredicateWhere.toArray(new Predicate[] {}));
-
-		// create query
-		TypedQuery<KshmtWorkingCondItem> query = em.createQuery(cq);
-
-		List<KshmtWorkingCondItem> result = query.getResultList();
-
-		// Check empty
-		if (CollectionUtil.isEmpty(result)) {
+		KshmtWorkingCond kshmtWorkingCond;
+		{
+			String sql = "select *"
+					+ " from KSHMT_WORKING_COND"
+					+ " where SID = @sid"
+					+ " and START_DATE <= @date"
+					+ " and END_DATE >= @date";
+			kshmtWorkingCond = this.jdbcProxy().query(sql)
+					.paramString("sid", employeeId)
+					.paramDate("date", baseDate)
+					.getSingle(rec -> KshmtWorkingCond.MAPPER.toEntity(rec))
+					.orElse(null);
+		}
+		
+		if (kshmtWorkingCond == null) {
 			return Optional.empty();
 		}
+		
+		String historyId = kshmtWorkingCond.getKshmtWorkingCondPK().getHistoryId();
+		String sqlHistId = "select * from {T} where HIST_ID = @hist";
+		
+		KshmtScheduleMethod kshmtScheduleMethod;
+		{
+			String sql = sqlHistId.replace("{T}", "KSHMT_SCHEDULE_METHOD");
+			kshmtScheduleMethod = this.jdbcProxy().query(sql)
+					.paramString("hist", historyId)
+					.getSingle(rec -> KshmtScheduleMethod.MAPPER.toEntity(rec)).get();
+		}
+		
+		KshmtWorkingCondItem kshmtWorkingCondItem;
+		{
+			String sql = sqlHistId.replace("{T}", "KSHMT_WORKING_COND_ITEM");
+			kshmtWorkingCondItem = this.jdbcProxy().query(sql)
+					.paramString("hist", historyId)
+					.getSingle(rec -> KshmtWorkingCondItem.MAPPER.toEntity(rec)).get();
+		}
+		
+		List<KshmtPerWorkCat> listKshmtPerWorkCat;
+		{
+			String sql = sqlHistId.replace("{T}", "KSHMT_PER_WORK_CAT");
+			listKshmtPerWorkCat = this.jdbcProxy().query(sql)
+					.paramString("hist", historyId)
+					.getList(rec -> KshmtPerWorkCat.MAPPER.toEntity(rec));
+			
+			Map<Integer, List<KshmtWorkCatTimeZone>> childMap;
+			{
+				String sql2 = sqlHistId.replace("{T}", "KSHMT_WORK_CAT_TIME_ZONE");
+				childMap = this.jdbcProxy().query(sql2)
+						.paramString("hist", historyId)
+						.getList(rec -> KshmtWorkCatTimeZone.MAPPER.toEntity(rec)).stream()
+						.collect(Collectors.groupingBy(e -> e.getKshmtWorkCatTimeZonePK().getPerWorkCatAtr()));
+			}
+			
+			listKshmtPerWorkCat.forEach(e -> {
+				e.setKshmtWorkCatTimeZones(childMap.get(e.getKshmtPerWorkCatPK().getPerWorkCatAtr()));
+			});
+		}
+		
+		List<KshmtPersonalDayOfWeek> listKshmtPersonalDayOfWeek;
+		{
+			String sql = sqlHistId.replace("{T}", "KSHMT_PERSONAL_DAY_OF_WEEK");
+			listKshmtPersonalDayOfWeek = this.jdbcProxy().query(sql)
+					.paramString("hist", historyId)
+					.getList(rec -> KshmtPersonalDayOfWeek.MAPPER.toEntity(rec));
 
+			Map<Integer, List<KshmtDayofweekTimeZone>> childMap;
+			{
+				String sql2 = sqlHistId.replace("{T}", "KSHMT_DAYOFWEEK_TIME_ZONE");
+				childMap = this.jdbcProxy().query(sql2)
+						.paramString("hist", historyId)
+						.getList(rec -> KshmtDayofweekTimeZone.MAPPER.toEntity(rec)).stream()
+						.collect(Collectors.groupingBy(e -> e.getKshmtDayofweekTimeZonePK().getPerWorkDayOffAtr()));
+			}
+			
+			listKshmtPersonalDayOfWeek.forEach(e -> {
+				e.setKshmtDayofweekTimeZones(childMap.get(e.getKshmtPersonalDayOfWeekPK().getPerWorkDayOffAtr()));
+			});
+		}
+		
+		kshmtWorkingCondItem.setKshmtPerWorkCats(listKshmtPerWorkCat);
+		kshmtWorkingCondItem.setKshmtPersonalDayOfWeeks(listKshmtPersonalDayOfWeek);
+		kshmtWorkingCondItem.setKshmtScheduleMethod(kshmtScheduleMethod);
+		
 		// exclude select
 		return Optional.of(new WorkingConditionItem(
-				new JpaWorkingConditionItemGetMemento(result.get(FIRST_ITEM_INDEX))));
+				new JpaWorkingConditionItemGetMemento(kshmtWorkingCondItem)));
 	}
 
 	@Override

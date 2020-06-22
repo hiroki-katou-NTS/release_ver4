@@ -12,6 +12,7 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 
 /**
  * The Class KshmtDayofweekTimeZone.
@@ -29,6 +30,8 @@ public class KshmtDayofweekTimeZone extends KshmtTimeZone implements Serializabl
 	@EmbeddedId
 	protected KshmtDayofweekTimeZonePK kshmtDayofweekTimeZonePK;
 
+	public static final JpaEntityMapper<KshmtDayofweekTimeZone> MAPPER = new JpaEntityMapper<>(KshmtDayofweekTimeZone.class);
+	
 	/**
 	 * Instantiates a new kshmt dayofweek time zone.
 	 */

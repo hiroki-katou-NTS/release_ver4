@@ -19,6 +19,7 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 /**
@@ -60,6 +61,8 @@ public class KshmtPersonalDayOfWeek extends UkJpaEntity implements Serializable 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<KshmtDayofweekTimeZone> kshmtDayofweekTimeZones;
 
+	public static final JpaEntityMapper<KshmtPersonalDayOfWeek> MAPPER = new JpaEntityMapper<>(KshmtPersonalDayOfWeek.class);
+	
 	/**
 	 * Instantiates a new kshmt personal day of week.
 	 */

@@ -12,6 +12,7 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 
 /**
  * The Class KshmtWorkCatTimeZone.
@@ -29,6 +30,8 @@ public class KshmtWorkCatTimeZone extends KshmtTimeZone implements Serializable 
 	@EmbeddedId
 	protected KshmtWorkCatTimeZonePK kshmtWorkCatTimeZonePK;
 
+	public static final JpaEntityMapper<KshmtWorkCatTimeZone> MAPPER = new JpaEntityMapper<>(KshmtWorkCatTimeZone.class);
+	
 	/**
 	 * Instantiates a new kshmt work cat time zone.
 	 */

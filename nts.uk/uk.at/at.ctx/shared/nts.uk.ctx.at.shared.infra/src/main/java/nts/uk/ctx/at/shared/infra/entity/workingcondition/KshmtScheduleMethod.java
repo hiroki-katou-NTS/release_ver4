@@ -13,6 +13,7 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 /**
@@ -55,6 +56,8 @@ public class KshmtScheduleMethod extends UkJpaEntity implements Serializable {
 	/** The ref working hours. */
 	@Column(name = "REF_WORKING_HOURS")
 	private Integer refWorkingHours;
+	
+	public static final JpaEntityMapper<KshmtScheduleMethod> MAPPER = new JpaEntityMapper<>(KshmtScheduleMethod.class);
 
 	/**
 	 * Instantiates a new kshmt schedule method.
