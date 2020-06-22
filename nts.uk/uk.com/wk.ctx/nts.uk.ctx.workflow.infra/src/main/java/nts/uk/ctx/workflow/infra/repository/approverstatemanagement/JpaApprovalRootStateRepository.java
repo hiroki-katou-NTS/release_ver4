@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.JpaRepository;
-import nts.arc.layer.infra.data.database.DatabaseProduct;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.time.GeneralDate;
@@ -204,24 +203,6 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
-	private static final String FIND_APP_STATE_SQL 
-			= " select rt.CID, rt.APP_ID, rt.EMPLOYEE_ID, rt.APP_DATE, "
-				+ " ph.PHASE_ORDER, ph.APP_PHASE_ATR, ph.APPROVAL_FORM, "
-				+ " fr.FRAME_ORDER, fr.APP_FRAME_ATR, fr.CONFIRM_ATR, fr.APPROVER_ID, fr.REPRESENTER_ID, fr.APPROVAL_DATE, fr.APPROVAL_REASON, "
-				+ " ap.APPROVER_CHILD_ID , ap.CID"
-			+ " from WWFDT_APP_APV_RT_STATE as rt" 
-			+ " left join WWFDT_APP_APV_PH_STATE as ph"
-			+ " with (index(WWFDI_APP_APV_PH_STATE)) " 
-			+ " on rt.APP_ID = ph.APP_ID"
-			+ " left join WWFDT_APP_APV_FR_STATE as fr" 
-			+ " with (index(WWFDI_APP_APV_FR_STATE)) "
-			+ " on ph.APP_ID = fr.APP_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " left join WWFDT_APP_APV_AP_STATE as ap"
-			+ " with (index(WWFDI_APP_APV_AP_STATE)) "
-			+ " on fr.APP_ID = ap.APP_ID" 
-			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
-			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
 	private static final String FIND_OFFICIAL_APP
 			= " and ap.APPROVER_CHILD_ID = @approverID";
@@ -238,12 +219,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	public Optional<ApprovalRootState> findByID(String appID) {
 		List<ApprovalRootState> listAppRootState = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_APP_STATE_SQL);
-		} else {
-			sql.append(FIND_APP_STATE);
-		}
+		sql.append(FIND_APP_STATE);
 		sql.append(" where rt.APP_ID = @appId ");
 		
 		listAppRootState = toDomain(new NtsStatement(sql.toString(), this.jdbcProxy())
@@ -259,12 +235,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	@Override
 	public List<ApprovalPhaseState> findAppApvMaxPhaseStateByID(String appID) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_APP_STATE_SQL);
-		} else {
-			sql.append(FIND_APP_STATE);
-		}
+		sql.append(FIND_APP_STATE);
 		sql.append(" where rt.APP_ID = @appId ");
 		sql.append(" and ph.APP_PHASE_ATR = 1 "); 
 		sql.append(" order by ph.PHASE_ORDER desc ");
@@ -278,12 +249,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	@Override
 	public List<ApprovalRootState> findAppApvRootStateByIDApprover(List<String> appIDLst, String approverID) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_APP_STATE_SQL);
-		} else {
-			sql.append(FIND_APP_STATE);
-		}
+		sql.append(FIND_APP_STATE);
 		sql.append(" where rt.APP_ID in @appIDs");
 		sql.append(" and rt.APP_DATE >= @startDate ");
 		sql.append(" and rt.APP_DATE <= @endDate ");
@@ -291,13 +257,8 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		sql.append(FIND_OFFICIAL_APP);
 		
 		sql.append(" union ");
-		
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_APP_STATE_SQL);
-		} else {
-			sql.append(FIND_APP_STATE);
-		}
+
+		sql.append(FIND_APP_STATE);
 		sql.append(" where rt.APP_ID in @appIDs");
 		sql.append(" and rt.APP_DATE >= @startDate ");
 		sql.append(" and rt.APP_DATE <= @endDate ");
@@ -323,12 +284,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	@Override
 	public List<ApprovalRootState> findAppApvRootStateByEmployee(DatePeriod period, List<String> employeeIDLst) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_APP_STATE_SQL);
-		} else {
-			sql.append(FIND_APP_STATE);
-		}
+		sql.append(FIND_APP_STATE);
 		sql.append(" where rt.EMPLOYEE_ID in @employeeIDs ");
 		sql.append(" and rt.APP_DATE >= @startDate ");
 		sql.append(" and rt.APP_DATE <= @endDate ");
@@ -345,12 +301,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	@Override
 	public List<ApprovalRootState> findAppApvRootStateByEmployee(List<GeneralDate> dates, List<String> employeeIDLst) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_APP_STATE_SQL);
-		} else {
-			sql.append(FIND_APP_STATE);
-		}
+		sql.append(FIND_APP_STATE);
 		sql.append(" where rt.EMPLOYEE_ID in @employeeIDs ");
 		sql.append(" and rt.APP_DATE in @dates ");
 		return NtsStatement.In.split(employeeIDLst, employeeIDs -> {
@@ -369,25 +320,15 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	@Override
 	public List<ApprovalRootState> findAppApvRootStateByApprover(DatePeriod period, String approverID) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_APP_STATE_SQL);
-		} else {
-			sql.append(FIND_APP_STATE);
-		}
+		sql.append(FIND_APP_STATE);
 		sql.append(" where rt.APP_DATE >= @startDate ");
 		sql.append(" and rt.APP_DATE <= @endDate ");
 		//正規ルートの申請
 		sql.append(FIND_OFFICIAL_APP);
 		
 		sql.append(" union ");
-		
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_APP_STATE_SQL);
-		} else {
-			sql.append(FIND_APP_STATE);
-		}
+
+		sql.append(FIND_APP_STATE);
 		sql.append(" where rt.APP_DATE >= @startDate ");
 		sql.append(" and rt.APP_DATE <= @endDate ");
 		//代行ルートの申請
@@ -434,12 +375,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		}
 
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_APP_STATE_SQL);
-		} else {
-			sql.append(FIND_APP_STATE);
-		}
+		sql.append(FIND_APP_STATE);
 		sql.append(" where rt.APP_DATE >= @startDate ");
 		sql.append(" and rt.APP_DATE <= @endDate ");
 		sql.append(" and ph.APP_PHASE_ATR in @phaseAtr ");

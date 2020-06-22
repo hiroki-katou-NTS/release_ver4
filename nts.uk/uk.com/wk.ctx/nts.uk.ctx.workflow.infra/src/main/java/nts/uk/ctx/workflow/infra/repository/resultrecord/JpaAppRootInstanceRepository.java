@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.JpaRepository;
-import nts.arc.layer.infra.data.database.DatabaseProduct;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
@@ -336,24 +335,6 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
-	private static final String FIND_DAY_INSTANCE_SQL 
-			= " select rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, "
-					+ " ph.PHASE_ORDER, ph.APPROVAL_FORM, "
-					+ " fr.FRAME_ORDER, fr.CONFIRM_ATR, "
-					+ " ap.APPROVER_CHILD_ID "
-			+ " from WWFDT_DAY_APV_RT_INSTANCE as rt" 
-			+ " left join WWFDT_DAY_APV_PH_INSTANCE as ph"
-			+ " with (index(WWFDI_DAY_APV_PH_INSTANCE)) " 
-			+ " on rt.ROOT_ID = ph.ROOT_ID"
-			+ " left join WWFDT_DAY_APV_FR_INSTANCE as fr" 
-			+ " with (index(WWFDI_DAY_APV_FR_INSTANCE)) "
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " left join WWFDT_DAY_APV_AP_INSTANCE as ap"
-			+ " with (index(WWFDI_DAY_APV_AP_INSTANCE)) "
-			+ " on fr.ROOT_ID = ap.ROOT_ID" 
-			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
-			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
 	@Override
 	@SneakyThrows
@@ -365,12 +346,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	@SneakyThrows
 	public List<AppRootInstance> findAppRootInstanceDailyByTarget(List<String> employeeIDLst, DatePeriod period) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_DAY_INSTANCE_SQL);
-		} else {
-			sql.append(FIND_DAY_INSTANCE);
-		}
+		sql.append(FIND_DAY_INSTANCE);
 		sql.append(" where rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and rt.START_DATE <= @endDate ");
 		sql.append(" and rt.END_DATE >= @startDate ");
@@ -394,12 +370,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	@SneakyThrows
 	public List<AppRootInstance> findAppRootInstanceDailyByApprover(List<String> approverIDLst, DatePeriod period) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_DAY_INSTANCE_SQL);
-		} else {
-			sql.append(FIND_DAY_INSTANCE);
-		}
+		sql.append(FIND_DAY_INSTANCE);
 		sql.append(" where ap.APPROVER_CHILD_ID in @sids ");
 		sql.append(" and rt.START_DATE <= @endDate ");
 		sql.append(" and rt.END_DATE >= @startDate ");
@@ -423,12 +394,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	@SneakyThrows
 	public List<AppRootInstance> findAppRootInstanceDailyByApproverTarget(String approverID, List<String> employeeIDLst, DatePeriod period) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_DAY_INSTANCE_SQL);
-		} else {
-			sql.append(FIND_DAY_INSTANCE);
-		}
+		sql.append(FIND_DAY_INSTANCE);
 		sql.append(" where rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and rt.START_DATE <= @endDate ");
 		sql.append(" and rt.END_DATE >= @startDate ");
@@ -452,23 +418,11 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		sql.append(" select top 1 rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, ph.PHASE_ORDER, ph.APPROVAL_FORM, fr.FRAME_ORDER, fr.CONFIRM_ATR, ap.APPROVER_CHILD_ID ");
 		sql.append(" from WWFDT_DAY_APV_RT_INSTANCE as rt" );
 		sql.append(" left join WWFDT_DAY_APV_PH_INSTANCE as ph");
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(" with (index(WWFDI_DAY_APV_PH_INSTANCE)) " );
-		}
 		sql.append(" on rt.ROOT_ID = ph.ROOT_ID");
 		sql.append(" left join WWFDT_DAY_APV_FR_INSTANCE as fr" );
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(" with (index(WWFDI_DAY_APV_FR_INSTANCE)) ");
-		}
 		sql.append(" on ph.ROOT_ID = fr.ROOT_ID" );
 		sql.append(" and ph.PHASE_ORDER = fr.PHASE_ORDER");
 		sql.append(" left join WWFDT_DAY_APV_AP_INSTANCE as ap");
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(" with (index(WWFDI_DAY_APV_AP_INSTANCE)) ");
-		}
 		sql.append(" on fr.ROOT_ID = ap.ROOT_ID" );
 		sql.append(" and fr.PHASE_ORDER = ap.PHASE_ORDER" );
 		sql.append(" and fr.FRAME_ORDER = ap.FRAME_ORDER");
@@ -505,24 +459,6 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
-	private static final String FIND_MON_INSTANCE_SQL 
-			= " select rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, "
-					+ " ph.PHASE_ORDER, ph.APPROVAL_FORM, "
-					+ " fr.FRAME_ORDER, fr.CONFIRM_ATR, "
-			+ " ap.APPROVER_CHILD_ID "
-			+ " from WWFDT_MON_APV_RT_INSTANCE as rt" 
-			+ " left join WWFDT_MON_APV_PH_INSTANCE as ph"
-			+ " with (index(WWFDI_MON_APV_PH_INSTANCE)) " 
-			+ " on rt.ROOT_ID = ph.ROOT_ID"
-			+ " left join WWFDT_MON_APV_FR_INSTANCE as fr" 
-			+ " with (index(WWFDI_MON_APV_FR_INSTANCE)) "
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " left join WWFDT_MON_APV_AP_INSTANCE as ap"
-			+ " with (index(WWFDI_MON_APV_AP_INSTANCE)) "
-			+ " on fr.ROOT_ID = ap.ROOT_ID" 
-			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
-			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
 	@Override
 	@SneakyThrows
@@ -534,12 +470,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	@SneakyThrows
 	public List<AppRootInstance> findAppRootInstanceMonthlyByTarget(List<String> employeeIDLst, DatePeriod period) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_MON_INSTANCE_SQL);
-		} else {
-			sql.append(FIND_MON_INSTANCE);
-		}
+		sql.append(FIND_MON_INSTANCE);
 		sql.append(" where rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and rt.START_DATE <= @endDate ");
 		sql.append(" and rt.END_DATE >= @startDate ");
@@ -563,12 +494,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	@SneakyThrows
 	public List<AppRootInstance> findAppRootInstanceMonthlyByApprover(List<String> approverIDLst, DatePeriod period) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_MON_INSTANCE_SQL);
-		} else {
-			sql.append(FIND_MON_INSTANCE);
-		}
+		sql.append(FIND_MON_INSTANCE);
 		sql.append(" where rt.START_DATE <= @endDate ");
 		sql.append(" and rt.END_DATE >= @startDate ");
 		sql.append(" and ap.APPROVER_CHILD_ID in @sids ");
@@ -593,12 +519,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	@SneakyThrows
 	public List<AppRootInstance> findAppRootInstanceMonthlyByApproverTarget(String approverID, List<String> employeeIDLst, DatePeriod period) {
 		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(FIND_MON_INSTANCE_SQL);
-		} else {
-			sql.append(FIND_MON_INSTANCE);
-		}
+		sql.append(FIND_MON_INSTANCE);
 		sql.append(" where rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and rt.START_DATE <= @endDate ");
 		sql.append(" and rt.END_DATE >= @startDate ");
@@ -622,23 +543,11 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		sql.append(" select top 1 rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, ph.PHASE_ORDER, ph.APPROVAL_FORM, fr.FRAME_ORDER, fr.CONFIRM_ATR, ap.APPROVER_CHILD_ID ");
 		sql.append(" from WWFDT_MON_APV_RT_INSTANCE as rt" );
 		sql.append(" left join WWFDT_MON_APV_PH_INSTANCE as ph");
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(" with (index(WWFDI_MON_APV_PH_INSTANCE)) " );
-		}
 		sql.append(" on rt.ROOT_ID = ph.ROOT_ID");
 		sql.append(" left join WWFDT_MON_APV_FR_INSTANCE as fr" );
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(" with (index(WWFDI_MON_APV_FR_INSTANCE)) ");
-		}
 		sql.append(" on ph.ROOT_ID = fr.ROOT_ID" );
 		sql.append(" and ph.PHASE_ORDER = fr.PHASE_ORDER");
 		sql.append(" left join WWFDT_MON_APV_AP_INSTANCE as ap");
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(" with (index(WWFDI_MON_APV_AP_INSTANCE)) ");
-		}
 		sql.append(" on fr.ROOT_ID = ap.ROOT_ID" );
 		sql.append(" and fr.PHASE_ORDER = ap.PHASE_ORDER" );
 		sql.append(" and fr.FRAME_ORDER = ap.FRAME_ORDER");
