@@ -1,5 +1,7 @@
 package nts.uk.ctx.workflow.dom.resultrecord.status.monthly;
 
+import java.util.Optional;
+
 import lombok.val;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstance;
@@ -23,14 +25,18 @@ public class RouteConfirmStatusMonthly extends RouteConfirmStatus<ClosureMonth> 
 		super(targetEmployeeId, targetMonth, progress, phases);
 	}
 
-	public static RouteConfirmStatusMonthly create(AppRootConfirm confirm, AppRootInstance instance) {
+	public static Optional<RouteConfirmStatusMonthly> create(Optional<AppRootConfirm> confirm, Optional<AppRootInstance> instance) {
 		
-		String targetEmployeeId = confirm.getEmployeeID();
-		val targetMonth = confirm.getClosureMonth();
-		val phases = RouteConfirmStatusPhases.create(confirm.getListAppPhase(), instance.getListAppPhase());
+		if(!confirm.isPresent() || !instance.isPresent()) {
+			return Optional.empty();
+		}
+		
+		String targetEmployeeId = confirm.get().getEmployeeID();
+		val targetMonth = confirm.get().getClosureMonth();
+		val phases = RouteConfirmStatusPhases.create(confirm.get().getListAppPhase(), instance.get().getListAppPhase());
 		val progress = RouteConfirmProgress.of(phases.isUnapproved(), phases.isApproved());
 		
-		return new RouteConfirmStatusMonthly(targetEmployeeId, targetMonth, progress, phases);
+		return Optional.of(new RouteConfirmStatusMonthly(targetEmployeeId, targetMonth, progress, phases));
 	}
 
 	@Override

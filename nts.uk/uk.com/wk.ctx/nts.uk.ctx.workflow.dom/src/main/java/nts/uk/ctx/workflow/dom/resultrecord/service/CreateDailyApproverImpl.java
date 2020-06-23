@@ -9,14 +9,12 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ConfirmationRootType;
 import nts.uk.ctx.workflow.dom.resultrecord.AppFrameInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.AppPhaseInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstanceRepository;
-import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirmRepository;
 import nts.uk.ctx.workflow.dom.resultrecord.RecordRootType;
 import nts.uk.ctx.workflow.dom.service.CollectApprovalRootService;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRootContentOutput;
@@ -33,21 +31,18 @@ public class CreateDailyApproverImpl implements CreateDailyApprover {
 	
 	@Inject
 	private AppRootInstanceRepository appRootInstanceRepository;
-	
-	@Inject
-	private AppRootConfirmRepository appRootConfirmRepository;
-	
+		
 	@Inject
 	private CollectApprovalRootService collectApprovalRootService;
 
 	@Override
-	public AppRootInstanceContent createDailyApprover(String employeeID, RecordRootType rootType, GeneralDate recordDate, GeneralDate closureStartDate) {
+	public AppRootInstanceContent createApprover(String employeeID, RecordRootType rootType, GeneralDate recordDate, GeneralDate closureStartDate) {
 		String companyID = AppContexts.user().companyId();
 		// 承認ルートを取得する（確認）
 		ApprovalRootContentOutput approvalRootContentOutput = collectApprovalRootService.getApprovalRootConfirm(
 																companyID, 
 																employeeID, 
-																EnumAdaptor.valueOf(rootType.value-1, ConfirmationRootType.class), 
+																this.rootTypeConvert(rootType), 
 																recordDate);
 		AppRootInstance appRootInstance = new AppRootInstance(
 				approvalRootContentOutput.getApprovalRootState().getRootStateID(), 
@@ -85,49 +80,86 @@ public class CreateDailyApproverImpl implements CreateDailyApprover {
 		default:
 			break;
 		}
+		// ドメインモデル「承認ルート中間データ」を削除する
+		this.deleteFromDate(rootType, employeeID, recordDate);
+		
 		if(errorFlag!=ErrorFlag.NO_ERROR){
-			// ドメインモデル「承認ルート中間データ」を削除する
-			appRootInstanceRepository.deleteDailyFromDate(employeeID, recordDate);
 			return new AppRootInstanceContent(appRootInstance, errorFlag, errorMsgID);
 		}
-		// ドメインモデル「承認ルート中間データ」を削除する
-		appRootInstanceRepository.deleteDailyFromDate(employeeID, recordDate);		
+		
 		// ドメインモデル「承認ルート中間データ」を取得する
-		Optional<AppRootInstance> opAppRootInstanceConflict = appRootInstanceRepository.findAppRootInstanceDailyNewestBelow(employeeID, recordDate);
-		if(opAppRootInstanceConflict.isPresent()){
-			// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」を取得する
-			AppRootInstance appRootInstanceConflict = opAppRootInstanceConflict.get();
-			// output．承認ルートの内容は取得したドメインモデル「承認ルート中間データ」を比較する
-			boolean isSame = compareAppRootContent(appRootInstanceConflict, appRootInstance)
-					&& compareAppRootContent(appRootInstance, appRootInstanceConflict);
-			if(isSame){
-				// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」をUPDATEする
-				DatePeriod oldPeriod = appRootInstanceConflict.getDatePeriod();
-				appRootInstanceConflict.setDatePeriod(new DatePeriod(oldPeriod.start(), GeneralDate.fromString("9999/12/31", "yyyy/MM/dd")));
-				appRootInstanceRepository.update(appRootInstanceConflict);
-				return new AppRootInstanceContent(appRootInstanceConflict, errorFlag, errorMsgID);
-			} else {
-				// 履歴の開始日を取得する
-				GeneralDate startHistDate = this.getHistoryStartDate(companyID, employeeID, rootType, recordDate, closureStartDate, appRootInstanceConflict);
-				// ドメインモデル「承認ルート中間データ」を削除する
-				appRootInstanceRepository.deleteDailyFromDate(employeeID, startHistDate);
+		Optional<AppRootInstance> opAppRootInstanceConflict = findAppRootInstanceNewestBelow(rootType, employeeID, recordDate);
+		if(!opAppRootInstanceConflict.isPresent()){
+			// 取得した承認ルートをドメインモデル「承認ルート中間データ」にINSERTする
+			appRootInstanceRepository.insert(appRootInstance);
+			return new AppRootInstanceContent(appRootInstance, errorFlag, errorMsgID);
+		}
+		
+		// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」を取得する
+		AppRootInstance appRootInstanceConflict = opAppRootInstanceConflict.get();
+		// output．承認ルートの内容は取得したドメインモデル「承認ルート中間データ」を比較する
+		boolean isSame = compareAppRootContent(appRootInstanceConflict, appRootInstance)
+				&& compareAppRootContent(appRootInstance, appRootInstanceConflict);
+		if(isSame){
+			// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」をUPDATEする
+			DatePeriod oldPeriod = appRootInstanceConflict.getDatePeriod();
+			appRootInstanceConflict.setDatePeriod(new DatePeriod(oldPeriod.start(), GeneralDate.fromString("9999/12/31", "yyyy/MM/dd")));
+			appRootInstanceRepository.update(appRootInstanceConflict);
+			return new AppRootInstanceContent(appRootInstanceConflict, errorFlag, errorMsgID);
+		} else {
+			// 履歴の開始日を取得する
+			GeneralDate startHistDate = this.getHistoryStartDate(companyID, employeeID, rootType, recordDate, closureStartDate, appRootInstanceConflict);
+			// ドメインモデル「承認ルート中間データ」を削除する
+			this.deleteFromDate(rootType, employeeID, startHistDate);
 
-				appRootInstance.setDatePeriod(new DatePeriod(startHistDate, GeneralDate.fromString("9999/12/31", "yyyy/MM/dd")));
-				// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」を取得する
-				AppRootInstance appRootInstNewest = appRootInstanceRepository.findAppRootInstanceDailyNewestBelow(employeeID, startHistDate).get();
-				// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」をUPDATEする
-				DatePeriod oldPeriod = appRootInstNewest.getDatePeriod();
-				appRootInstNewest.setDatePeriod(new DatePeriod(oldPeriod.start(), startHistDate.addDays(-1)));
-				appRootInstanceRepository.update(appRootInstNewest);
-				//承認状態をクリアする
-				// appRootConfirmRepository.clearStatusFromDate(companyID, employeeID, recordDate, rootType);
-			}
+			appRootInstance.setDatePeriod(new DatePeriod(startHistDate, GeneralDate.fromString("9999/12/31", "yyyy/MM/dd")));
+			// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」を取得する
+			AppRootInstance appRootInstNewest = findAppRootInstanceNewestBelow(rootType, employeeID, startHistDate).get();
+			
+			// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」をUPDATEする
+			DatePeriod oldPeriod = appRootInstNewest.getDatePeriod();
+			appRootInstNewest.setDatePeriod(new DatePeriod(oldPeriod.start(), startHistDate.addDays(-1)));
+			appRootInstanceRepository.update(appRootInstNewest);
+			//承認状態をクリアする
+			// appRootConfirmRepository.clearStatusFromDate(companyID, employeeID, recordDate, rootType);
 		}
 		// 取得した承認ルートをドメインモデル「承認ルート中間データ」にINSERTする
 		appRootInstanceRepository.insert(appRootInstance);
 		return new AppRootInstanceContent(appRootInstance, errorFlag, errorMsgID);
 	}
+
+	private Optional<AppRootInstance> findAppRootInstanceNewestBelow(RecordRootType rootType, String employeeID,
+			GeneralDate recordDate) {
+		Optional<AppRootInstance> opAppRootInstanceConflict;
+		if(rootType == RecordRootType.CONFIRM_WORK_BY_DAY) {
+			opAppRootInstanceConflict= appRootInstanceRepository.findAppRootInstanceDailyNewestBelow(employeeID, recordDate);
+		}
+		else {
+			opAppRootInstanceConflict = appRootInstanceRepository.findAppRootInstanceMonthlyNewestBelow(employeeID, recordDate);
+		}
+		return opAppRootInstanceConflict;
+	}
+
+	private void deleteFromDate(RecordRootType rootType, String employeeID, GeneralDate recordDate) {
+		if(rootType == RecordRootType.CONFIRM_WORK_BY_DAY) {
+			appRootInstanceRepository.deleteDailyFromDate(employeeID, recordDate);
+		}
+		else if(rootType == RecordRootType.CONFIRM_WORK_BY_MONTH) {
+			appRootInstanceRepository.deleteMonthlyFromDate(employeeID, recordDate);
+		}
+	}
 	
+	private ConfirmationRootType rootTypeConvert(RecordRootType rootType) {
+		switch(rootType) {
+			case CONFIRM_WORK_BY_DAY:
+				return ConfirmationRootType.DAILY_CONFIRMATION;
+			case CONFIRM_WORK_BY_MONTH:
+				return ConfirmationRootType.MONTHLY_CONFIRMATION;
+			default :
+				throw new RuntimeException("Can not Convert to ConfirmationRootType. Invalid type error: RecordRootType[" + rootType +"]");
+		}
+	}
+
 	private boolean compareAppRootContent(AppRootInstance oldAppRoot, AppRootInstance newAppRoot){
 		for(AppPhaseInstance oldAppPhase : oldAppRoot.getListAppPhase()){
 			Optional<AppPhaseInstance> opNewAppPhaseLoop = 
@@ -187,7 +219,7 @@ public class CreateDailyApproverImpl implements CreateDailyApprover {
 			ApprovalRootContentOutput approvalRootContentOutput = collectApprovalRootService.getApprovalRootConfirm(
 					companyID, 
 					employeeID, 
-					EnumAdaptor.valueOf(rootType.value-1, ConfirmationRootType.class), 
+					this.rootTypeConvert(rootType), 
 					loopDate);
 			AppRootInstance appRootInsRs = new AppRootInstance(
 					approvalRootContentOutput.getApprovalRootState().getRootStateID(), 
@@ -211,12 +243,8 @@ public class CreateDailyApproverImpl implements CreateDailyApprover {
 				// ドメインモデル「承認ルート中間データ」を取得する
 				List<AppRootInstance> opAppIns = new ArrayList<>();
 				// 日次の場合
-				if (rootType.value == 1) {
+				if (rootType == RecordRootType.CONFIRM_WORK_BY_DAY) {
 					opAppIns = appRootInstanceRepository.findAppRootInstanceDailyByTarget(Arrays.asList(employeeID), new DatePeriod(loopDate, loopDate));
-				}
-				// 月次の場合
-				else {
-					opAppIns = appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(Arrays.asList(employeeID), new DatePeriod(loopDate, loopDate));
 				}
 
 				if(!opAppIns.isEmpty()){

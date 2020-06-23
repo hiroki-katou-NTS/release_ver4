@@ -22,7 +22,7 @@ public class GetRouteConfirmStatusDailyTarget {
 			return Optional.empty();
 		}
 		
-		return Optional.of(RouteConfirmStatusDaily.create(confirm.get(), instance.get()));
+		return RouteConfirmStatusDaily.create(confirm, instance);
 	}
 
 	public static interface Require {

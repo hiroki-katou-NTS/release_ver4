@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import javax.ejb.Stateless;
+
 import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
@@ -20,14 +22,14 @@ import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstanceRepository;
 import nts.uk.ctx.workflow.dom.resultrecord.RecordRootType;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.FullJoinAppRootInstance;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdtApvRootInstanceDaily;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdtApvPhaseInstanceDaily;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdtApvFrameInstanceDaily;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdtApvApproveInstanceDaily;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdtApvRootInstanceMonthly;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdtApvPhaseInstanceMonthly;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdtApvFrameInstanceMonthly;
+import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdtApvFrameInstanceDaily;
+import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdtApvPhaseInstanceDaily;
+import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdtApvRootInstanceDaily;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdtApvApproveInstanceMonthly;
+import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdtApvFrameInstanceMonthly;
+import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdtApvPhaseInstanceMonthly;
+import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdtApvRootInstanceMonthly;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
@@ -252,7 +254,8 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 				sql.append(" where ROOT_ID = @rootId ");
 
 				jdbcProxy().query(sql.toString())
-					.paramString("rootId", appRootInstance.getRootID());
+					.paramString("rootId", appRootInstance.getRootID())
+					.execute();
 			});
 		}
 		// 月次の場合
@@ -270,7 +273,8 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 				sql.append(" where ROOT_ID = @rootId ");
 
 				jdbcProxy().query(sql.toString())
-					.paramString("rootId", appRootInstance.getRootID());
+					.paramString("rootId", appRootInstance.getRootID())
+					.execute();
 			});
 		}
 	}
@@ -292,7 +296,8 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 
 			jdbcProxy().query(sql.toString())
 				.paramString("sid", employeeID)
-				.paramDate("date", date);
+				.paramDate("date", date)
+				.execute();
 		});
 	} 
 
@@ -308,12 +313,13 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 			StringBuilder sql = new StringBuilder();
 			sql.append(SQL_DELETE);
 			sql.append(targetTable);
-			sql.append(" where rt.EMPLOYEE_ID = @sid ");
-			sql.append(" and rt.START_DATE >= @date ");
+			sql.append(" where EMPLOYEE_ID = @sid ");
+			sql.append(" and START_DATE >= @date ");
 
 			jdbcProxy().query(sql.toString())
 				.paramString("sid", employeeID)
-				.paramDate("date", date);
+				.paramDate("date", date)
+				.execute();
 		});
 	}
 
@@ -428,7 +434,8 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		sql.append(" and fr.FRAME_ORDER = ap.FRAME_ORDER");
 
 		sql.append(" where rt.EMPLOYEE_ID = @sid ");
-		sql.append(" and rt.START_DATE <= @date ");
+		sql.append(" and rt.START_DATE < @date ");
+		sql.append(" order by rt.START_DATE desc ");
 
 		listAppRootInstance = toDomain(jdbcProxy().query(sql.toString())
 				.paramString("sid", employeeID)
@@ -553,7 +560,8 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		sql.append(" and fr.FRAME_ORDER = ap.FRAME_ORDER");
 
 		sql.append(" where rt.EMPLOYEE_ID = @sid ");
-		sql.append(" and rt.START_DATE <= @date ");
+		sql.append(" and rt.START_DATE < @date ");
+		sql.append(" order by rt.START_DATE desc ");
 		
 		listAppRootInstance = toDomain(jdbcProxy().query(sql.toString())
 				.paramString("sid", employeeID)

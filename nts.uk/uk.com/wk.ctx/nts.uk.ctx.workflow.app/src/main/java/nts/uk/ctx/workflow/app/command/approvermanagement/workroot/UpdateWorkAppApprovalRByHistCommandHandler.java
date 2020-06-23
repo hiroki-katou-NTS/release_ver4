@@ -476,15 +476,15 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 			}
 			if(dateLastest.before(sDate)){//取得した開始日(1)＜新しい履歴の開始日
 				//指定社員の中間データを作成する（日別）
-				creDailyAppr.createDailyApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_DAY, dateLastest, dateLastest);
+				creDailyAppr.createApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_DAY, dateLastest, dateLastest);
 				//指定社員の中間データを作成する（月別）
-				creDailyAppr.createDailyApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_MONTH, dateLastest, dateLastest);
+				creDailyAppr.createApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_MONTH, dateLastest, dateLastest);
 			}
 		}
 		//指定社員の中間データを作成する（日別）
-		creDailyAppr.createDailyApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_DAY, sDate, sDate);
+		creDailyAppr.createApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_DAY, sDate, sDate);
 		//指定社員の中間データを作成する（月別）
-		creDailyAppr.createDailyApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_MONTH, sDate, sDate);
+		creDailyAppr.createApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_MONTH, sDate, sDate);
 	}
 	/**
 	 * check 編集後の履歴の開始年月日 > 取得した履歴の開始年月日 が falseの場合

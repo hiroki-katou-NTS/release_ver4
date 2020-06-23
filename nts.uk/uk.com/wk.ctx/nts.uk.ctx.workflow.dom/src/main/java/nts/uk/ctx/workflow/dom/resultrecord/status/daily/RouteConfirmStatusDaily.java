@@ -1,5 +1,7 @@
 package nts.uk.ctx.workflow.dom.resultrecord.status.daily;
 
+import java.util.Optional;
+
 import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
@@ -23,14 +25,17 @@ public class RouteConfirmStatusDaily extends RouteConfirmStatus<GeneralDate> {
 		super(targetEmployeeId, targetDate, progress, phases);
 	}
 
-	public static RouteConfirmStatusDaily create(AppRootConfirm confirm, AppRootInstance instance) {
+	public static Optional<RouteConfirmStatusDaily> create(Optional<AppRootConfirm> confirm, Optional<AppRootInstance> instance) {
 		
-		String targetEmployeeId = confirm.getEmployeeID();
-		val targetDate = confirm.getRecordDate();
-		val phases = RouteConfirmStatusPhases.create(confirm.getListAppPhase(), instance.getListAppPhase());
+		if (!confirm.isPresent() || !instance.isPresent()) {
+			return Optional.empty();
+		}
+		String targetEmployeeId = instance.get().getEmployeeID();	
+		val targetDate = confirm.get().getRecordDate();
+		val phases = RouteConfirmStatusPhases.create(confirm.get().getListAppPhase(), instance.get().getListAppPhase());
 		val progress = RouteConfirmProgress.of(phases.isUnapproved(), phases.isApproved());
 		
-		return new RouteConfirmStatusDaily(targetEmployeeId, targetDate, progress, phases);
+		return Optional.of(new RouteConfirmStatusDaily(targetEmployeeId, targetDate, progress, phases));
 	}
 
 	@Override

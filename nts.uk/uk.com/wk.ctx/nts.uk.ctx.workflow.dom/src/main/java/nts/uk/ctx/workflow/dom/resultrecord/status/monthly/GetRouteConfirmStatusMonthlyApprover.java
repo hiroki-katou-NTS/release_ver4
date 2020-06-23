@@ -1,6 +1,7 @@
 package nts.uk.ctx.workflow.dom.resultrecord.status.monthly;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,11 +20,15 @@ public class GetRouteConfirmStatusMonthlyApprover {
 		
 		// 主体社員が承認者となっているインスタンス
 		val instanceApprover = require.getAppRootInstancesMonthly(approverEmployeeId, targetEmployeeId, closureMonth, period);
-
+		val confirm = require.getAppRootConfirmsMonthly(targetEmployeeId, closureMonth);
+		
+		if(!confirm.isPresent()) {
+			return Collections.emptyList();
+		}
+		
 		if (!instanceApprover.isEmpty()) {
-			val confirm = require.getAppRootConfirmsMonthly(targetEmployeeId, closureMonth);
 			return instanceApprover.stream()
-				.map(instance -> RouteConfirmStatusMonthly.create(confirm.get(), instance))
+				.map(instance -> RouteConfirmStatusMonthly.create(confirm, Optional.of(instance)).get())
 				.collect(Collectors.toList());
 		}
 		
@@ -37,8 +42,7 @@ public class GetRouteConfirmStatusMonthlyApprover {
 			results.addAll(
 				InstanceRequester.stream()
 					.map(instance -> {
-						val confirm = require.getAppRootConfirmsMonthly(targetEmployeeId, closureMonth);
-						return RouteConfirmStatusMonthly.create(confirm.get(), instance);
+						return RouteConfirmStatusMonthly.create(confirm, Optional.of(instance)).get();
 					})
 					.collect(Collectors.toList())
 			);

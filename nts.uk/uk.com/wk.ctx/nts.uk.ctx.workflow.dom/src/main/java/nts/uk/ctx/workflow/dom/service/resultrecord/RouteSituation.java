@@ -49,7 +49,7 @@ public class RouteSituation {
 			String approverId,
 			List<String> representRequesterIds) {
 		
-		val status = RouteConfirmStatusDaily.create(confirm, instance)
+		val status = RouteConfirmStatusDaily.create(Optional.of(confirm), Optional.of(instance)).get()
 				.getStatusFor(approverId, representRequesterIds);
 		
 		return new RouteSituation(

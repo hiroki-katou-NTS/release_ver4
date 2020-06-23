@@ -23,7 +23,7 @@ public class GetRouteConfirmStatusMonthlyTarget {
 		}
 
 		return instanceApprover.stream()
-			.map(instance -> RouteConfirmStatusMonthly.create(confirm.get(), instance))
+			.map(instance -> RouteConfirmStatusMonthly.create(confirm, Optional.of(instance)).get())
 			.collect(Collectors.toList());
 	}
 		

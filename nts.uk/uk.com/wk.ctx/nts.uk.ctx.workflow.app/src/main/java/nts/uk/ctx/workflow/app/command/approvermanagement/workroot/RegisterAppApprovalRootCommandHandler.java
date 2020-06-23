@@ -470,9 +470,9 @@ public class RegisterAppApprovalRootCommandHandler  extends CommandHandler<Regis
 			return;
 		}
 		//指定社員の中間データを作成する（日別）
-		creDailyAppr.createDailyApprover(data.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_DAY, sDate, sDate);
+		creDailyAppr.createApprover(data.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_DAY, sDate, sDate);
 		//指定社員の中間データを作成する（月別）
-		creDailyAppr.createDailyApprover(data.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_MONTH, sDate, sDate);
+		creDailyAppr.createApprover(data.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_MONTH, sDate, sDate);
 	}
 	/**
 	 * Add new history

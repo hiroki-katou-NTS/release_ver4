@@ -12,21 +12,26 @@ public class GetRouteConfirmStatusDailyApprover {
 
 	public static Optional<RouteConfirmStatusDaily> get(
 			Require require, String approverEmployeeId, String targetEmployeeId, GeneralDate date) {
+
+		val confirm = require.getAppRootConfirmsDaily(targetEmployeeId, date);
+		
+		if(!confirm.isPresent()) {
+			return Optional.empty();
+		}
 		
 		// approver自身が承認者となっているインスタンス
 		val instanceApprover = require.getAppRootInstancesDaily(approverEmployeeId, targetEmployeeId, date);
 		
 		if (instanceApprover.isPresent()) {
-			val confirm = require.getAppRootConfirmsDaily(targetEmployeeId, date);
-			return Optional.of(RouteConfirmStatusDaily.create(confirm.get(), instanceApprover.get()));
+			return RouteConfirmStatusDaily.create(confirm, instanceApprover);
 		}
 		
 		// システム日付時点でapproverに代行依頼している承認者達のインスタンス
 		return require.getRepresentRequesterIds(approverEmployeeId, GeneralDate.today()).stream()
 				.map(requesterId -> require.getAppRootInstancesDaily(requesterId, targetEmployeeId, date))
+				.filter(Optional::isPresent)
 				.map(instance -> {
-					val confirm = require.getAppRootConfirmsDaily(targetEmployeeId, date);
-					return RouteConfirmStatusDaily.create(confirm.get(), instance.get());
+					return RouteConfirmStatusDaily.create(confirm, instance).get();
 				})
 				.findFirst();
 	}

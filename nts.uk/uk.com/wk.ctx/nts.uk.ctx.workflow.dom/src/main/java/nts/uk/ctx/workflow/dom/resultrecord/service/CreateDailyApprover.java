@@ -16,6 +16,6 @@ public interface CreateDailyApprover {
 	 * @param rootType
 	 * @param recordDate
 	 */
-	public AppRootInstanceContent createDailyApprover(String employeeID, RecordRootType rootType, GeneralDate recordDate, GeneralDate closureStartDate);
+	public AppRootInstanceContent createApprover(String employeeID, RecordRootType rootType, GeneralDate recordDate, GeneralDate closureStartDate);
 	
 }

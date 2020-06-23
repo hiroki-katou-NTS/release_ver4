@@ -296,7 +296,7 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 
 	@Override
 	public AppRootInsContentExport createDailyApprover(String employeeID, Integer rootType, GeneralDate recordDate, GeneralDate closureStartDate) {
-		AppRootInstanceContent appRootInstanceContent = createDailyApprover.createDailyApprover(employeeID, EnumAdaptor.valueOf(rootType, RecordRootType.class), recordDate, closureStartDate);
+		AppRootInstanceContent appRootInstanceContent = createDailyApprover.createApprover(employeeID, EnumAdaptor.valueOf(rootType, RecordRootType.class), recordDate, closureStartDate);
 		return new AppRootInsContentExport(
 				new AppRootInsExport(
 						appRootInstanceContent.getAppRootInstance().getRootID(), 
