@@ -29,4 +29,10 @@ public interface TmpAnnualHolidayMngRepository {
 	 * @return
 	 */
 	List<TmpAnnualHolidayMng> getBySidPeriod(String sid, DatePeriod period);
+	/**
+	 * 暫定残数管理データ、暫定年休管理データを削除
+	 * @param sid　社員ID
+	 * @param period　期間
+	 */
+	public void deleteSidPeriod(String sid, DatePeriod period);
 }

@@ -64,6 +64,7 @@ public class JpaExecutionLogRepository extends JpaRepository implements Executio
 		this.commandProxy().insertAll(lstKrcdtExecutionLog);
 	}
 
+	//type = 4:UI, type =0:server-daily,type =1:server-calculate,type =2:server-reflect,type =3:server-monthly
 	@Override
 	public void updateExecutionDate(String empCalAndSumExecLogID, GeneralDateTime executionStartDate,
 			GeneralDateTime executionEndDate, GeneralDateTime dailyCreateStartTime, GeneralDateTime dailyCreateEndTime,
@@ -73,24 +74,20 @@ public class JpaExecutionLogRepository extends JpaRepository implements Executio
 		
 		List<KrcdtExecutionLog> krcdtExecutionLogs = this.queryProxy().query(SELECT_BY_CAL_AND_SUM_EXE_ID, KrcdtExecutionLog.class)
 		.setParameter("empCalAndSumExecLogID", empCalAndSumExecLogID).getList();
-		
+		// fix bug 110491 ↓
 		Optional<KrcdtExecutionLog> createLog = krcdtExecutionLogs.stream().filter(item -> item.krcdtExecutionLogPK.executionContent == 0).findFirst();
 		Optional<KrcdtExecutionLog> calculateLog = krcdtExecutionLogs.stream().filter(item -> item.krcdtExecutionLogPK.executionContent == 1).findFirst();
 		Optional<KrcdtExecutionLog> log = krcdtExecutionLogs.stream().filter(item -> item.krcdtExecutionLogPK.executionContent == 2).findFirst();
 		Optional<KrcdtExecutionLog> monthlyLog = krcdtExecutionLogs.stream().filter(item -> item.krcdtExecutionLogPK.executionContent == 3).findFirst();
-
-		if (createLog.isPresent()) {
+		
+		if (createLog.isPresent() && dailyCreateEndTime != null) {
 			if (dailyCreateStartTime != null) {
 				createLog.get().executionStartDate = dailyCreateStartTime;				
 			} else {
 				createLog.get().executionStartDate = executionEndDate;
 			}
-			
-			if (dailyCreateEndTime != null) {
-				createLog.get().executionEndDate = dailyCreateEndTime;
-			} else {
-				createLog.get().executionEndDate = executionEndDate;
-			}
+
+			createLog.get().executionEndDate = dailyCreateEndTime;
 			
 //			if (stopped == 1) {
 //				createLog.get().executionEndDate = executionEndDate;
@@ -101,7 +98,7 @@ public class JpaExecutionLogRepository extends JpaRepository implements Executio
 			this.getEntityManager().flush();
 		}
 		
-		if (calculateLog.isPresent()) {
+		if (calculateLog.isPresent() && dailyCalculateEndTime != null) {
 			
 			if (dailyCalculateStartTime != null) {
 				calculateLog.get().executionStartDate = dailyCalculateStartTime;
@@ -109,11 +106,9 @@ public class JpaExecutionLogRepository extends JpaRepository implements Executio
 				calculateLog.get().executionStartDate = executionEndDate;
 			}
 			
-			if (dailyCalculateEndTime != null) {
-				calculateLog.get().executionEndDate = dailyCalculateEndTime;
-			} else {
-				calculateLog.get().executionEndDate = executionEndDate;
-			}
+
+			calculateLog.get().executionEndDate = dailyCalculateEndTime;
+
 			
 //			if (stopped == 1 && dailyCalculateStartTime == null) {
 //				calculateLog.get().executionStartDate = dailyCreateEndTime;
@@ -124,18 +119,15 @@ public class JpaExecutionLogRepository extends JpaRepository implements Executio
 			this.getEntityManager().flush();
 		}
 
-		if (log.isPresent()) {
+		if (log.isPresent() && reflectApprovalEndTime != null) {
 			if (reflectApprovalStartTime != null) {
 				log.get().executionStartDate = reflectApprovalStartTime;
 			} else {
 				log.get().executionStartDate = executionEndDate;
 			}
 			
-			if (reflectApprovalEndTime != null) {
-				log.get().executionEndDate = reflectApprovalEndTime;
-			} else {
-				log.get().executionEndDate = executionEndDate;
-			}
+			log.get().executionEndDate = reflectApprovalEndTime;
+
 			
 //			if (stopped == 1 &&  reflectApprovalStartTime == null) {
 //				if (dailyCalculateEndTime != null) {
@@ -151,18 +143,15 @@ public class JpaExecutionLogRepository extends JpaRepository implements Executio
 			this.getEntityManager().flush();
 		}
 		
-		if (monthlyLog.isPresent()) {
+		if (monthlyLog.isPresent() && monthlyAggregateEndTime != null) {
 			if (monthlyAggregateStartTime != null) {
 				monthlyLog.get().executionStartDate = monthlyAggregateStartTime;
 			} else {
 				monthlyLog.get().executionStartDate = executionEndDate;
 			}
 			
-			if (monthlyAggregateEndTime != null) {
-				monthlyLog.get().executionEndDate = monthlyAggregateEndTime;
-			} else {
-				monthlyLog.get().executionEndDate = executionEndDate;
-			}
+			monthlyLog.get().executionEndDate = monthlyAggregateEndTime;
+
 			
 //			if (stopped == 1 && monthlyAggregateStartTime == null) {
 //				if (reflectApprovalEndTime != null) {

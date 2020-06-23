@@ -58,7 +58,7 @@ public class AggregateByPeriodRecordServiceImpl implements AggregateByPeriodReco
 
 		// 計算に必要なデータを準備する
 		MonthlyCalculatingDailys calcDailys = MonthlyCalculatingDailys.loadData(
-				employeeId, aggrPeriod, this.repositories);
+				employeeId, aggrPeriod, this.repositories, employeeSets);
 
 		// 労働制を取得
 		Optional<WorkingConditionItem> workingConditionItemOpt =

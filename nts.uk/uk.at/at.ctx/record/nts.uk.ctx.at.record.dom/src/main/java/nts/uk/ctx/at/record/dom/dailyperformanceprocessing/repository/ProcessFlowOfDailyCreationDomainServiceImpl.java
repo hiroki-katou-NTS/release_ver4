@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,6 +94,7 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 		
 		LoginUserContext login = AppContexts.user();
 		String companyId = login.companyId();
+		
 //		String employeeID = AppContexts.user().employeeId();
 
 		//①実行方法を取得する
@@ -129,10 +132,14 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 			logsMap.put(executionLog.getExecutionContent(), executionLog);
 		}
 		
+		//0: daily, 1: calculate, 2: approval, 3: monthly
+		List<Integer> interrupts = new ArrayList<>();
 		// 日別実績の作成　実行
 		if (logsMap.containsKey(ExecutionContent.DAILY_CREATION)
 				&& finalStatus == ProcessState.SUCCESS) {
 			dataSetter.updateData("dailyCreateStartTime", GeneralDateTime.now().toString());
+			// fix bug 110491
+			GeneralDateTime dailyCreateStartTime = GeneralDateTime.now();
 			
 			Optional<ExecutionLog> dailyCreationLog =
 					Optional.of(logsMap.get(ExecutionContent.DAILY_CREATION));
@@ -149,6 +156,14 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 				asyncContext.finishedAsCancelled();
 			}
 			dataSetter.updateData("dailyCreateEndTime", GeneralDateTime.now().toString());
+			// fix bug 110491 ↓
+			GeneralDateTime dailyCreateEndTime = GeneralDateTime.now();
+			
+			this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, dailyCreateEndTime, 
+					dailyCreateStartTime, dailyCreateEndTime, null, null, 
+					null, null, null, null, 0);
+			interrupts.add(0);
+			//***** ↑
 		}
 		
 		//***** ↓　以下、仮実装。ログ制御全体を見直して、正確な手順に再修正要。（2018.1.16 Shuichi Ishida）
@@ -157,12 +172,21 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 				&& finalStatus == ProcessState.SUCCESS) {
 			dataSetter.updateData("dailyCalculateStatus", ExecutionStatus.PROCESSING.nameId);
 			dataSetter.updateData("dailyCalculateStartTime", GeneralDateTime.now().toString());
+			// fix bug 110491
+			GeneralDateTime dailyCalculateStartTime = GeneralDateTime.now();
 			
 			Optional<ExecutionLog> dailyCalculationLog =
 					Optional.of(logsMap.get(ExecutionContent.DAILY_CALCULATION));
 			finalStatus = this.dailyCalculationService.manager(asyncContext, employeeIdList,
 					periodTime, executionAttr, empCalAndSumExecLogID, dailyCalculationLog);
 			dataSetter.updateData("dailyCalculateEndTime", GeneralDateTime.now().toString());
+			// fix bug 110491 ↓
+			GeneralDateTime dailyCalculateEndTime = GeneralDateTime.now();
+			
+			this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, dailyCalculateEndTime, 
+					null, null, dailyCalculateStartTime, dailyCalculateEndTime, 
+					null, null, null, null, 0);
+			interrupts.add(1);
 		}
 
 		//承認反映
@@ -171,6 +195,8 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 			Optional<ExecutionLog> reflectApproval =
 					Optional.of(logsMap.get(ExecutionContent.REFLRCT_APPROVAL_RESULT));
 			dataSetter.updateData("reflectApprovalStartTime", GeneralDateTime.now().toString());
+			// fix bug 110491
+			GeneralDateTime reflectApprovalStartTime = GeneralDateTime.now();
 			dataSetter.updateData("reflectApprovalStatus", ExecutionStatus.PROCESSING.nameId);
 			finalStatus = this.appReflectService.applicationRellect(empCalAndSumExecLogID, periodTime, asyncContext);
 			if(finalStatus == ProcessState.INTERRUPTION) {
@@ -181,6 +207,13 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 				dataSetter.updateData("reflectApprovalStatus", ExecutionStatus.DONE.nameId);	
 			}
 			dataSetter.updateData("reflectApprovalEndTime", GeneralDateTime.now().toString());
+			// fix bug 110491 ↓
+			GeneralDateTime reflectApprovalEndTime = GeneralDateTime.now();
+			
+			this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, reflectApprovalEndTime, 
+					null, null, null, null, 
+					reflectApprovalStartTime, reflectApprovalEndTime, null, null, 0);
+			interrupts.add(2);
 		}
 		
 		// 月別実績の集計　実行
@@ -188,6 +221,7 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 				&& finalStatus == ProcessState.SUCCESS) {
 
 			dataSetter.updateData("monthlyAggregateStartTime", GeneralDateTime.now().toString());
+			GeneralDateTime monthlyAggregateStatus = GeneralDateTime.now();
 			dataSetter.updateData("monthlyAggregateStatus", ExecutionStatus.PROCESSING.nameId);
 			
 			Optional<ExecutionLog> monthlyAggregationLog =
@@ -195,6 +229,12 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 			finalStatus = this.monthlyAggregationService.manager(asyncContext, companyId, employeeIdList,
 					periodTime, executionAttr, empCalAndSumExecLogID, monthlyAggregationLog);
 			dataSetter.updateData("monthlyAggregateEndTime", GeneralDateTime.now().toString());
+			GeneralDateTime monthlyAggregateEndTime = GeneralDateTime.now();
+			
+			this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, monthlyAggregateEndTime, 
+					null, null, null, null, 
+					null, null, monthlyAggregateStatus, monthlyAggregateEndTime, 0);
+			interrupts.add(3);
 		}
 		
 		//***** ↑
@@ -202,6 +242,27 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 		// ドメインモデル「就業計算と修正実行ログ」を更新する
 		// 就業計算と集計実行ログ．実行状況　←　実行中止
 		if (finalStatus == ProcessState.INTERRUPTION) {
+			GeneralDateTime time = GeneralDateTime.now();
+			if(!interrupts.isEmpty() && interrupts.stream().allMatch(i->i!=0)) {
+				this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, time, 
+						time, time, null, null, 
+						null, null, null, null, 0);
+			}
+			if(!interrupts.isEmpty() && interrupts.stream().allMatch(i->i!=1)) {
+				this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, time, 
+						null, null, time, time, 
+						null, null, null, null, 0);
+			}
+			if(!interrupts.isEmpty() && interrupts.stream().allMatch(i->i!=2)) {
+				this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, time, 
+						null, null, null, null, 
+						time, time, null, null, 0);
+			}
+			if(!interrupts.isEmpty() && interrupts.stream().allMatch(i->i!=3)) {
+				this.executionLogRepository.updateExecutionDate(empCalAndSumExecLogID, null, time, 
+						null, null, null, null, 
+						null, null, time, time, 0);
+			}
 			this.empCalAndSumExeLogRepository.updateStatus(empCalAndSumExecLogID, ExeStateOfCalAndSum.STOPPING.value);
 			dataSetter.setData("endTime", GeneralDateTime.now().toString());
 			asyncContext.finishedAsCancelled();

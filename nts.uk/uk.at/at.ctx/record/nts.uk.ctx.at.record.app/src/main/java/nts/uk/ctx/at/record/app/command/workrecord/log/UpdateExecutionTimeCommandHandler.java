@@ -33,31 +33,28 @@ public class UpdateExecutionTimeCommandHandler extends CommandHandler<UpdateExec
 				: null;
 
 		GeneralDateTime dailyCreateEndTime = !command.getDailyCreateEndTime().equals("0")
-				? GeneralDateTime.localDateTime(LocalDateTime.parse(command.getDailyCreateEndTime(), formatter)) : null;
+				? null: endDate;
 
 		// daily calculate
 		GeneralDateTime dailyCalculateStartTime = !command.getDailyCalculateStartTime().equals("0")
 				? GeneralDateTime.localDateTime(LocalDateTime.parse(command.getDailyCalculateStartTime(), formatter))
 				: null;
 		GeneralDateTime dailyCalculateEndTime = !command.getDailyCalculateEndTime().equals("0")
-				? GeneralDateTime.localDateTime(LocalDateTime.parse(command.getDailyCalculateEndTime(), formatter))
-				: null;
+				? null: endDate;
 
 		// approval
 		GeneralDateTime reflectApprovalStartTime = !command.getReflectApprovalStartTime().equals("0")
 				? GeneralDateTime.localDateTime(LocalDateTime.parse(command.getReflectApprovalStartTime(), formatter))
 				: null;
 		GeneralDateTime reflectApprovalEndTime = !command.getReflectApprovalEndTime().equals("0")
-				? GeneralDateTime.localDateTime(LocalDateTime.parse(command.getReflectApprovalEndTime(), formatter))
-				: null;
+				? null: endDate;
 
 		// monthly
 		GeneralDateTime monthlyAggregateStartTime = !command.getMonthlyAggregateStartTime().equals("0")
 				? GeneralDateTime.localDateTime(LocalDateTime.parse(command.getMonthlyAggregateStartTime(), formatter))
 				: null;
 		GeneralDateTime monthlyAggregateEndTime = !command.getMonthlyAggregateEndTime().equals("0")
-				? GeneralDateTime.localDateTime(LocalDateTime.parse(command.getMonthlyAggregateEndTime(), formatter))
-				: null;
+				? null: endDate;
 
 		this.executionLogRepository.updateExecutionDate(command.getEmpCalAndSumExecLogID(), startDate, endDate,
 				dailyCreateStartTime, dailyCreateEndTime, dailyCalculateStartTime, dailyCalculateEndTime,

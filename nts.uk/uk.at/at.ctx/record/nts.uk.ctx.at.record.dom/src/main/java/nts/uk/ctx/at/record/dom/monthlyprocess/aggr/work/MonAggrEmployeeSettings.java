@@ -61,7 +61,7 @@ public class MonAggrEmployeeSettings {
 	private List<ClosureStatusManagement> closureStatusMngs;
 	/** 労働条件項目 */
 	private List<WorkingConditionItem> workingConditionItems;
-	/** 労働条件 */
+	/** 労働条件: 履歴ID-期間 */
 	private Map<String, DatePeriod> workingConditions;
 	
 	/** 集計開始日を締め開始日とする */

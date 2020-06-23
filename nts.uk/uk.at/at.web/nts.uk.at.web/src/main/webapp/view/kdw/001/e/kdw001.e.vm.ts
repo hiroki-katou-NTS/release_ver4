@@ -358,7 +358,7 @@ module nts.uk.at.view.kdw001.e.viewmodel {
                 //self.getLogData();
                 self.enableCancelTask(false);
                 
-                if (self.endTime() != null && self.endTime() != undefined && self.endTime() != "") {
+                /*if (self.endTime() != null && self.endTime() != undefined && self.endTime() != "") {
                     
                     var paramsUpdate = {
                         empCalAndSumExecLogID: empCalAndSumExecLogID,
@@ -375,7 +375,7 @@ module nts.uk.at.view.kdw001.e.viewmodel {
                         stopped : stopped
                     };
                     service.updateExcutionTime(paramsUpdate);
-                }
+                }*/
             }   
         }
 
