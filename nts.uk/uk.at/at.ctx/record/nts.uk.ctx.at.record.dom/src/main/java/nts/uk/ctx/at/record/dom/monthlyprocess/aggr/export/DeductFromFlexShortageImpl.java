@@ -68,7 +68,7 @@ public class DeductFromFlexShortageImpl implements DeductFromFlexShortage {
 
 		// 集計に必要な日別実績データを取得する
 		MonthlyCalculatingDailys monthlyCalcDailys = MonthlyCalculatingDailys.loadData(
-				employeeId, period, this.repositories);
+				employeeId, period, this.repositories, employeeSets);
 
 		// 集計前の月別実績データを確認する
 		MonthlyOldDatas monthlyOldDatas = MonthlyOldDatas.loadData(
