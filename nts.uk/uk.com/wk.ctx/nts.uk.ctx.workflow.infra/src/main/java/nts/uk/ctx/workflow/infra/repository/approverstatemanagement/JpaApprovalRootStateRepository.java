@@ -5,11 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import javax.ejb.Stateless;
+
 import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.JpaRepository;
-import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ApprovalForm;
@@ -397,6 +399,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 
 	@Override
 	public boolean checkAppShouldApproval(DatePeriod period) {
+		GeneralDate baseDate = GeneralDate.today();
 		String loginSID = AppContexts.user().employeeId();
 		StringBuilder sql = new StringBuilder();
 		sql.append(" select count(*) as COUNT");
@@ -419,8 +422,8 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 			sql.append(" where fr.APP_FRAME_ATR = @frameAtr ");
 			sql.append(" and ap.APP_DATE >= @startDate ");
 			sql.append(" and ap.APP_DATE <= @endDate ");
-			sql.append(" and ag.START_DATE >= @sysDate ");
-			sql.append(" and ag.END_DATE <= @sysDate ");
+			sql.append(" and ag.START_DATE <= @sysDate ");
+			sql.append(" and ag.END_DATE >= @sysDate ");
 			sql.append(" and ag.AGENT_APP_TYPE1 = @appType1 ");
 			sql.append(" and ag.AGENT_SID1 = @agentSID1 ");
 		sql.append(" ) as apfr");
@@ -440,8 +443,8 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 				.paramInt("frameAtr", 0)
 				.paramDate("startDate", period.start())
 				.paramDate("endDate", period.end())
-				.paramDate("sysDate", period.end())
-				.paramInt("appType1", 1)
+				.paramDate("sysDate", baseDate)
+				.paramInt("appType1", 0)
 				.paramString("agentSID1", loginSID)
 		 		.getList(rec -> {
 		 			return new Integer(
