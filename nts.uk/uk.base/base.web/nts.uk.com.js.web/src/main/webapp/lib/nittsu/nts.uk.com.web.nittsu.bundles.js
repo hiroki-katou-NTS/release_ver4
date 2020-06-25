@@ -3536,6 +3536,7 @@ var nts;
                             return;
                         }
                         else if (countRetryByDeadLock >= 2) {
+                            //リトライに失敗したらメッセージ表示
                             jqXHR.responseJSON.message = "アクセスが集中しています。少し時間を空けてからもう一度登録してください";
                             dfd.reject(jqXHR.responseJSON);
                             return;

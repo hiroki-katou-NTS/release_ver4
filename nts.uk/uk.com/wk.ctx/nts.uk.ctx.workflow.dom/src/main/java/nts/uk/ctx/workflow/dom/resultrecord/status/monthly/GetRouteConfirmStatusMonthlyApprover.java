@@ -33,7 +33,7 @@ public class GetRouteConfirmStatusMonthlyApprover {
 		}
 		
 		// システム日付時点で主体社員に代行依頼している承認者達のインスタンス
-		List<String> requesterIds = require.getReprentRequesterIds(approverEmployeeId, period.end());
+		List<String> requesterIds = require.getReprentRequesterIds(approverEmployeeId, GeneralDate.today());
 		List<RouteConfirmStatusMonthly> results = new ArrayList<>();
 		for (String requesterId : requesterIds) {
 			List<AppRootInstance> InstanceRequester = require.getAppRootInstancesMonthly(

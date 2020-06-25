@@ -64,7 +64,7 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 		for (String targetEmployeeId : targetEmployeeIds) {
 			for (GeneralDate date : period.datesBetween()) {
 				GetRouteConfirmStatusDailyApprover.get(require, approverEmployeeId, targetEmployeeId, date)
-					.map(status -> toExport(approverEmployeeId, require, date, status))
+					.map(status -> toExport(approverEmployeeId, require, status))
 					.ifPresent(r -> results.add(r));
 			}
 		}
@@ -75,7 +75,6 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 	private static DailySubjectiveStatus toExport(
 			String approverEmployeeId,
 			DailyRecordApprovalPubImpl.RequireGetSubjectiveStatus require,
-			GeneralDate date,
 			RouteConfirmStatusDaily status) {
 		
 		return new DailySubjectiveStatus(
@@ -85,7 +84,7 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 			ConvertRecordApproval.statusDaily(
 					status,
 					approverEmployeeId,
-					require.getRepresentRequesterIds(approverEmployeeId, date)));
+					require.getRepresentRequesterIds(approverEmployeeId, GeneralDate.today())));
 	}
 
 	@Override

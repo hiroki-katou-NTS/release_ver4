@@ -80,7 +80,7 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 			ConvertRecordApproval.statusMonthly(
 					status,
 					approverEmployeeId,
-					require.getReprentRequesterIds(approverEmployeeId, closureMonth.defaultPeriod().end())));
+					require.getReprentRequesterIds(approverEmployeeId, GeneralDate.today())));
 	}
 	
 	class RequireGetSubjectiveStatus implements GetRouteConfirmStatusMonthlyApprover.Require {
