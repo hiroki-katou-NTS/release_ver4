@@ -136,7 +136,7 @@ public class ConfirmStatusInfoEmp {
 
 	}
 
-	// 複数社員の承認状況情報を取得する
+	// 複数社員の確認状況情報を取得する
 	public List<ConfirmInfoResult> confirmStatusInfoMulEmp(List<String> employeeIds,
 			Optional<DatePeriod> periodOpt, Optional<YearMonth> yearMonthOpt,
 			Map<ClosurePeriodCacheKey, List<ClosurePeriod>> cachedClosurePeriod) {
@@ -144,7 +144,7 @@ public class ConfirmStatusInfoEmp {
 		Map<DatePeriod, Set<String>> groupByMaxPeriodEmpList = new HashMap<>();
 		Map<AggrPeriodEachActualClosure, Set<String>> aggrPeriods = new HashMap<>();
 		for (String employeeId : employeeIds) {
-			List<ClosurePeriod> lstClosure = new ArrayList<>();
+			List<ClosurePeriod> lstClosure;
 			if (periodOpt.isPresent()) {
 				// 期間を指定して集計期間を求める
 				lstClosure = getClosurePeriod.fromPeriod(employeeId, periodOpt.get().end(), periodOpt.get(), cachedClosurePeriod);
@@ -186,10 +186,11 @@ public class ConfirmStatusInfoEmp {
 				});
 		}
 
-		List<InformationMonth> inforMonths = new ArrayList<>();
+		Map<String, InformationMonth> inforMonths = new HashMap<>();
 		for (AggrPeriodEachActualClosure mergePeriodClr : aggrPeriods.keySet()) {
 			List<String> emplist = new ArrayList<>(aggrPeriods.get(mergePeriodClr));
 
+			// ドメインモデル「月の本人確認」を取得する
 			List<ConfirmationMonth> lstConfirmMonth = confirmationMonthRepository.findBySomeProperty(
 					emplist, mergePeriodClr.getClosureMonth());
 
@@ -198,7 +199,7 @@ public class ConfirmStatusInfoEmp {
 					.getProgress(emplist, mergePeriodClr.getClosureMonth(), mergePeriodClr.getPeriod());
 
 			for (String employeeId : emplist) {
-				inforMonths.add(new InformationMonth(
+				inforMonths.put(employeeId, new InformationMonth(
 						mergePeriodClr,
 						lstConfirmMonth.stream().filter(cm -> employeeId.equals(cm.getEmployeeId())).collect(Collectors.toList()),
 						lstApprovalMonthStatus.stream().filter(ams -> employeeId.equals(ams.getEmployeeId())).collect(Collectors.toList())));
@@ -245,7 +246,7 @@ public class ConfirmStatusInfoEmp {
 			// [No.26]社員、期間に一致する申請を取得する
 			List<ApplicationRecordImport> lstApplication = applicationRecordAdapter
 					.getApplicationBySID(employeeList, dateEmpExport.start(), dateEmpExport.end());
-
+			
 			for (String employeeId : employeeList) {
 
 				List<Identification> indentifications = indentities.stream()
@@ -255,6 +256,8 @@ public class ConfirmStatusInfoEmp {
 				List<ApplicationRecordImport> application = lstApplication.stream()
 						.filter(i -> i.getEmployeeID().equals(employeeId)).collect(Collectors.toList());
 
+				InformationMonth inforMonth = inforMonths.get(employeeId);
+						
 				// [No.303]対象期間に日別実績のエラーが発生している年月日を取得する
 				List<EmployeeDateErrorOuput> lstOut = realityStatusService
 						.checkEmployeeErrorOnProcessingDate(employeeId, dateEmpExport.start(), dateEmpExport.end()).stream()
@@ -274,7 +277,7 @@ public class ConfirmStatusInfoEmp {
 						.lstApplication(application)
 						.lstOut(lstOut)
 						.statusOfEmp(statusOfEmps.get(employeeId).get(0))
-						.informationMonths(inforMonths)
+						.informationMonths(Arrays.asList(inforMonth))
 						.build();
 				results.add(result);
 			}
@@ -282,7 +285,7 @@ public class ConfirmStatusInfoEmp {
 		return results;
 	}
 
-	// 複数社員の承認状況情報を取得する
+	// 複数社員の確認状況情報を取得する
 	public List<ConfirmInfoResult> confirmStatusInfoMulEmp(List<String> employeeIds,
 			Optional<DatePeriod> periodOpt, Optional<YearMonth> yearMonthOpt) {
 		List<ConfirmInfoResult> results = new ArrayList<>();
@@ -338,6 +341,7 @@ public class ConfirmStatusInfoEmp {
 			List<InformationMonth> inforMonths = new ArrayList<>();
 			for (AggrPeriodEachActualClosure mergePeriodClr : aggrPeriods) {
 
+				// ドメインモデル「月の本人確認」を取得する
 				List<ConfirmationMonth> lstConfirmMonth = confirmationMonthRepository.findBySomeProperty(
 						Arrays.asList(employeeId), mergePeriodClr.getClosureMonth());
 
