@@ -7,13 +7,11 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import nts.arc.scoped.request.RequestContextProvider;
 import nts.uk.ctx.sys.portal.dom.adapter.person.PersonInfoAdapter;
 import nts.uk.ctx.sys.portal.dom.adapter.role.LoginResponsibleDto;
 import nts.uk.ctx.sys.portal.dom.adapter.role.RoleGrantAdapter;
 import nts.uk.ctx.sys.portal.dom.standardmenu.StandardMenuRepository;
 import nts.uk.shr.com.context.AppContexts;
-import nts.uk.shr.com.context.AppContextsConfig;
 import nts.uk.shr.com.context.LoginUserContext;
 import nts.uk.shr.com.menu.adapter.ProgramNameDto;
 import nts.uk.shr.com.menu.adapter.ShareMenuAdapter;

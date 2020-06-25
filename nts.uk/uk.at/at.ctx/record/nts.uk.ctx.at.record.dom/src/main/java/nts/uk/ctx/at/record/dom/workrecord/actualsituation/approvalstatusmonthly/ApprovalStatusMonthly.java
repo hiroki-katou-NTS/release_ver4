@@ -195,9 +195,6 @@ public class ApprovalStatusMonthly {
 				}
 				ApprovalStatusForEmployee normalStatus = optApproveRootStatusForEmpImport.get().approvalStatusForEmployee();
 
-//				List<AppRootSituationMonth> approvalRootSituations = new ArrayList<>();
-//				infoMonth.getLstAppRootOfEmpMonth().stream()
-//						.forEach(x -> approvalRootSituations.addAll(x.getApprovalRootSituations()));
 				Optional<ApprovalSubjectiveMonthlyOnWorkflow> optAppRootSituationMonth = infoMonth.getLstAppRootOfEmpMonth().stream()
 						.filter(x -> x.getTargetEmployeeId().equals(employeeId) && x.getDate().yearMonth().equals(yearMonth))
 						.findFirst();
@@ -316,8 +313,6 @@ public class ApprovalStatusMonthly {
 		ClosureMonth cm = new ClosureMonth(yearMonth, closureId, closureDate);
 		List<ApprovalProgressMonthly> lstApprovalStatus = approvalStatusMonthlyAdapter
 				.getProgress(Arrays.asList(employeeId), cm, workPeriod); // 2 : 月別確認
-//		List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
-//				.getApprovalByListEmplAndListApprovalRecordDateNew(workPeriod, new ClosureMonth(yearMonth, closureId, closureDate), Arrays.asList(employeeId));
 		if (lstApprovalStatus.isEmpty())
 			return Optional.empty();
 

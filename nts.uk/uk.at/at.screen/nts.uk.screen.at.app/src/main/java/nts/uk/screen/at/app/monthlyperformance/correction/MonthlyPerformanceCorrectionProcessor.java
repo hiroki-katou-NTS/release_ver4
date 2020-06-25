@@ -326,7 +326,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 			employeeIds = results.stream().map(e -> e.getEmployeeId()).collect(Collectors.toList());
 
 			// アルゴリズム「表示フォーマットの取得」を実行する(Thực hiện 「Lấy format hiển thị」)
-			// TODO Data null confirm??formatPerformance
+			// Data null confirm??formatPerformance
 			if (formatPerformance.isPresent()) {
 				monthlyDisplay.getDisplayFormat(employeeIds, formatPerformance.get().getSettingUnitType(), screenDto, monthlyResults, cachedErrorData);
 			} else {
@@ -480,8 +480,6 @@ public class MonthlyPerformanceCorrectionProcessor {
 		// 対象期間に対象の締めに紐付いた雇用に属しているかチェックする ↑ (End)
 
 		// lay thong tin nhan vien theo empID thu duoc
-//		EmployeeInformationQueryDtoImport params = new EmployeeInformationQueryDtoImport(employeeIds,
-//				screenDto.getSelectedActualTime().getEndDate(), true, false, false, true, false, false);
 		EmployeeInformationQueryDtoImport params = new EmployeeInformationQueryDtoImport(employeeIds,
 				screenDto.getSelectedActualTime().getEndDate(), false, false, false, false, false, false);
 		List<MonthlyPerformanceEmployeeDto> lstEmployee = employeeInformationAdapter.getEmployeeInfo(params)
@@ -846,8 +844,8 @@ public class MonthlyPerformanceCorrectionProcessor {
 			MonthlyModifyResult rowData = employeeDataMap.get(employeeId);
 			if (rowData == null) continue; //neu khong co data cua nhan vien thi bo qua
 
-			String lockStatus = lockStatusMap.isEmpty() || !lockStatusMap.containsKey(employee.getId()) || param.getInitMenuMode() == 1 ? ""
-					: lockStatusMap.get(employee.getId()).getLockStatusString();
+			String lockStatus = lockStatusMap.isEmpty() || !lockStatusMap.containsKey(employeeId) || param.getInitMenuMode() == 1 ? ""
+					: lockStatusMap.get(employeeId).getLockStatusString();
 
 			// set dailyConfirm
 			MonthlyPerformaceLockStatus monthlyPerformaceLockStatus = lockStatusMap.get(employeeId);
@@ -880,7 +878,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 			Optional<ApprovalStatusResult> approvalStatusResult = Optional.empty();
 			if(approvalStatusMonth.isPresent()) {
 				approvalStatusResult = approvalStatusMonth.get().getApprovalStatusResult().stream()
-					.filter(r -> r.getEmployeeId().equals(employee.getId()))
+					.filter(r -> r.getEmployeeId().equals(employeeId))
 					.findFirst();
 			}
 			// set state approval
@@ -917,7 +915,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 			// set state identify
 			if(statusConfirmMonthDto.isPresent()) {
 				for (ConfirmStatusResult confirmStatusResult : statusConfirmMonthDto.get().getListConfirmStatus()) {
-					if(confirmStatusResult.getEmployeeId().equals(employee.getId())) {
+					if(confirmStatusResult.getEmployeeId().equals(employeeId)) {
 						identify =  confirmStatusResult.isConfirmStatus();
 					}
 				}
