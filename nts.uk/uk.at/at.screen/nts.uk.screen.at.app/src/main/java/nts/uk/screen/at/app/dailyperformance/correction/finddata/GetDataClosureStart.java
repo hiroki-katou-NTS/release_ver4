@@ -1,7 +1,5 @@
 package nts.uk.screen.at.app.dailyperformance.correction.finddata;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -16,24 +14,11 @@ public class GetDataClosureStart implements IGetDataClosureStart {
 	@Inject
 	private GetClosureStartForEmployee getClosureStartForEmployee;
 
-	private static Map<String, Optional<GeneralDate>> MAP_SID_DATE_CLOSURE_START = new HashMap<>();
-
-	//社員に対応する締め開始日を取得する 
+	// 社員に対応する締め開始日を取得する
 	// performance
 	@Override
 	public Optional<GeneralDate> getDataClosureStart(String employeeId) {
-		if (MAP_SID_DATE_CLOSURE_START.containsKey(employeeId)) {
-			return MAP_SID_DATE_CLOSURE_START.get(employeeId);
-		} else {
-			Optional<GeneralDate> result = getClosureStartForEmployee.algorithm(employeeId);
-			MAP_SID_DATE_CLOSURE_START.put(employeeId, result);
-			return result;
-		}
-	}
-
-	@Override
-	public void clearClosureStart() {
-		MAP_SID_DATE_CLOSURE_START.clear();
+		return getClosureStartForEmployee.algorithm(employeeId);
 	}
 
 }
