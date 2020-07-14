@@ -727,14 +727,14 @@ public class HolidaysRemainingReportGeneratorImp extends AsposeCellsReportGenera
 		cells.get(firstRow, 6).setValue(currentHolidayLeft.getMonthUse());
 		if (isOutputItemSubstitute) {
 			// I1_4 代休_残数_日数
-			cells.get(firstRow, 7).setValue(currentHolidayLeft.getMonthEndRemain());
-			cells.get(firstRow, 8).setValue(currentHolidayLeft.getMonthEndRemain());
+			cells.get(firstRow, 7).setValue(currentHolidayLeft.getMonthEndRemain());			
 			if (currentHolidayLeft.getMonthEndRemain() < 0) {
 				setForegroundRed(cells.get(firstRow, 7));
 			}
 		}
 		if (isRepresentSubstitute) {
 			// I1_5 代休_未消化_日数
+			cells.get(firstRow, 8).setValue(currentHolidayLeft.getMonthExtinction());
 			if (currentHolidayLeft.getMonthExtinction() != null
 					&& currentHolidayLeft.getMonthExtinction() > 0) {
 				setForegroundRed(cells.get(firstRow, 8));
