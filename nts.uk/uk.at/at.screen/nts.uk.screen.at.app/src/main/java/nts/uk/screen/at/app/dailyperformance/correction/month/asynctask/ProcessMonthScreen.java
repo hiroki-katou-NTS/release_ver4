@@ -45,7 +45,7 @@ public class ProcessMonthScreen {
 
 	public DailyPerformanceCorrectionDto processMonth(ParamCommonAsync param) {
 		DailyPerformanceCorrectionDto screenDto = new DailyPerformanceCorrectionDto();
-		System.out.println("start month");
+
 		long startTime = System.currentTimeMillis();
 		String companyId = AppContexts.user().companyId();
 		String sId = AppContexts.user().employeeId();
@@ -74,7 +74,7 @@ public class ProcessMonthScreen {
 			// }
 			// screenDto.setFlexShortage(null);
 		}
-		System.out.println("end month"+ (System.currentTimeMillis() - startTime));
+
 		return screenDto;
 	}
 }

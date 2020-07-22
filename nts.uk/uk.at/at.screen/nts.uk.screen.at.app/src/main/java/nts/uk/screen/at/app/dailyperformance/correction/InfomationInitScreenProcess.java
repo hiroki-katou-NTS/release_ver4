@@ -149,7 +149,7 @@ public class InfomationInitScreenProcess {
 		//Map<String, String> wplNameMap = repo.getListWorkplaceAllEmp(changeEmployeeIds, screenDto.getDateRange().getEndDate());
 		screenDto.setLstEmployee(findAllEmployee.findAllEmployee(changeEmployeeIds, dateRange.getEndDate()));
 		// only get detail infomation employee when mode 2, 3 extract
-		System.out.println("time get data employee" + (System.currentTimeMillis() - timeStart));
+
 		val timeStart1 = System.currentTimeMillis();
 		Map<String, WorkPlaceHistTemp> WPHMap = repo.getWplByListSidAndPeriod(companyId, changeEmployeeIds, screenDto.getDateRange().getEndDate());
 		//set name workplace
@@ -164,7 +164,7 @@ public class InfomationInitScreenProcess {
 			changeEmployeeIds = changeEmployeeIds.stream().filter(x -> x.equals(employeeSelect)).collect(Collectors.toList());
 		}
 		//List<WorkPlaceHistImport> wPH = changeEmployeeIds.isEmpty() ? Collections.emptyList() : workplaceWorkRecordAdapter.getWplByListSidAndPeriod(changeEmployeeIds, new DatePeriod(GeneralDate.min(), GeneralDate.max()));
-		System.out.println("time get data wplhis" + (System.currentTimeMillis() - timeStart1));//slow
+
 		List<DailyPerformanceEmployeeDto> lstEmployeeData = processor.extractEmployeeData(initScreen, sId,
 				screenDto.getLstEmployee(), objectShare);
 		
@@ -180,7 +180,6 @@ public class InfomationInitScreenProcess {
 		//社員ID（List）と指定期間から所属会社履歴項目を取得
 		Map<String, List<AffComHistItemAtScreen>> affCompanyMap = repo.getAffCompanyHistoryOfEmployee(AppContexts.user().companyId(), changeEmployeeIds);
 		
-		System.out.println("time map data wplhis, date:" + (System.currentTimeMillis() - timeStart2)); //slow
 		val timeStart3 = System.currentTimeMillis();
 		screenDto.setLstData(processor.setWorkPlace(WPHMap, affCompanyMap, screenDto.getLstData()));
 		/// 対応する「日別実績」をすべて取得する | Acquire all corresponding "daily performance"
@@ -190,7 +189,7 @@ public class InfomationInitScreenProcess {
 			screenDto.setErrorInfomation(DCErrorInfomation.NOT_EMP_IN_HIST.value);
 			return Pair.of(screenDto, null);
 		}
-		System.out.println("time map data wplhis, date:" + (System.currentTimeMillis() - timeStart3));
+
 		//パラメータ「表示形式」をチェックする - Đã thiết lập truyền từ UI nên không cần check lấy theo định dạng nào , nhân viên đã được truyền
 		
 		// Lấy thành tích nhân viên theo ngày 
@@ -235,7 +234,7 @@ public class InfomationInitScreenProcess {
 		// check show column 本人
 		// check show column 承認
 		//DailyRecOpeFuncDto dailyRecOpeFun = findDailyRecOpeFun(screenDto, companyId, mode).orElse(null);
-		System.out.println("time before get item" + (System.currentTimeMillis() - timeStart4));
+
 		boolean showButton = true;
 		if (displayFormat == 0) {
 			if (!listEmployeeId.isEmpty() && !sId.equals(listEmployeeId.get(0))) {
@@ -256,7 +255,7 @@ public class InfomationInitScreenProcess {
 		DPControlDisplayItem dPControlDisplayItem = processor.getItemIdNames(disItem, showButton);
 		screenDto.setLstControlDisplayItem(dPControlDisplayItem);
 		screenDto.setDisItem(disItem);
-		System.out.println("time init All" + (System.currentTimeMillis() - timeStart));
+
 		return Pair.of(screenDto, listEmployeeId.isEmpty() ? null : new ParamCommonAsync(listEmployeeId.get(0), dateRange, screenDto.getEmploymentCode(), screenDto.getAutBussCode(), displayFormat, screenDto.getIdentityProcessDto(), screenDto.getClosureId()));
 	}
 }
