@@ -984,10 +984,6 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 		builderString.append("SELECT e FROM [table] e ");
 		builderString.append("WHERE ( e.processingDate BETWEEN :startDate AND :endDate ) ");
 		builderString.append("AND e.employeeId IN :lstEmployee");
-//select * from [table]
-//where PROCESSING_DATE between @startDate and @endDate
-//and SID in @sids
-		
 		List<DPErrorDto> listDPError = new ArrayList<>();
 		CollectionUtil.split(lstEmployee, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 
@@ -1007,10 +1003,6 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 		builderString.append("WHERE ( e.processingDate BETWEEN :startDate AND :endDate ) ");
 		builderString.append("AND e.employeeId IN :lstEmployee ");
 		builderString.append("AND e.errorCode IN :errorCodes");
-//select * from [table]
-//where PROCESSING_DATE between @startDate and @endDate
-//and SID in @sids
-//and ERROR_CODE in @errorCodes
 		List<DPErrorDto> dpErrors = new ArrayList<>();
 		CollectionUtil.split(lstEmployee, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			dpErrors.addAll(findErAl(KrcdtSyainDpErList.class, KrcdtErSuAtd.class, dateRange, subList, ec, builderString));
