@@ -45,7 +45,7 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 		KrcstDaiCalculationSetMerge calc = this.queryProxy()
 				.find(new KrcstDaiCalculationSetMergePK(employeeId, baseDate), KrcstDaiCalculationSetMerge.class).orElse(null);
 		if (calc != null) {
-			return toDomain(calc);
+			return calc.toDomain();
 		}
 		return null;
 	}
@@ -106,84 +106,6 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 //		this.getEntityManager().flush();
 	}
 
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	@Override
-	public List<CalAttrOfDailyPerformance> finds(List<String> employeeId, DatePeriod baseDate) {
-		List<CalAttrOfDailyPerformance> result = new ArrayList<>();
-		
-		
-		CollectionUtil.split(employeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, empIds -> {
-			result.addAll(internalQuery(baseDate, empIds));
-		});
-		return result;
-	}
-
-	@SneakyThrows
-	private List<CalAttrOfDailyPerformance> internalQuery(DatePeriod baseDate, List<String> empIds) {
-		String subEmp = NtsStatement.In.createParamsString(empIds);
-		StringBuilder query = new StringBuilder("SELECT * FROM KRCST_DAI_CALCULATION_SET_MERGE c  ");
-		query.append(" WHERE c.YMD <= ? AND c.YMD >= ? ");
-		query.append(" AND c.SID IN (" + subEmp + ")");
-		try (val stmt = this.connection().prepareStatement(query.toString())){
-			stmt.setDate(1, Date.valueOf(baseDate.end().localDate()));
-			stmt.setDate(2, Date.valueOf(baseDate.start().localDate()));
-			for (int i = 0; i < empIds.size(); i++) {
-				stmt.setString(i + 3, empIds.get(i));
-			}
-			return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
-				return new CalAttrOfDailyPerformance(rec.getString("SID"), 
-						rec.getGeneralDate("YMD"), 
-						new AutoCalFlexOvertimeSetting(new AutoCalSetting(EnumAdaptor.valueOf(rec.getInt("FLEX_EXCESS_LIMIT_SET"), TimeLimitUpperLimitSetting.class), 
-																			EnumAdaptor.valueOf(rec.getInt("FLEX_EXCESS_TIME_CAL_ATR"), AutoCalAtrOvertime.class))), 
-						new AutoCalRaisingSalarySetting(rec.getInt("BONUS_PAY_SPE_CAL_SET") == 1, 
-														rec.getInt("BONUS_PAY_NORMAL_CAL_SET") == 1), 
-						new AutoCalRestTimeSetting(
-								newAutoCalcSetting(rec.getInt("HOL_WORK_TIME_CAL_ATR"), rec.getInt("HOL_WORK_TIME_LIMIT_SET")),
-								newAutoCalcSetting(rec.getInt("LATE_NIGHT_TIME_CAL_ATR"), rec.getInt("LATE_NIGHT_TIME_LIMIT_SET"))), 
-						new AutoCalOvertimeSetting(
-								newAutoCalcSetting(rec.getInt("EARLY_OVER_TIME_CAL_ATR"), rec.getInt("EARLY_OVER_TIME_LIMIT_SET")),
-								newAutoCalcSetting(rec.getInt("EARLY_MID_OT_CAL_ATR"), rec.getInt("EARLY_MID_OT_LIMIT_SET")),
-								newAutoCalcSetting(rec.getInt("NORMAL_OVER_TIME_CAL_ATR"), rec.getInt("NORMAL_OVER_TIME_LIMIT_SET")),
-								newAutoCalcSetting(rec.getInt("NORMAL_MID_OT_CAL_ATR"), rec.getInt("NORMAL_MID_OT_LIMIT_SET")),
-								newAutoCalcSetting(rec.getInt("LEGAL_OVER_TIME_CAL_ATR"), rec.getInt("LEGAL_OVER_TIME_LIMIT_SET")),
-								newAutoCalcSetting(rec.getInt("LEGAL_MID_OT_CAL_ATR"), rec.getInt("LEGAL_MID_OT_LIMIT_SET"))), 
-						new AutoCalcOfLeaveEarlySetting(rec.getInt("LEAVE_EARLY_SET") == 1,
-														rec.getInt("LEAVE_LATE_SET")  == 1),
-						new AutoCalcSetOfDivergenceTime(getEnum(rec.getInt("DIVERGENCE_TIME"), DivergenceTimeAttr.class)));
-			});
-		}
-	}
-
-	private CalAttrOfDailyPerformance toDomain(KrcstDaiCalculationSetMerge calc) {
-		AutoCalSetting flex = null;
-		AutoCalRestTimeSetting holiday = null;
-		AutoCalOvertimeSetting overtime = null;
-		if (calc != null) {
-			flex = newAutoCalcSetting(calc.flexExcessTimeCalAtr, calc.flexExcessLimitSet);
-			holiday = new AutoCalRestTimeSetting(
-					newAutoCalcSetting(calc.holWorkTimeCalAtr, calc.holWorkTimeLimitSet),
-					newAutoCalcSetting(calc.lateNightTimeCalAtr, calc.lateNightTimeLimitSet));
-			overtime = new AutoCalOvertimeSetting(
-					newAutoCalcSetting(calc.earlyOverTimeCalAtr, calc.earlyOverTimeLimitSet),
-					newAutoCalcSetting(calc.earlyMidOtCalAtr, calc.earlyMidOtLimitSet),
-					newAutoCalcSetting(calc.normalOverTimeCalAtr, calc.normalOverTimeLimitSet),
-					newAutoCalcSetting(calc.normalMidOtCalAtr, calc.normalMidOtLimitSet),
-					newAutoCalcSetting(calc.legalOverTimeCalAtr, calc.legalOverTimeLimitSet),
-					newAutoCalcSetting(calc.legalMidOtCalAtr, calc.legalMidOtLimitSet));
-		}
-
-		return new CalAttrOfDailyPerformance(calc.krcstDaiCalculationSetMergePK.sid, calc.krcstDaiCalculationSetMergePK.ymd,
-				new AutoCalFlexOvertimeSetting(flex),
-				new AutoCalRaisingSalarySetting(
-						calc.bonusPaySpeCalSet == 1 ? true : false,
-						calc.bonusPayNormalCalSet == 1 ? true : false
-						),
-				holiday, overtime,
-				new AutoCalcOfLeaveEarlySetting(calc.leaveEarlySet == 1 ? true : false,
-						calc.leaveLateSet  == 1 ? true : false),
-				new AutoCalcSetOfDivergenceTime(getEnum(calc.divergenceTime, DivergenceTimeAttr.class)));
-	}
-
 	private void setOvertimeCalcSetting(AutoCalOvertimeSetting domain, KrcstDaiCalculationSetMerge overtimeCalc) {
 		if (domain != null) {
 			overtimeCalc.earlyMidOtCalAtr = domain.getEarlyMidOtTime() == null ? 0
@@ -232,14 +154,7 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 		}
 	}
 
-	private AutoCalSetting newAutoCalcSetting(int calc, int limit) {
-		return new AutoCalSetting(getEnum(limit, TimeLimitUpperLimitSetting.class),
-				getEnum(calc, AutoCalAtrOvertime.class));
-	}
 
-	private <T> T getEnum(int value, Class<T> className) {
-		return EnumAdaptor.valueOf(value, className);
-	}
 
 	@Override
 	public void deleteByKey(String employeeId, GeneralDate baseDate) {
@@ -266,19 +181,72 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 	@Override
 	public List<CalAttrOfDailyPerformance> finds(Map<String, List<GeneralDate>> param) {
 		List<CalAttrOfDailyPerformance> result = new ArrayList<>();
-		StringBuilder query = new StringBuilder("SELECT c FROM KrcstDaiCalculationSetMerge c ");
-		query.append("WHERE c.krcstDaiCalculationSetMergePK.sid IN :ids ");
-		query.append("AND c.krcstDaiCalculationSetMergePK.ymd IN :date");
-		
+		StringBuilder query = new StringBuilder("SELECT * FROM KRCST_DAI_CALCULATION_SET_MERGE ");
+		query.append("WHERE SID IN @ids ");
+		query.append("AND YMD IN @date");
 		CollectionUtil.split(param, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, p -> {
 			result.addAll(
-					this.queryProxy().query(query.toString(), KrcstDaiCalculationSetMerge.class)
-					.setParameter("ids", p.keySet())
-					.setParameter("date", p.values().stream().flatMap(List::stream).collect(Collectors.toSet()))
-					.getList(f -> toDomain(f))
+					new NtsStatement(query.toString(), this.jdbcProxy())
+						.paramString("ids", new ArrayList<>(p.keySet()))
+						.paramDate("date", p.values().stream().flatMap(List::stream).collect(Collectors.toList()))
+						.getList(rec -> KrcstDaiCalculationSetMerge.MAPPER.toEntity(rec).toDomain())
 			);
 		});
 		return result;
 	}
+	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	@Override
+	public List<CalAttrOfDailyPerformance> finds(List<String> employeeId, DatePeriod baseDate) {
+		List<CalAttrOfDailyPerformance> result = new ArrayList<>();
+		CollectionUtil.split(employeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, empIds -> {
+			result.addAll(internalQuery(baseDate, empIds));
+		});
+		return result;
+	}
 
+	@SneakyThrows
+	private List<CalAttrOfDailyPerformance> internalQuery(DatePeriod baseDate, List<String> empIds) {
+		String subEmp = NtsStatement.In.createParamsString(empIds);
+		StringBuilder query = new StringBuilder("SELECT * FROM KRCST_DAI_CALCULATION_SET_MERGE c  ");
+		query.append(" WHERE c.YMD <= ? AND c.YMD >= ? ");
+		query.append(" AND c.SID IN (" + subEmp + ")");
+		try (val stmt = this.connection().prepareStatement(query.toString())){
+			stmt.setDate(1, Date.valueOf(baseDate.end().localDate()));
+			stmt.setDate(2, Date.valueOf(baseDate.start().localDate()));
+			for (int i = 0; i < empIds.size(); i++) {
+				stmt.setString(i + 3, empIds.get(i));
+			}
+			return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+				return new CalAttrOfDailyPerformance(rec.getString("SID"), 
+						rec.getGeneralDate("YMD"), 
+						new AutoCalFlexOvertimeSetting(new AutoCalSetting(EnumAdaptor.valueOf(rec.getInt("FLEX_EXCESS_LIMIT_SET"), TimeLimitUpperLimitSetting.class), 
+																			EnumAdaptor.valueOf(rec.getInt("FLEX_EXCESS_TIME_CAL_ATR"), AutoCalAtrOvertime.class))), 
+						new AutoCalRaisingSalarySetting(rec.getInt("BONUS_PAY_SPE_CAL_SET") == 1, 
+														rec.getInt("BONUS_PAY_NORMAL_CAL_SET") == 1), 
+						new AutoCalRestTimeSetting(
+								newAutoCalcSetting(rec.getInt("HOL_WORK_TIME_CAL_ATR"), rec.getInt("HOL_WORK_TIME_LIMIT_SET")),
+								newAutoCalcSetting(rec.getInt("LATE_NIGHT_TIME_CAL_ATR"), rec.getInt("LATE_NIGHT_TIME_LIMIT_SET"))), 
+						new AutoCalOvertimeSetting(
+								newAutoCalcSetting(rec.getInt("EARLY_OVER_TIME_CAL_ATR"), rec.getInt("EARLY_OVER_TIME_LIMIT_SET")),
+								newAutoCalcSetting(rec.getInt("EARLY_MID_OT_CAL_ATR"), rec.getInt("EARLY_MID_OT_LIMIT_SET")),
+								newAutoCalcSetting(rec.getInt("NORMAL_OVER_TIME_CAL_ATR"), rec.getInt("NORMAL_OVER_TIME_LIMIT_SET")),
+								newAutoCalcSetting(rec.getInt("NORMAL_MID_OT_CAL_ATR"), rec.getInt("NORMAL_MID_OT_LIMIT_SET")),
+								newAutoCalcSetting(rec.getInt("LEGAL_OVER_TIME_CAL_ATR"), rec.getInt("LEGAL_OVER_TIME_LIMIT_SET")),
+								newAutoCalcSetting(rec.getInt("LEGAL_MID_OT_CAL_ATR"), rec.getInt("LEGAL_MID_OT_LIMIT_SET"))), 
+						new AutoCalcOfLeaveEarlySetting(rec.getInt("LEAVE_EARLY_SET") == 1,
+														rec.getInt("LEAVE_LATE_SET")  == 1),
+						new AutoCalcSetOfDivergenceTime(getEnum(rec.getInt("DIVERGENCE_TIME"), DivergenceTimeAttr.class)));
+			});
+		}
+	}
+	
+	private AutoCalSetting newAutoCalcSetting(int calc, int limit) {
+		return new AutoCalSetting(getEnum(limit, TimeLimitUpperLimitSetting.class),
+				getEnum(calc, AutoCalAtrOvertime.class));
+	}
+
+	private <T> T getEnum(int value, Class<T> className) {
+		return EnumAdaptor.valueOf(value, className);
+	}
 }
