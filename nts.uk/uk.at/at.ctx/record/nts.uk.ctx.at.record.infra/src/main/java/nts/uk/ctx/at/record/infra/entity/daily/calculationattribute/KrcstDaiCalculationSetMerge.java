@@ -12,6 +12,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import nts.arc.enums.EnumAdaptor;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
+import nts.uk.ctx.at.record.dom.calculationattribute.AutoCalcSetOfDivergenceTime;
+import nts.uk.ctx.at.record.dom.calculationattribute.CalAttrOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.calculationattribute.enums.DivergenceTimeAttr;
+import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalAtrOvertime;
+import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalFlexOvertimeSetting;
+import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalOvertimeSetting;
+import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalRestTimeSetting;
+import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalSetting;
+import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalcOfLeaveEarlySetting;
+import nts.uk.ctx.at.shared.dom.ot.autocalsetting.TimeLimitUpperLimitSetting;
+import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.AutoCalRaisingSalarySetting;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 @Entity
@@ -127,6 +140,8 @@ public class KrcstDaiCalculationSetMerge extends UkJpaEntity implements Serializ
     public int lateNightTimeLimitSet;
     //休出の自動計算設定
     
+    public static final JpaEntityMapper<KrcstDaiCalculationSetMerge> MAPPER = new JpaEntityMapper<>(KrcstDaiCalculationSetMerge.class);
+    
     @Override
     public int hashCode() {
         int hash = 0;
@@ -155,5 +170,41 @@ public class KrcstDaiCalculationSetMerge extends UkJpaEntity implements Serializ
 	@Override
 	protected Object getKey() {
 		return krcstDaiCalculationSetMergePK;
+	}
+	
+	public CalAttrOfDailyPerformance toDomain() {
+		AutoCalSetting flex = newAutoCalcSetting(flexExcessTimeCalAtr, flexExcessLimitSet);
+		AutoCalRestTimeSetting holiday = new AutoCalRestTimeSetting(
+				newAutoCalcSetting(holWorkTimeCalAtr, holWorkTimeLimitSet),
+				newAutoCalcSetting(lateNightTimeCalAtr, lateNightTimeLimitSet));
+		AutoCalOvertimeSetting overtime = new AutoCalOvertimeSetting(
+				newAutoCalcSetting(earlyOverTimeCalAtr, earlyOverTimeLimitSet),
+				newAutoCalcSetting(earlyMidOtCalAtr, earlyMidOtLimitSet),
+				newAutoCalcSetting(normalOverTimeCalAtr, normalOverTimeLimitSet),
+				newAutoCalcSetting(normalMidOtCalAtr, normalMidOtLimitSet),
+				newAutoCalcSetting(legalOverTimeCalAtr, legalOverTimeLimitSet),
+				newAutoCalcSetting(legalMidOtCalAtr, legalMidOtLimitSet));
+
+		return new CalAttrOfDailyPerformance(krcstDaiCalculationSetMergePK.sid, krcstDaiCalculationSetMergePK.ymd,
+				new AutoCalFlexOvertimeSetting(flex),
+				new AutoCalRaisingSalarySetting(
+						bonusPaySpeCalSet == 1 ? true : false,
+						bonusPayNormalCalSet == 1 ? true : false
+						),
+				holiday, overtime,
+				new AutoCalcOfLeaveEarlySetting(leaveEarlySet == 1 ? true : false,
+						leaveLateSet  == 1 ? true : false),
+				new AutoCalcSetOfDivergenceTime(getEnum(divergenceTime, DivergenceTimeAttr.class)));
+	}
+
+
+
+	private AutoCalSetting newAutoCalcSetting(int calc, int limit) {
+		return new AutoCalSetting(getEnum(limit, TimeLimitUpperLimitSetting.class),
+				getEnum(calc, AutoCalAtrOvertime.class));
+	}
+	
+	private <T> T getEnum(int value, Class<T> className) {
+		return EnumAdaptor.valueOf(value, className);
 	}
 }
