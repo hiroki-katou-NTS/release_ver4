@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.infra.entity.breakorgoout;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -14,6 +15,8 @@ import javax.persistence.Table;
 
 import lombok.NoArgsConstructor;
 import lombok.val;
+import nts.arc.layer.infra.data.jdbc.JdbcProxy;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.breakorgoout.OutingTimeOfDaily;
 import nts.uk.ctx.at.record.dom.daily.TimeWithCalculation;
@@ -22,6 +25,7 @@ import nts.uk.ctx.at.record.dom.daily.breaktimegoout.BreakTimeGoOutTimes;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.OutingTotalTime;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.WithinOutingTotalTime;
 import nts.uk.ctx.at.record.dom.stamp.GoOutReason;
+import nts.uk.ctx.at.record.infra.entity.daily.shortwork.KrcdtDayShorttime;
 import nts.uk.ctx.at.record.infra.entity.daily.time.KrcdtDayTime;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
@@ -37,6 +41,18 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 public class KrcdtDayOutingTime extends UkJpaEntity implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
+	
+	public static final JpaEntityMapper<KrcdtDayOutingTime> MAPPER = new JpaEntityMapper<>(KrcdtDayOutingTime.class);
+	
+	public static class Query {
+		public static List<KrcdtDayOutingTime> find(JdbcProxy proxy, KrcdtDayTime.Query.Key key) {
+			return KrcdtDayTime.Query.query(proxy, "KRCDT_DAY_OUTING_TIME", key, MAPPER);
+		}
+	}
+
+	public KrcdtDayTime.Query.RecordKey getRecordKey() {
+		return new KrcdtDayTime.Query.RecordKey(this.krcdtDayOutingTimePK.sid, this.krcdtDayOutingTimePK.ymd);
+	}
 	
 	@EmbeddedId
 	public KrcdtDayOutingTimePK krcdtDayOutingTimePK;

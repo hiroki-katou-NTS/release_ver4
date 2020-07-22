@@ -19,7 +19,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import lombok.Value;
 import lombok.val;
+import nts.arc.layer.infra.data.jdbc.JdbcProxy;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
+import nts.arc.time.GeneralDate;
 import nts.gul.reflection.FieldReflection;
 import nts.gul.text.StringUtil;
 import nts.gul.util.value.Finally;
@@ -86,6 +91,7 @@ import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.holidaywork.HolidayWork
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.holidaywork.StaturoryAtrOfHolidayWork;
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.overtime.overtimeframe.OverTimeFrameNo;
 import nts.uk.shr.com.time.TimeWithDayAttr;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 @Entity
@@ -93,6 +99,64 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 public class KrcdtDayTime extends UkJpaEntity implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
+	
+	public static final JpaEntityMapper<KrcdtDayTime> MAPPER = new JpaEntityMapper<>(KrcdtDayTime.class);
+	
+	/**
+	 * テーブル単一で取得するための処理
+	 *　結合する子テーブル達にも利用できるように作ってある
+	 */
+	public static class Query {
+		
+		@Value
+		public static class RecordKey {
+			String employeeId;
+			GeneralDate date;
+		}
+		
+		public static interface Key {
+			String where();
+			NtsStatement setParam(NtsStatement statement);
+		}
+		
+		@Value
+		public static class PeriodKey implements Key {
+			List<String> employeeIds;
+			DatePeriod period;
+			
+			@Override
+			public String where() {
+				return "where SID in @sids and YMD between @start and @end";
+			}
+			
+			@Override
+			public NtsStatement setParam(NtsStatement statement) {
+				return statement
+						.paramString("sids", employeeIds)
+						.paramDate("start", period.start())
+						.paramDate("end", period.end());
+			}
+			
+		}
+
+		public static <E> List<E> query(JdbcProxy proxy, String tableName, Key key, JpaEntityMapper<E> mapper) {
+			return key.setParam(proxy.query(createSql(tableName, key)))
+					.getList(rec -> mapper.toEntity(rec));
+		}
+		
+		public static String createSql(String tableName, Key key) {
+			return "select * from " + tableName + " " + key.where();
+		}
+		
+		public static List<KrcdtDayTime> find(JdbcProxy proxy, Key key) {
+			return query(proxy, "KRCDT_DAY_TIME", key, MAPPER);
+		}
+		
+	}
+	
+	public Query.RecordKey getRecordKey() {
+		return new Query.RecordKey(this.krcdtDayTimePK.employeeID, this.krcdtDayTimePK.generalDate);
+	}
 
 	/* 主キー */
 	@EmbeddedId

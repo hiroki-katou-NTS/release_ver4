@@ -25,7 +25,7 @@ public class KrcdtDayLateTimePK implements Serializable{
 	/*年月日*/
 	@Convert(converter = GeneralDateToDBConverter.class)
 	@Column(name = "YMD")
-	private GeneralDate generalDate;
+	public GeneralDate generalDate;
 	/*勤務No*/
 	@Column(name = "WORK_NO")
 	public int workNo;

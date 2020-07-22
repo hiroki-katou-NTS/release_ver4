@@ -13,6 +13,8 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import nts.arc.layer.infra.data.jdbc.JdbcProxy;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.arc.time.GeneralDate;
 import nts.gul.reflection.FieldReflection;
 import nts.uk.ctx.at.record.dom.premiumtime.PremiumTime;
@@ -27,6 +29,19 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 public class KrcdtDayPremiumTime extends UkJpaEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final JpaEntityMapper<KrcdtDayPremiumTime> MAPPER = new JpaEntityMapper<>(KrcdtDayPremiumTime.class);
+	
+	public static class Query {
+		public static List<KrcdtDayPremiumTime> find(JdbcProxy proxy, KrcdtDayTime.Query.Key key) {
+			return KrcdtDayTime.Query.query(proxy, "KRCDT_DAY_PREMIUM_TIME", key, MAPPER);
+		}
+	}
+
+	public KrcdtDayTime.Query.RecordKey getRecordKey() {
+		return new KrcdtDayTime.Query.RecordKey(this.krcdtDayPremiumTimePK.employeeID, this.krcdtDayPremiumTimePK.generalDate);
+	}
+	
 	
 	/* 主キー */
 	@EmbeddedId

@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.infra.entity.daily.shortwork;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -13,6 +14,8 @@ import javax.persistence.Table;
 
 import lombok.NoArgsConstructor;
 import lombok.val;
+import nts.arc.layer.infra.data.jdbc.JdbcProxy;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.daily.DeductionTotalTime;
@@ -35,6 +38,18 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 public class KrcdtDayShorttime extends UkJpaEntity implements Serializable{
 	
 	private static final long serialVersionUID = 1L; 
+	
+	public static final JpaEntityMapper<KrcdtDayShorttime> MAPPER = new JpaEntityMapper<>(KrcdtDayShorttime.class);
+	
+	public static class Query {
+		public static List<KrcdtDayShorttime> find(JdbcProxy proxy, KrcdtDayTime.Query.Key key) {
+			return KrcdtDayTime.Query.query(proxy, "KRCDT_DAY_SHORTTIME", key, MAPPER);
+		}
+	}
+
+	public KrcdtDayTime.Query.RecordKey getRecordKey() {
+		return new KrcdtDayTime.Query.RecordKey(this.krcdtDayShorttimePK.sid, this.krcdtDayShorttimePK.ymd);
+	}
 	
 	@EmbeddedId
 	public KrcdtDayShorttimePK krcdtDayShorttimePK;
