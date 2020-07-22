@@ -984,7 +984,9 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 		builderString.append("SELECT e FROM [table] e ");
 		builderString.append("WHERE ( e.processingDate BETWEEN :startDate AND :endDate ) ");
 		builderString.append("AND e.employeeId IN :lstEmployee");
-
+//select * from [table]
+//where PROCESSING_DATE between @startDate and @endDate
+//and SID in @sids
 		
 		List<DPErrorDto> listDPError = new ArrayList<>();
 		CollectionUtil.split(lstEmployee, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
@@ -1005,7 +1007,10 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 		builderString.append("WHERE ( e.processingDate BETWEEN :startDate AND :endDate ) ");
 		builderString.append("AND e.employeeId IN :lstEmployee ");
 		builderString.append("AND e.errorCode IN :errorCodes");
-
+//select * from [table]
+//where PROCESSING_DATE between @startDate and @endDate
+//and SID in @sids
+//and ERROR_CODE in @errorCodes
 		List<DPErrorDto> dpErrors = new ArrayList<>();
 		CollectionUtil.split(lstEmployee, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			dpErrors.addAll(findErAl(KrcdtSyainDpErList.class, KrcdtErSuAtd.class, dateRange, subList, ec, builderString));
@@ -1051,46 +1056,71 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 		}).collect(Collectors.toList());
 	}
 	
+
 	@Override
 	public List<EmpErrorCode> getListErAlItem28(String companyId, int errorType, DateRange range, String empId) {
-		Connection con = this.getEntityManager().unwrap(Connection.class);
 		List<EmpErrorCode> result = new ArrayList<>();
-		
-		result.addAll(internalGet(companyId, errorType, range, empId, con, "KRCDT_DAY_ERAL", "KRCDT_DAY_ERAL_SU_ATD"));
-		result.addAll(internalGet(companyId, errorType, range, empId, con, "KRCDT_DAY_OTK_ERAL", "KRCDT_DAY_ERAL_OTK_ATD"));
-		result.addAll(internalGet(companyId, errorType, range, empId, con, "KRCDT_DAY_DG_ERAL", "KRCDT_DAY_ERAL_DG_ATD"));
-		
+		val errorCodes = getErrorCode(companyId, errorType);
+		result.addAll(getEmpErrorCode(range, empId, errorCodes, "KRCDT_DAY_ERAL", "KRCDT_DAY_ERAL_SU_ATD"));
+		result.addAll(getEmpErrorCode(range, empId, errorCodes, "KRCDT_DAY_OTK_ERAL", "KRCDT_DAY_ERAL_OTK_ATD"));
+		result.addAll(getEmpErrorCode(range, empId, errorCodes, "KRCDT_DAY_DG_ERAL", "KRCDT_DAY_ERAL_DG_ATD"));
 		return result;
 	}
-
-	private List<EmpErrorCode> internalGet(String companyId, int errorType, DateRange range, String empId,
-			Connection con, String className, String cClassName) {
-		List<EmpErrorCode> lstResult = new ArrayList<>();
-		String query = "select e.SID, e.PROCESSING_DATE, e.ERROR_CODE, i.ATTENDANCE_ITEM_ID from " + className + " e "
-				+ "join " + cClassName + " i on e.ID = i.ID "
-				+ "left join KRCMT_ERAL_SET s on e.ERROR_CODE = s.ERROR_ALARM_CD and s.CID = e.CID "
-				+ "where s.ERAL_ATR = ? " + " and e.CID =  ? "
-				+ "and e.PROCESSING_DATE BETWEEN ? AND ? " + " and e.SID = ? ";
-
-		try (PreparedStatement pstatement = con.prepareStatement(query)) {
-			pstatement.setInt(1, errorType);
-			pstatement.setString(2, companyId);
-			pstatement.setDate(3, Date.valueOf(range.getStartDate().localDate()));
-			pstatement.setDate(4, Date.valueOf(range.getEndDate().localDate()));
-			pstatement.setString(5, empId);
-			ResultSet rs = pstatement.executeQuery();
-
-			while (rs.next()) {
-				lstResult.add(new EmpErrorCode(rs.getString(1), GeneralDate.localDate(rs.getDate(2).toLocalDate()), rs.getString(3), rs.getString(4) == null ? null : Integer.parseInt(rs.getString(4))));
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-		return lstResult;
+	
+	private List<EmpErrorCode> getEmpErrorCode(DateRange date, String empId, List<String> errorCodes, String className, String cClassName) {
+		val idMap = getIdFromATD(cClassName, empId, date);
+		if(idMap.isEmpty()) return Collections.emptyList();
+		return getEmployeeError(className, empId, date, errorCodes, idMap);
 	}
-
+	
+	private Map<String, Integer> getIdFromATD(String cClassName, String empId, DateRange date) {
+		String query = "select ID, ATTENDANCE_ITEM_ID"
+					+ " from " + cClassName
+					+ " where SID = @sid"
+					+ " and PROCESSING_DATE between @startDate and @endDate";
+		Map<String, Integer> map = new HashMap<>();
+		new NtsStatement(query, this.jdbcProxy())
+				.paramString("sid", empId)
+				.paramDate("startDate", date.getStartDate())
+				.paramDate("endDate", date.getEndDate())
+				.getList(rec -> map.put(rec.getString("ID"),
+										rec.getInt("ATTENDANCE_ITEM_ID")));
+		return map;
+	}
+	
+	private List<EmpErrorCode> getEmployeeError(String className, String empId, DateRange date, List<String> errorCodes, Map<String,Integer> idAttendanceItemId) {
+		String query = "select SID, PROCESSING_DATE, ERROR_CODE, ID"
+					+ " from " + className 
+					+ " where SID = @sid"
+					+ " and PROCESSING_DATE between @startDate and @endDate"
+					+ " and ID in @ids"
+					+ " and ERROR_CODE in @errorCodes";
+		
+		return new NtsStatement(query, this.jdbcProxy())
+					.paramString("sid", empId)
+					.paramDate("startDate", date.getStartDate())
+					.paramDate("endDate", date.getEndDate())
+					.paramString("ids", new ArrayList<>(idAttendanceItemId.keySet()))
+					.paramString("errorCodes", errorCodes)
+					.getList(rec -> {
+						return new EmpErrorCode(rec.getString("SID"),
+												rec.getGeneralDate("PROCESSING_DATE"),
+												rec.getString("ERROR_CODE"),
+												idAttendanceItemId.get(rec.getString("ID")));
+					});
+	}
+	
+	private List<String> getErrorCode(String companyId, int errorType){
+		String query = "select ERROR_ALARM_CD"
+				+ " from KRCMT_ERAL_SET "
+				+ " where CID = @cid"
+				+ " and ERAL_ATR = @type";
+		return new NtsStatement(query, this.jdbcProxy())
+					.paramString("cid", companyId)
+					.paramInt("type", errorType)
+					.getList(rec -> rec.getString("ERROR_ALARM_CD"));
+	}
+	
 	@Override
 	public List<DPErrorSettingDto> getErrorSetting(String companyId, List<String> listErrorCode, boolean showError,
 			boolean showAlarm, boolean showOther) {
