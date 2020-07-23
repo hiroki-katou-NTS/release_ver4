@@ -9,6 +9,10 @@ import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import nts.arc.enums.EnumAdaptor;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
+import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.editstate.enums.EditStateSetting;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 /**
@@ -34,5 +38,15 @@ public class KrcdtDailyRecEditSet extends UkJpaEntity implements Serializable {
 	@Override
 	protected Object getKey() {
 		return this.krcdtDailyRecEditSetPK;
+	}
+	
+	public static final JpaEntityMapper<KrcdtDailyRecEditSet> MAPPER = new JpaEntityMapper<>(KrcdtDailyRecEditSet.class);
+	
+	public EditStateOfDailyPerformance toDomain() {
+		return new EditStateOfDailyPerformance(
+				this.krcdtDailyRecEditSetPK.employeeId,
+				this.krcdtDailyRecEditSetPK.attendanceItemId,
+				this.krcdtDailyRecEditSetPK.processingYmd,
+				EnumAdaptor.valueOf(this.editState, EditStateSetting.class));
 	}
 }
