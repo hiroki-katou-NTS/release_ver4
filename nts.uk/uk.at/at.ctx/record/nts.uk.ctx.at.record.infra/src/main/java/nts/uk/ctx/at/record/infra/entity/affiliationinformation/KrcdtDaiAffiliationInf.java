@@ -9,6 +9,7 @@ import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.ctx.at.record.dom.affiliationinformation.AffiliationInforOfDailyPerfor;
 import nts.uk.ctx.at.record.dom.affiliationinformation.primitivevalue.ClassificationCode;
 import nts.uk.ctx.at.shared.dom.bonuspay.primitives.BonusPaySettingCode;
@@ -51,6 +52,8 @@ public class KrcdtDaiAffiliationInf extends UkJpaEntity implements Serializable 
 	protected Object getKey() {
 		return this.krcdtDaiAffiliationInfPK;
 	}
+	
+	public static final JpaEntityMapper<KrcdtDaiAffiliationInf> MAPPER = new JpaEntityMapper<>(KrcdtDaiAffiliationInf.class);
 
 	public AffiliationInforOfDailyPerfor toDomain(){
 		AffiliationInforOfDailyPerfor domain = new AffiliationInforOfDailyPerfor(
