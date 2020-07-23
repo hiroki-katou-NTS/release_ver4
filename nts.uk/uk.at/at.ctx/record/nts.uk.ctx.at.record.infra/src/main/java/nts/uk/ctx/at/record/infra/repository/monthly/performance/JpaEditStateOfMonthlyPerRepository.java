@@ -5,7 +5,9 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.performance.EditStateOfMonthlyPerRepository;
@@ -22,13 +24,6 @@ import nts.uk.shr.com.time.calendar.date.ClosureDate;
 @Stateless
 public class JpaEditStateOfMonthlyPerRepository extends JpaRepository implements EditStateOfMonthlyPerRepository{
 
-	private static final String FIND_BY_CLOSURE = "SELECT a FROM KrcdtEditStateOfMothlyPer a "
-			+ "WHERE a.krcdtEditStateOfMothlyPerPK.employeeID = :employeeId "
-			+ "AND a.krcdtEditStateOfMothlyPerPK.processDate = :yearMonth "
-			+ "AND a.krcdtEditStateOfMothlyPerPK.closureID = :closureId "
-			+ "AND a.krcdtEditStateOfMothlyPerPK.closeDay = :closureDay "
-			+ "AND a.krcdtEditStateOfMothlyPerPK.isLastDay = :isLastDay ";
-
 	private static final String DELETE_BY_CLOSURE = "DELETE FROM KrcdtEditStateOfMothlyPer a "
 			+ "WHERE a.krcdtEditStateOfMothlyPerPK.employeeID = :employeeId "
 			+ "AND a.krcdtEditStateOfMothlyPerPK.processDate = :yearMonth "
@@ -43,15 +38,22 @@ public class JpaEditStateOfMonthlyPerRepository extends JpaRepository implements
 	@Override
 	public List<EditStateOfMonthlyPerformance> findByClosure(
 			String employeeId, YearMonth yearMonth, ClosureId closureId, ClosureDate closureDate) {
-		
-		return this.queryProxy().query(FIND_BY_CLOSURE, KrcdtEditStateOfMothlyPer.class)
-				.setParameter("employeeId", employeeId)
-				.setParameter("yearMonth", yearMonth.v())
-				.setParameter("closureId", closureId.value)
-				.setParameter("closureDay", closureDate.getClosureDay().v())
-				.setParameter("isLastDay", (closureDate.getLastDayOfMonth() ? 1 : 0))
-				.getList(c -> c.toDomain());
+		String query = "select * "
+					+ " from KRCDT_EDIT_STATE_MONTH"
+					+ " where SID = @sid"
+					+ " and YM = @yearMonth"
+					+ " and CLOSURE_ID = @closureId"
+					+ " and CLOSURE_DAY = @closureDay"
+					+ " and IS_LAST_DAY = @isLastDay";
+		return new NtsStatement(query, this.jdbcProxy())
+					.paramString("sid", employeeId)
+					.paramInt("yearMonth", yearMonth.v())
+					.paramInt("closureId", closureId.value)
+					.paramInt("closureDay", closureDate.getClosureDay().v())
+					.paramInt("isLastDay", (closureDate.getLastDayOfMonth() ? 1 : 0))
+					.getList(rec -> KrcdtEditStateOfMothlyPer.MAPPER.toEntity(rec).toDomain());
 	}
+	
 	
 	/** 削除 */
 	@Override

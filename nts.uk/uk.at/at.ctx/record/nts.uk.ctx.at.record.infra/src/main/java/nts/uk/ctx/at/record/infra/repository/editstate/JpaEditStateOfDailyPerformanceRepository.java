@@ -204,10 +204,16 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 	}
 	
 	private <T> List<T> internalFinds(Map<String, List<GeneralDate>> param, Function<KrcdtDailyRecEditSet, T> actions) {
+		val start = System.currentTimeMillis();
 		List<T> result = new ArrayList<>();
 		StringBuilder query = new StringBuilder("SELECT a FROM KrcdtDailyRecEditSet a ");
 		query.append("WHERE a.krcdtDailyRecEditSetPK.employeeId IN :employeeId ");
 		query.append("AND a.krcdtDailyRecEditSetPK.processingYmd IN :date");
+//		select * 
+//		from KRCDT_DAILY_REC_EDIT_SET
+//		where SID in @sids
+//		and YMD in @dates
+//		
 		TypedQueryWrapper<KrcdtDailyRecEditSet> tQuery=  this.queryProxy().query(query.toString(), KrcdtDailyRecEditSet.class);
 		CollectionUtil.split(param, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, p -> {
 			result.addAll(tQuery.setParameter("employeeId", p.keySet())
@@ -219,6 +225,7 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 					.entrySet().stream().map(c -> c.getValue().stream().map(actions).collect(Collectors.toList()))
 					.flatMap(List::stream).collect(Collectors.toList()));
 		});
+		val end = System.currentTimeMillis();
 		return result;
 	}
 
@@ -302,20 +309,20 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 	@Override
 	public List<EditStateOfDailyPerformance> findByEditState(String sid, GeneralDate ymd, List<Integer> ids,
 			EditStateSetting editState) {
-		StringBuilder builderString = new StringBuilder();
-		builderString.append("SELECT a ");
-		builderString.append("FROM KrcdtDailyRecEditSet a ");
-		builderString.append("WHERE a.krcdtDailyRecEditSetPK.employeeId = :employeeId ");
-		builderString.append("AND a.krcdtDailyRecEditSetPK.processingYmd = :ymd ");
-		builderString.append("AND a.krcdtDailyRecEditSetPK.attendanceItemId IN :items ");
-		builderString.append("AND a.editState = :editState ");
-		builderString.append("ORDER BY a.krcdtDailyRecEditSetPK.attendanceItemId");
-		return this.queryProxy().query(builderString.toString(), KrcdtDailyRecEditSet.class)
-				.setParameter("employeeId", sid)
-				.setParameter("ymd", ymd)
-				.setParameter("items", ids)
-				.setParameter("editState", editState.value)
-				.getList(c -> toDomain(c));
+		String query = "select * "
+					+ " from KRCDT_DAILY_REC_EDIT_SET"
+					+ " where SID = @sid"
+					+ " and YMD = @ymd"
+					+ " and ATTENDANCE_ITEM_ID in @ids"
+					+ " and EDIT_STATE = @editState";
+		return new NtsStatement(query, this.jdbcProxy())
+						.paramString("sid", sid)
+						.paramDate("ymd", ymd)
+						.paramInt("ids", ids)
+						.paramInt("editState", editState.value)
+						.getList(rec -> KrcdtDailyRecEditSet.MAPPER.toEntity(rec).toDomain());
+		
+
 	}
 
 }
