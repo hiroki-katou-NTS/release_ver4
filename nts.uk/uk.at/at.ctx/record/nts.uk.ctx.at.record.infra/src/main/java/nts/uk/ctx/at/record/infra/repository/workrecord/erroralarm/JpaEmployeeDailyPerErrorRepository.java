@@ -22,6 +22,7 @@ import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
@@ -443,9 +444,9 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 //			commandProxy().removeAll(result);
 //			commandProxy().removeAll(result.stream().map(c -> c.getErAttendanceItem()).flatMap(List::stream).collect(Collectors.toList()));
 //		}
-		deleteX(param, KrcdtSyainDpErList.class);
-		deleteX(param, KrcdtEmpDivErAl.class);
-		deleteX(param, KrcdtOtkErAl.class);
+		deleteX(param, KrcdtSyainDpErList.class.getSimpleName(), KrcdtErSuAtd.class.getSimpleName());
+		deleteX(param, KrcdtEmpDivErAl.class.getSimpleName(), KrcdtErDivAtd.class.getSimpleName());
+		deleteX(param, KrcdtOtkErAl.class.getSimpleName(), KrcdtErOtkAtd.class.getSimpleName());
 	}
 
 	@Override
@@ -520,19 +521,6 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 					.getList());
 		});
 		return eai;
-	}
-
-	private <T extends KrcdtEmpErAlCommon, U extends KrcdtErAttendanceItem> Class<?> getFrom(Class<T> className){
-		String name = className.getSimpleName();
-		if (name.equals("KrcdtOtkErAl")) {
-			return KrcdtErOtkAtd.class;
-		}
-
-		if (name.equals("KrcdtEmpDivErAl")) {
-			return KrcdtErDivAtd.class;
-		}
-
-		return KrcdtErSuAtd.class;
 	}
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
@@ -645,60 +633,59 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 
 	@Override
 	public void removeNotOTK(Map<String, List<GeneralDate>> param) {
-
-		deleteX(param, KrcdtSyainDpErList.class);
-		deleteX(param, KrcdtEmpDivErAl.class);
-
-//		List<KrcdtEmpErAlCommon> result = new ArrayList<>();
-//
-//		findsBy(param, KrcdtEmpDivErAl.class, (p,e) -> {
-//			result.addAll(e);
-//		});
-//		findsBy(param, KrcdtSyainDpErList.class, (p,e) -> {
-//			result.addAll(e);
-//		});
-//
-//		if (!result.isEmpty()) {
-//			commandProxy().removeAll(result);
-//			commandProxy().removeAll(result.stream().map(c -> c.getErAttendanceItem()).flatMap(List::stream).collect(Collectors.toList()));
-//		}
-
+		val start = System.currentTimeMillis();
+		deleteX(param, "KRCDT_DAY_ERAL", "KRCDT_DAY_ERAL_SU_ATD");
+		deleteX(param, "KRCDT_DAY_DG_ERAL", "KRCDT_DAY_ERAL_DG_ATD");
+		val end = System.currentTimeMillis();
+		val dif = end - start;
+		String.valueOf(dif);
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T extends KrcdtEmpErAlCommon, U extends KrcdtErAttendanceItem> void deleteX(Map<String, List<GeneralDate>> param, Class<T> cname) {
-		StringBuilder query = new StringBuilder("DELETE FROM ");
-		query.append(cname.getSimpleName());
-		query.append(" a WHERE a.employeeId IN :employeeId ");
-		query.append("AND a.processingDate IN :date");
-		TypedQueryWrapper<T> tQuery = this.queryProxy().query(query.toString(), cname);
-
-		Class<U> cl = (Class<U>) getFrom(cname);
+	private void deleteX(Map<String, List<GeneralDate>> param, String c1name, String c2name) {
+		StringBuilder query1 = new StringBuilder("DELETE FROM ");
+		query1.append(c1name);
+		query1.append(" WHERE SID IN @sids ");
+		query1.append("AND PROCESSING_DATE IN @dates");
+		val tQuery1 = new NtsStatement(query1.toString(), this.jdbcProxy());
 
 		StringBuilder query2 = new StringBuilder("DELETE FROM ");
-		query2.append(cl.getSimpleName());
-		query2.append(" a WHERE a.sid IN :employeeId ");
-		query2.append("AND a.processDate IN :date");
-		TypedQueryWrapper<U> tQuery2 = this.queryProxy().query(query2.toString(), cl);
+		query2.append(c2name);
+		query2.append(" WHERE SID IN @sids ");
+		query2.append("AND PROCESSING_DATE IN @dates");
+		val tQuery2 = new NtsStatement(query2.toString(), this.jdbcProxy());
 
 		CollectionUtil.split(param, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, p -> {
-			tQuery.setParameter("employeeId", p.keySet())
-			.setParameter("date", p.values().stream().flatMap(List::stream).collect(Collectors.toSet())).getQuery().executeUpdate();
+			val keys = new ArrayList<>(p.keySet());
+			val values = p.values().stream().flatMap(List::stream).collect(Collectors.toList());
+			tQuery1
+			.paramString("sids", keys)
+			.paramDate("dates", values).execute();
 
-			tQuery2.setParameter("employeeId", p.keySet())
-			.setParameter("date", p.values().stream().flatMap(List::stream).collect(Collectors.toSet())).getQuery().executeUpdate();
+			tQuery2
+			.paramString("sids", keys)
+			.paramDate("dates", values).execute();
 
 		});
 	}
+	
+	private <T extends KrcdtEmpErAlCommon, U extends KrcdtErAttendanceItem> Class<?> getFrom(Class<T> className){
+		String name = className.getSimpleName();
+		if (name.equals("KrcdtOtkErAl")) {
+			return KrcdtErOtkAtd.class;
+		}
 
+		if (name.equals("KrcdtEmpDivErAl")) {
+			return KrcdtErDivAtd.class;
+		}
+
+		return KrcdtErSuAtd.class;
+	}
+	
 	@Override
 	public void update(List<EmployeeDailyPerError> employeeDailyPerformanceError) {
 		if (employeeDailyPerformanceError.isEmpty()) {
 			return;
 		}
-//		this.commandProxy().insertAll(employeeDailyPerformanceError.stream().map(e -> convertToEntity(e))
-//				.collect(Collectors.toList()));
-
 		insert(employeeDailyPerformanceError);
 	}
 
