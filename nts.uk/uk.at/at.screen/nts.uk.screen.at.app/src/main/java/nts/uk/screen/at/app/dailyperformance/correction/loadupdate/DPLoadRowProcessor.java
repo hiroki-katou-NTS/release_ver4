@@ -210,7 +210,6 @@ public class DPLoadRowProcessor {
 		result.markLoginUser(sId);
 		long start1 = System.currentTimeMillis();
 		result.createModifierCellStateCaseRow(mapDP, param.getLstHeader());
-		System.out.println("time disable : " + (System.currentTimeMillis() - start1));
 		
 		if (result.getLstEmployee().size() > 0) {
 			if (lstError.size() > 0) {

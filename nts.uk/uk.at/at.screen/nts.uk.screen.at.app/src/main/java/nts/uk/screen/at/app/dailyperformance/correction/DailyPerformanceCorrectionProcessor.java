@@ -260,7 +260,7 @@ public class DailyPerformanceCorrectionProcessor {
 	public DailyPerformanceCorrectionDto generateData(DailyPerformanceCorrectionDto screenDto,
 			List<DailyPerformanceEmployeeDto> lstEmployee, Integer initScreen, Integer mode, Integer displayFormat,
 			CorrectionOfDailyPerformance correct, List<String> formatCodes, Boolean showError, Boolean showLock, ObjectShare objectShare, Integer closureId) {
-		System.out.println("start daily");
+
 		long startTime = System.currentTimeMillis();
 		String NAME_EMPTY = TextResource.localize("KDW003_82");
 		String NAME_NOT_FOUND = TextResource.localize("KDW003_81");
@@ -283,7 +283,7 @@ public class DailyPerformanceCorrectionProcessor {
 		screenDto.markLoginUser(sId);
 		long start1 = System.currentTimeMillis();
 		screenDto.createAccessModifierCellState(mapDP);
-		System.out.println("time disable : " + (System.currentTimeMillis() - start1));
+
 		
 		// get data from DB
 		List<DailyModifyResult> results = new ArrayList<>();
@@ -339,14 +339,12 @@ public class DailyPerformanceCorrectionProcessor {
 //					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(),
 //					Optional.of(keyFind));
 			confirmResults = confirmStatusActualDayChange.processConfirmStatus(companyId, sId, listEmployeeId, Optional.of(new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate())), Optional.empty());
-			System.out.println("thoi gian load checkbox 1:" + (System.currentTimeMillis() - startTime1));
 
 			approvalResults = approvalStatusActualDayChange.processApprovalStatus(companyId, sId, listEmployeeId, Optional.of(new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate())), Optional.empty(), mode);
 //			approvalResults = approvalStatusActualDay.processApprovalStatus(companyId, listEmployeeId,
 //					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(), mode,
 //					Optional.of(keyFind));
 			// approvalResults = new ArrayList<>();
-			System.out.println("thoi gian load checkbox 2:" + (System.currentTimeMillis() - startTime1));
 //		} else {
 //			confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId, listEmployeeId,
 //					dateRange.getStartDate(), screenDto.getClosureId());
@@ -373,7 +371,7 @@ public class DailyPerformanceCorrectionProcessor {
 				companyId, disItem, screenDto.getLstControlDisplayItem(), dailyRecEditSetsMap,
 				workInfoOfDaily, disableSignMap, NAME_EMPTY, NAME_NOT_FOUND, dpLockDto, confirmResults, approvalResults, mapClosingEmpResult);
 		// set cell data
-		System.out.println("time get data into cell : " + (System.currentTimeMillis() - start1));
+
 		//bug 107966 disable edit flex in case lock
 		if(displayFormat == 0 && screenDto.getMonthResult() != null && screenDto.getMonthResult().getFlexShortage() != null) {
 			boolean disableFlex = checkLockDataDaily.checkLockInPeriod(screenDto.getLstData(),
@@ -385,7 +383,7 @@ public class DailyPerformanceCorrectionProcessor {
 		screenDto.setShowErrorDialog(showDialogError.showDialogError(lstError, showError, dailyPerformanceDto));
 		screenDto.setDateRange(screenDto.getDatePeriodResult());
 		screenDto.resetDailyInit();
-		System.out.println("end daily"+ (System.currentTimeMillis() - startTime));
+
 		screenDto.setApprovalConfirmCache(new ApprovalConfirmCache(sId, listEmployeeId,
 				new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), mode, confirmResults,
 				approvalResults));
