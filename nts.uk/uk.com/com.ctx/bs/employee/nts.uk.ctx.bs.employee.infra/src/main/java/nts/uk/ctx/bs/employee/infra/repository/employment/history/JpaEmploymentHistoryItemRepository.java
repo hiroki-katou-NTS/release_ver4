@@ -23,6 +23,7 @@ import javax.persistence.criteria.Root;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import nts.arc.diagnose.stopwatch.Stopwatches;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
@@ -90,37 +91,24 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<EmploymentInfo> getDetailEmploymentHistoryItem(String companyId, String sid, GeneralDate date) {
-		StringBuilder builder = new StringBuilder();
-		builder.append(" SELECT a.CODE ,a.NAME FROM BSYMT_EMPLOYMENT a");
-		builder.append(" INNER JOIN BSYMT_EMPLOYMENT_HIST h");
-		builder.append(" ON a.CID = h.CID");
-		builder.append(" INNER JOIN BSYMT_EMPLOYMENT_HIS_ITEM i");
-		builder.append(" ON h.HIST_ID = i.HIST_ID AND h.SID = i.SID AND a.CODE = i.EMP_CD");
-		builder.append(" WHERE a.CID = ? AND h.SID = ? ");
-		builder.append(" AND h.START_DATE <= ? AND h.END_DATE >= ?");
-		try (val statement = this.connection().prepareStatement(builder.toString())) {
-			statement.setString(1, companyId);
-			statement.setString(2, sid);
-			statement.setDate(3, Date.valueOf(date.localDate()));
-			statement.setDate(4, Date.valueOf(date.localDate()));
-			return new NtsResultSet(statement.executeQuery()).getSingle(rec -> {
-				EmploymentInfo emp = new EmploymentInfo();
-				if (rec.getString("CODE") != null) {
+
+		String sql = " select m.CODE, m.NAME"
+				+ " from BSYMT_EMPLOYMENT m"
+				+ " inner join BSYMT_EMPLOYMENT_HIST_MERGE h"
+				+ " on m.CID = h.CID"
+				+ " and m.CODE = h.EMP_CD"
+				+ " where h.SID = @sid"
+				+ " and h.START_DATE <= @date and h.END_DATE >= @date";
+		
+		return jdbcProxy().query(sql)
+				.paramString("sid", sid)
+				.paramDate("date", date)
+				.getSingle(rec -> {
+					EmploymentInfo emp = new EmploymentInfo();
 					emp.setEmploymentCode(rec.getString("CODE"));
-				}
-				if (rec.getString("NAME") != null) {
 					emp.setEmploymentName(rec.getString("NAME"));
-				}
-				return emp;
-			});
-			
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
-//		Optional<EmploymentInfo> employee = this.queryProxy().query(SEL_HIS_ITEM, Object[].class)
-//				.setParameter("sid", sid).setParameter("date", date).setParameter("companyId", companyId)
-//				.getSingle(c -> toDomainEmployee(c));
-//		return employee;
+					return emp;
+				});
 	}
 	
 	@Override

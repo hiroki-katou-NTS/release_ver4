@@ -1,17 +1,15 @@
 package nts.uk.ctx.bs.employee.infra.repository.employee.history;
 
-import java.lang.reflect.Array;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.sql.SQLException;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -31,7 +29,6 @@ import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistByEmployee;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistItem;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistRepository;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyInfo;
-import nts.uk.ctx.bs.employee.dom.jobtitle.affiliate.AffJobTitleHistoryItem;
 import nts.uk.ctx.bs.employee.infra.entity.employee.history.BsymtAffCompanyHist;
 import nts.uk.ctx.bs.employee.infra.entity.employee.history.BsymtAffCompanyHistPk;
 import nts.uk.ctx.bs.employee.infra.entity.employee.history.BsymtAffCompanyInfo;
@@ -165,8 +162,13 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public AffCompanyHist getAffCompanyHistoryOfEmployee(String employeeId) {
-		List<BsymtAffCompanyHist> lstBsymtAffCompanyHist = this.queryProxy()
-				.query(SELECT_BY_EMPLOYEE_ID, BsymtAffCompanyHist.class).setParameter("sId", employeeId).getList();
+
+		String sql = "select * from BSYMT_AFF_COM_MERGE"
+				+ " where SID = @sid";
+		
+		List<BsymtAffCompanyHist> lstBsymtAffCompanyHist = this.jdbcProxy().query(sql)
+				.paramString("sid", employeeId)
+				.getList(rec -> BsymtAffCompanyHist.MAPPER.toEntity(rec));
 
 		return toDomain(lstBsymtAffCompanyHist);
 	}
