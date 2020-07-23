@@ -633,12 +633,8 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 
 	@Override
 	public void removeNotOTK(Map<String, List<GeneralDate>> param) {
-		val start = System.currentTimeMillis();
 		deleteX(param, "KRCDT_DAY_ERAL", "KRCDT_DAY_ERAL_SU_ATD");
 		deleteX(param, "KRCDT_DAY_DG_ERAL", "KRCDT_DAY_ERAL_DG_ATD");
-		val end = System.currentTimeMillis();
-		val dif = end - start;
-		String.valueOf(dif);
 	}
 
 	private void deleteX(Map<String, List<GeneralDate>> param, String c1name, String c2name) {
