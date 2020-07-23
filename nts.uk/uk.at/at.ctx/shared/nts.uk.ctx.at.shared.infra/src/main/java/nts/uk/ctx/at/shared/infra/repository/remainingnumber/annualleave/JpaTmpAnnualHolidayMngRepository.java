@@ -14,6 +14,7 @@ import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 //import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.interim.TmpAnnualHolidayMng;
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.interim.TmpAnnualHolidayMngRepository;
@@ -26,16 +27,14 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 public class JpaTmpAnnualHolidayMngRepository extends JpaRepository implements TmpAnnualHolidayMngRepository{
 	@Inject
 	private InterimRemainRepository interRemain;
+	
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<TmpAnnualHolidayMng> getById(String mngId) {
-		Optional<TmpAnnualHolidayMng> optTmpAnnualHolidayMng = this.queryProxy().find(mngId, KrcmtInterimAnnualMng.class)
-				.map(x -> toDomain(x));
-		return optTmpAnnualHolidayMng;
-	}
-
-	private TmpAnnualHolidayMng toDomain(KrcmtInterimAnnualMng x) {
-		return new TmpAnnualHolidayMng(x.annualMngId, x.workTypeCode, new UseDay(x.useDays));
+		String sql = "SELECT * FROM KRCMT_INTERIM_ANNUAL_MNG WHERE ANNUAL_MNG_ID = @mngId";
+		return new NtsStatement(sql, this.jdbcProxy())
+				.paramString("mngId", mngId)
+				.getSingle(rec -> KrcmtInterimAnnualMng.MAPPER.toEntity(rec).toDomain());
 	}
 
 	@Override
