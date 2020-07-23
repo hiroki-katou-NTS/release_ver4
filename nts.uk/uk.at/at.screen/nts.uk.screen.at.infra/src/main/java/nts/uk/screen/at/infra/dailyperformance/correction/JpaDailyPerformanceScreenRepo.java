@@ -218,6 +218,11 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 	private final static String SEL_FIND_CLASSIFICATION_JDBC = "SELECT CLSCD, CLSNAME FROM BSYMT_CLASSIFICATION WHERE CID = ? ";
 
+	private final static String SELECT_CONFIRM_DAY = 
+			"select *"
+			+ " from KRCDT_CONFIRMATION_DAY "
+			+ " where SID in @sids"
+			+ " and PROCESSING_YMD between @startDate and @endDate";
 	
 //	private final static String SEL_FIND_WORKPLACE_LOCATION;
 
@@ -262,11 +267,6 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 //			+ " WHERE c.id.cid = :companyId";
 
 	private final static String SELECT_ALL_DIVREASON_JDBC = "SELECT REASON, [NO], REASON_CD FROM KRCST_DVGC_REASON c WHERE CID = ?";
-
-	private final static String SELECT_CONFIRM_DAY = "SELECT c FROM KrcdtIdentificationStatus c"
-			+ " WHERE c.krcdtIdentificationStatusPK.companyID = :companyID"
-			+ " AND c.krcdtIdentificationStatusPK.employeeId IN :sids"
-			+ " AND c.krcdtIdentificationStatusPK.processingYmd IN :processingYmds";
 
 	public final static String SELECT_BY_LIST_EMPID = "SELECT e FROM BsymtEmployeeDataMngInfo e WHERE e.bsymtEmployeeDataMngInfoPk.sId IN :listSid ";
 
@@ -1693,20 +1693,18 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 	@Override
 	public Map<String, Boolean> getConfirmDay(String companyId, List<String> sids, DateRange dates) {
-		if (!sids.isEmpty()) {
-			Map<String, Boolean> result = new HashMap<>();
-			CollectionUtil.split(sids, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-				result.putAll(this.queryProxy().query(SELECT_CONFIRM_DAY, KrcdtIdentificationStatus.class)
-						.setParameter("companyID", companyId).setParameter("sids", subList)
-						.setParameter("processingYmds", dates.toListDate())
-						.getList(x -> x.krcdtIdentificationStatusPK.employeeId + "|"
-								+ x.krcdtIdentificationStatusPK.processingYmd)
-						.stream().collect(Collectors.toMap(y -> y, y -> true)));
-			});
-			return result;
-		} else {
-			return Collections.emptyMap();
-		}
+		Map<String, Boolean> result = new HashMap<>();
+		CollectionUtil.split(sids, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			result.putAll(
+					new NtsStatement(SELECT_CONFIRM_DAY, this.jdbcProxy())
+							.paramString("sids", subList)
+							.paramDate("startDate", dates.getStartDate())
+							.paramDate("endDate", dates.getEndDate())
+							.getList(x -> x.getString("SID") + "|"
+									+ x.getGeneralDate("PROCESSING_YMD"))
+							.stream().collect(Collectors.toMap(y -> y, y -> true)));
+		});
+		return result;
 	}
 
 	@Override
