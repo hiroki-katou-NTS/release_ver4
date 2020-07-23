@@ -6,6 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.shared.dom.remainingnumber.reserveleave.empinfo.grantremainingdata.ReserveLeaveGrantRemainingData;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 @Entity
@@ -51,4 +52,8 @@ public class KrcmtReverseLeaRemain extends UkJpaEntity {
 		return rvsLeaId;
 	}
 
+	public ReserveLeaveGrantRemainingData toDomain() {
+		return ReserveLeaveGrantRemainingData.createFromJavaType(this.rvsLeaId, this.sid, this.grantDate, this.deadline,
+				this.expStatus, this.registerType, this.grantDays, this.usedDays, this.overLimitDays, this.remainingDays);
+	}
 }
