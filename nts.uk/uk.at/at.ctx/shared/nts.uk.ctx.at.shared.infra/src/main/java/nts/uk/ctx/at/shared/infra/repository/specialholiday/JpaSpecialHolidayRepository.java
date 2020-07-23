@@ -13,6 +13,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
+import lombok.val;
+import nts.arc.diagnose.stopwatch.Stopwatches;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
@@ -518,24 +520,33 @@ public class JpaSpecialHolidayRepository extends JpaRepository implements Specia
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<SpecialHoliday> findBySingleCD(String companyID, int specialHolidayCD) {
 		
-		return this.findByCode(companyID, specialHolidayCD)
+		val result = this.findByCode(companyID, specialHolidayCD)
 			.map(x -> {
-				List<Integer> absenceFrameNoLst = this.queryProxy().query(SELECT_SPHD_ABSENCE_BY_CODE, KshstSphdAbsence.class)
-						.setParameter("companyID", companyID)
-						.setParameter("specialHolidayCD", specialHolidayCD)
-						.getList(c -> Integer.valueOf(c.pk.absFameNo));
-				List<Integer> frameNoLst = this.queryProxy().query(SELECT_SPHD_SPEC_LEAVE, KshstSphdSpecLeave.class)
-						.setParameter("companyID", companyID)
-						.setParameter("specialHolidayCD", specialHolidayCD)
-						.getList(c -> c.pk.sphdNo);
-				List<String> listCls = this.queryProxy().query(SELECT_SPEC_CLS, KshstSpecCls.class)
-						.setParameter("companyID", companyID)
-						.setParameter("specialHolidayCD", specialHolidayCD)
-						.getList(c -> c.pk.clsCode);
-				List<String> listEmp = this.queryProxy().query(SELECT_SPEC_EMP, KshstSpecEmp.class)
-						.setParameter("companyID", companyID)
-						.setParameter("specialHolidayCD", specialHolidayCD)
-						.getList(c -> c.pk.empCode);
+				List<Integer> absenceFrameNoLst = jdbcProxy()
+						.query("select ABS_FRAME_NO from KSHST_SPHD_ABSENCE"
+								+ " where CID = @cid and SPHD_CD = @code")
+						.paramString("cid", companyID)
+						.paramInt("code", specialHolidayCD)
+						.getList(rec -> rec.getInt(1));
+				List<Integer> frameNoLst = jdbcProxy()
+						.query("select SPHD_NO from KSHST_SPHD_SPEC_LEAVE"
+								+ " where CID = @cid and SPHD_CD = @code")
+						.paramString("cid", companyID)
+						.paramInt("code", specialHolidayCD)
+						.getList(rec -> rec.getInt(1));
+				List<String> listCls = jdbcProxy()
+						.query("select CLS_CD from KSHST_SPEC_CLS"
+								+ " where CID = @cid and SPHD_CD = @code")
+						.paramString("cid", companyID)
+						.paramInt("code", specialHolidayCD)
+						.getList(rec -> rec.getString(1));
+				List<String> listEmp = jdbcProxy()
+						.query("select EMP_CD from KSHST_SPEC_EMP"
+								+ " where CID = @cid and SPHD_CD = @code")
+						.paramString("cid", companyID)
+						.paramInt("code", specialHolidayCD)
+						.getList(rec -> rec.getString(1));
+				
 				if(!absenceFrameNoLst.isEmpty()) {
 					x.getTargetItem().setAbsenceFrameNo(absenceFrameNoLst);	
 				}
@@ -550,7 +561,8 @@ public class JpaSpecialHolidayRepository extends JpaRepository implements Specia
 				}				
 				return x;
 			});
-		
+
+		return result;
 	}
 
 	@Override
