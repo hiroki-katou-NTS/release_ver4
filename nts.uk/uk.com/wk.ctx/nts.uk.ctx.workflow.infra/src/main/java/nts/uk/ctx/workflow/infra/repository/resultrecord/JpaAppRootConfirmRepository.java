@@ -1,16 +1,26 @@
 package nts.uk.ctx.workflow.infra.repository.resultrecord;
 
+import static java.util.stream.Collectors.*;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.JdbcProxy;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
@@ -82,13 +92,18 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	
 	private static AppPhaseConfirm toDomainPhase(String appId, Integer phaseOrder, List<FullJoinAppRootConfirm> fullJoinInPhase) {
 		FullJoinAppRootConfirm first = fullJoinInPhase.get(0);
-		List<AppFrameConfirm> frames = fullJoinInPhase.stream().collect(Collectors.groupingBy(f -> f.getFrameOrder()))
+		List<AppFrameConfirm> frames = new ArrayList<>();
+		
+		if (first.getFrameOrder() != null) {
+			frames = fullJoinInPhase.stream().collect(Collectors.groupingBy(f -> f.getFrameOrder()))
 				.entrySet().stream()
 				.map(f -> {
 					Integer frameOrder = f.getKey();
 					List<FullJoinAppRootConfirm> fullJoinInFrame = f.getValue();
 					return toDomainFrame(appId, phaseOrder, frameOrder, fullJoinInFrame);
 				}).collect(Collectors.toList());
+		}
+		
 		return AppPhaseConfirm.builder()
 				.phaseOrder(first.getPhaseOrder())
 				.appPhaseAtr(ApprovalBehaviorAtr.of(first.getAppPhaseAtr()))
@@ -270,34 +285,149 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		return internalQueryDaily(employeeIDLst, period);
 	}
 
-	private static final String FIND_DAY_CONFIRM 
-			= " select rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.RECORD_DATE, "
-					+ " ph.PHASE_ORDER, ph.APP_PHASE_ATR, "
-					+ " fr.FRAME_ORDER, fr.APPROVER_ID, fr.REPRESENTER_ID, fr.APPROVAL_DATE "
-			+ " from WWFDT_DAY_APV_RT_CONFIRM as rt" 
-			+ " left join WWFDT_DAY_APV_PH_CONFIRM as ph"
-			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " left join WWFDT_DAY_APV_FR_CONFIRM as fr"
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
-
-
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	private List<AppRootConfirm> internalQueryDaily(List<String> employeeIDLst, DatePeriod period) {
-		StringBuilder sql = new StringBuilder();
-		sql.append(FIND_DAY_CONFIRM);
-		sql.append(" where rt.EMPLOYEE_ID in @sids ");
-		sql.append(" and rt.RECORD_DATE between @startDate and @endDate");
 		
-		return NtsStatement.In.split(employeeIDLst, employeeIDs -> {
-			return toDomain(jdbcProxy().query(sql.toString())
-					.paramString("sids", employeeIDs)
-					.paramDate("startDate", period.start())
-					.paramDate("endDate", period.end())
-					.getList(rec -> createFullJoinAppRootConfirmDaily(rec)));
-		});
+		val query = new InternalQueryDaily(jdbcProxy(), employeeIDLst, period);
+		List<FullJoinAppRootConfirm> fullJoins = query.execute();
+		
+		return toDomain(fullJoins);
+		
 	}
 	
+	@RequiredArgsConstructor
+	public static class InternalQueryDaily {
+		
+		private final JdbcProxy proxy;
+		private final List<String> employeeIds;
+		private final DatePeriod period;
+		
+		public List<FullJoinAppRootConfirm> execute() {
+			List<List<Object>> rootsList = roots();
+			Map<String, List<List<Object>>> phasesMap = phases();
+			Map<String, List<List<Object>>> framesMap = frames();
+			return InternalQueryDaily.fullJoin(rootsList, phasesMap, framesMap);
+		}
+		
+		private List<List<Object>> roots() {
+
+			String tableName = "WWFDT_DAY_APV_RT_CONFIRM";
+			val columns = Arrays.asList("ROOT_ID", "CID", "EMPLOYEE_ID", "RECORD_DATE");
+			
+			return fetch(tableName, columns);
+		}
+		
+		private Map<String, List<List<Object>>> phases() {
+			
+			String tableName = "WWFDT_DAY_APV_PH_CONFIRM";
+			val columns = Arrays.asList("ROOT_ID", "PHASE_ORDER", "APP_PHASE_ATR");
+			
+			return fetch(tableName, columns).stream()
+					.collect(Collectors.groupingBy(e -> (String) e.get(0)));
+		}
+
+		private Map<String, List<List<Object>>> frames() {
+
+			String tableName = "WWFDT_DAY_APV_FR_CONFIRM";
+			val columns = Arrays.asList("ROOT_ID", "PHASE_ORDER", "FRAME_ORDER", "APPROVER_ID", "REPRESENTER_ID", "APPROVAL_DATE");
+
+			return fetch(tableName, columns).stream()
+					.collect(Collectors.groupingBy(e -> (String) e.get(0)));
+		}
+		
+		private static String buildSql(String tableName, List<String> columns) {
+			
+			return "select " + columns.stream().collect(Collectors.joining(", "))
+					+ " from " + tableName
+					+ " where EMPLOYEE_ID in @sids"
+					+ " and RECORD_DATE between @start and @end";
+		}
+		
+		private NtsStatement setParams(NtsStatement statement, List<String> subEmployeeIds) {
+			
+			return statement.paramString("sids", subEmployeeIds)
+				.paramDate("start", period.start())
+				.paramDate("end", period.end());
+		}
+
+		private List<List<Object>> fetch(String tableName, List<String> columns) {
+			
+			String sql = buildSql(tableName, columns);
+			
+			return NtsStatement.In.split(employeeIds, subEmpIds -> {
+				return setParams(proxy.query(sql), subEmpIds)
+						.getList(rec -> rec.getObjects(columns));
+			});
+		}
+
+		private static List<FullJoinAppRootConfirm> fullJoin(
+				List<List<Object>> rootsList,
+				Map<String, List<List<Object>>> phasesMap,
+				Map<String, List<List<Object>>> framesMap) {
+			
+			List<FullJoinAppRootConfirm> fullJoins = new ArrayList<>();
+			
+			for (val root : rootsList) {
+				
+				String rootID = (String) root.get(0);
+				String companyID = (String) root.get(1);
+				String employeeID = (String) root.get(2);
+				GeneralDate recordDate = getDate(root.get(3));
+				
+				val fjRoot = FullJoinAppRootConfirm.dailyRoot(rootID, companyID, employeeID, recordDate);
+				
+				val phases = phasesMap.get(rootID);
+				if (phases == null) {
+					fullJoins.add(fjRoot);
+					continue;
+				}
+				
+				for (val phase : phases) {
+					
+					// 0 は ROOT_ID
+					Integer phaseOrder = getInt(phase.get(1));
+					Integer appPhaseAtr = getInt(phase.get(2));
+					val fjPhase = fjRoot.phase(phaseOrder, appPhaseAtr);
+					
+					val frames = framesMap.get(rootID);
+					if (frames == null) {
+						fullJoins.add(fjPhase);
+						continue;
+					}
+					
+					val framesOfPhase = frames.stream()
+							.filter(f -> f.get(1) == phaseOrder)
+							.collect(toList());
+					
+					if (framesOfPhase.isEmpty()) {
+						fullJoins.add(fjPhase);
+						continue;
+					}
+					
+					for (val frame : framesOfPhase) {
+						
+						// 0 は ROOT_ID
+						Integer frameOrder = getInt(frame.get(2));
+						String approverID = (String) frame.get(3);
+						String representerID = (String) frame.get(4);
+						GeneralDate approvalDate = getDate(frame.get(5));
+						val fjFrame = fjPhase.frame(frameOrder, approverID, representerID, approvalDate);
+						
+						fullJoins.add(fjFrame);
+					}
+				}
+			}
+			return fullJoins;
+		}
+		
+		private static GeneralDate getDate(Object value) {
+			return GeneralDate.legacyDate((Timestamp) value);
+		}
+		
+		private static Integer getInt(Object value) {
+			return value == null ? null : ((BigDecimal) value).intValue();
+		}
+	}
 	
 	@Override
 	public Optional<AppRootConfirm> findAppRootConfirmMonthly(String employeeID, ClosureMonth closureMonth) {

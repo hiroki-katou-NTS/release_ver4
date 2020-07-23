@@ -97,6 +97,11 @@ public class JpaBasicScheduleRepository extends JpaRepository implements BasicSc
 			+ " WHERE c.kscdpBSchedulePK.sId = :employeeId"
 			+ " AND c.kscdpBSchedulePK.date IN :dates";
 
+	private static final String GET_WORK_SCH_TIMEZONE = "SELECT a FROM KscdtWorkScheduleTimeZone a"
+			+ " WHERE a.kscdtWorkScheduleTimeZonePk.sId = :sId"
+			+ " AND a.kscdtWorkScheduleTimeZonePk.date >= :startDate"
+			+ " AND a.kscdtWorkScheduleTimeZonePk.date <= :endDate";
+	
 	@Override
 	public void insert(BasicSchedule bSchedule) {
 		this.insertScheBasic(bSchedule);
@@ -816,6 +821,16 @@ public class JpaBasicScheduleRepository extends JpaRepository implements BasicSc
 		// exclude select
 		return query.getResultList();
 	}
+	
+	private Map<GeneralDate, List<KscdtWorkScheduleTimeZone>> findAllWorkScheduleTimeZone(String employeeId, DatePeriod period) {
+		List<KscdtWorkScheduleTimeZone> result = this.queryProxy().query(GET_WORK_SCH_TIMEZONE, KscdtWorkScheduleTimeZone.class)
+					.setParameter("sId", employeeId)
+					.setParameter("startDate", period.start())
+					.setParameter("endDate", period.end())
+					.getList(x -> x);
+		return result.stream()
+				.collect(Collectors.groupingBy(r -> r.kscdtWorkScheduleTimeZonePk.date));
+	}
 
 	/**
 	 * insert 勤務予定マスタ情報
@@ -1162,10 +1177,12 @@ public class JpaBasicScheduleRepository extends JpaRepository implements BasicSc
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<BasicSchedule> getBasicScheduleBySidPeriodDate(String employeeId, DatePeriod dateData) {
+		Map<GeneralDate, List<KscdtWorkScheduleTimeZone>> timeZoneMap = this.findAllWorkScheduleTimeZone(employeeId, dateData);
+		
 		List<BasicSchedule> lstData = this.queryProxy().query(QUERY_BY_SID_PERIOD, KscdtBasicSchedule.class)
 				.setParameter("employeeId", employeeId).setParameter("startDate", dateData.start())
 				.setParameter("endDate", dateData.end())
-				.getList(x -> toDomain(x, this.findAllWorkScheduleTimeZone(employeeId, x.kscdpBSchedulePK.date)));
+				.getList(x -> toDomain(x, timeZoneMap.get(x.kscdpBSchedulePK.date)));
 		return lstData;
 	}
 

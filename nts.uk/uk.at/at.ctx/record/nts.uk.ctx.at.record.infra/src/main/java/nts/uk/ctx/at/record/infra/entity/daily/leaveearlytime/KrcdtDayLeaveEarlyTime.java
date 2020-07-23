@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.infra.entity.daily.leaveearlytime; 
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -12,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.val;
+import nts.arc.layer.infra.data.jdbc.JdbcProxy;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.daily.LeaveEarlyTimeOfDaily;
 import nts.uk.ctx.at.record.dom.daily.TimeWithCalculation;
@@ -19,6 +22,7 @@ import nts.uk.ctx.at.record.dom.daily.TimevacationUseTimeOfDaily;
 import nts.uk.ctx.at.record.dom.daily.latetime.IntervalExemptionTime;
 //import nts.uk.ctx.at.record.infra.entity.daily.actualworktime.KrcdtDayAttendanceTime;
 import nts.uk.ctx.at.record.infra.entity.daily.time.KrcdtDayTime;
+import nts.uk.ctx.at.record.infra.entity.daily.time.KrcdtDayTime.Query;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
@@ -28,6 +32,19 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 public class KrcdtDayLeaveEarlyTime  extends UkJpaEntity implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
+	
+	public static final JpaEntityMapper<KrcdtDayLeaveEarlyTime> MAPPER = new JpaEntityMapper<>(KrcdtDayLeaveEarlyTime.class);
+	
+	public static class Query {
+		public static List<KrcdtDayLeaveEarlyTime> find(JdbcProxy proxy, KrcdtDayTime.Query.Key key) {
+			return KrcdtDayTime.Query.query(proxy, "KRCDT_DAY_LEAVEEARLYTIME", key, MAPPER);
+		}
+	}
+
+	public KrcdtDayTime.Query.RecordKey getRecordKey() {
+		return new KrcdtDayTime.Query.RecordKey(this.krcdtDayLeaveEarlyTimePK.employeeID, this.krcdtDayLeaveEarlyTimePK.generalDate);
+	}
+	
 	/*主キー*/
 	@EmbeddedId
 	public KrcdtDayLeaveEarlyTimePK krcdtDayLeaveEarlyTimePK;

@@ -6,6 +6,7 @@
 package nts.uk.ctx.at.record.infra.entity.daily.shortwork;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -21,6 +22,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import nts.arc.layer.infra.data.jdbc.JdbcProxy;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 //import nts.uk.ctx.at.record.infra.entity.daily.actualworktime.KrcdtDayAttendanceTime;
@@ -55,6 +58,20 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 	})
 public class KrcdtDaiShortWorkTime extends UkJpaEntity implements Serializable {
     private static final long serialVersionUID = 1L;
+    
+	public static final JpaEntityMapper<KrcdtDaiShortWorkTime> MAPPER = new JpaEntityMapper<>(KrcdtDaiShortWorkTime.class);
+	
+	public static class Query {
+		public static List<KrcdtDaiShortWorkTime> find(JdbcProxy proxy, KrcdtDayTime.Query.Key key) {
+			return KrcdtDayTime.Query.query(proxy, "KRCDT_DAI_SHORTTIME_TS", key, MAPPER);
+		}
+	}
+
+	public KrcdtDayTime.Query.RecordKey getRecordKey() {
+		return new KrcdtDayTime.Query.RecordKey(this.krcdtDaiShortWorkTimePK.sid, this.krcdtDaiShortWorkTimePK.ymd);
+	}
+	
+    
     @EmbeddedId
     public KrcdtDaiShortWorkTimePK krcdtDaiShortWorkTimePK;
     @Basic(optional = false)

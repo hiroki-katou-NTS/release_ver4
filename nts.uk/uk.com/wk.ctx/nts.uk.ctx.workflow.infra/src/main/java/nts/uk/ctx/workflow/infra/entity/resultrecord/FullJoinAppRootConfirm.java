@@ -13,19 +13,46 @@ import nts.arc.time.GeneralDate;
 @Getter
 @Builder
 public class FullJoinAppRootConfirm {
-	private String rootID;
-	private String companyID;
-	private String employeeID;
-	private GeneralDate recordDate;
-	private Integer rootType;
-	private Integer yearMonth;
-	private Integer closureID;
-	private Integer closureDay;
-	private Integer lastDayFlg;
-	private Integer phaseOrder;
-	private Integer appPhaseAtr;
-	private Integer frameOrder;
-	private String approverID;
-	private String representerID;
-	private GeneralDate approvalDate;
+	private final String rootID;
+	private final String companyID;
+	private final String employeeID;
+	private final GeneralDate recordDate;
+	private final Integer rootType;
+	private final Integer yearMonth;
+	private final Integer closureID;
+	private final Integer closureDay;
+	private final Integer lastDayFlg;
+	private final Integer phaseOrder;
+	private final Integer appPhaseAtr;
+	private final Integer frameOrder;
+	private final String approverID;
+	private final String representerID;
+	private final GeneralDate approvalDate;
+	
+	public static FullJoinAppRootConfirm dailyRoot(
+			String rootID, String companyID, String employeeID, GeneralDate recordDate) {
+		
+		return new FullJoinAppRootConfirm(
+				rootID, companyID, employeeID, recordDate,
+				1,
+				null, null, null, null, null, null, null, null, null, null);
+	}
+	
+	public FullJoinAppRootConfirm phase(
+			Integer phaseOrder, Integer appPhaseAtr) {
+		
+		return new FullJoinAppRootConfirm(
+				rootID, companyID, employeeID, recordDate, rootType, yearMonth, closureID, closureDay, lastDayFlg,
+				phaseOrder, appPhaseAtr,
+				frameOrder, approverID, representerID, approvalDate);
+	}
+	
+	public FullJoinAppRootConfirm frame(
+			Integer frameOrder, String approverID, String representerID, GeneralDate approvalDate) {
+		
+		return new FullJoinAppRootConfirm(
+				rootID, companyID, employeeID, recordDate, rootType, yearMonth, closureID, closureDay, lastDayFlg,
+				phaseOrder, appPhaseAtr,
+				frameOrder, approverID, representerID, approvalDate);
+	}
 }
