@@ -116,8 +116,15 @@ public class JpaAffiliationInforOfDailyPerforRepository extends JpaRepository
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<AffiliationInforOfDailyPerfor> findByKey(String employeeId, GeneralDate ymd) {
-		return this.queryProxy().query(FIND_BY_KEY, KrcdtDaiAffiliationInf.class).setParameter("employeeId", employeeId)
-				.setParameter("ymd", ymd).getSingle(f -> f.toDomain());
+		String query = "select * "
+				+ " from KRCDT_DAI_AFFILIATION_INF"
+				+ " where SID = @sid"
+				+ " and YMD = @ymd";
+		
+		return new NtsStatement(query, this.jdbcProxy())
+					.paramString("sid", employeeId)
+					.paramDate("ymd", ymd)
+					.getSingle(rec -> KrcdtDaiAffiliationInf.MAPPER.toEntity(rec).toDomain());
 	}
 
 	@Override

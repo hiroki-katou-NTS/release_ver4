@@ -5,6 +5,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
+import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.interim.TmpAnnualHolidayMng;
+import nts.uk.ctx.at.shared.dom.remainingnumber.interimremain.primitive.UseDay;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 /**
@@ -37,4 +40,9 @@ public class KrcmtInterimAnnualMng extends UkJpaEntity{
 		return annualMngId;
 	}
 
+	public static final JpaEntityMapper<KrcmtInterimAnnualMng> MAPPER = new JpaEntityMapper<>(KrcmtInterimAnnualMng.class);
+	
+	public TmpAnnualHolidayMng toDomain() {
+		return new TmpAnnualHolidayMng(this.annualMngId, this.workTypeCode, new UseDay(this.useDays));
+	}
 }

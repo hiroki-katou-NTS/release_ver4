@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nts.arc.enums.EnumAdaptor;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.monthly.performance.EditStateOfMonthlyPerformance;
@@ -53,6 +54,8 @@ public class KrcdtEditStateOfMothlyPer extends UkJpaEntity implements Serializab
 	protected Object getKey() {
 		return this.krcdtEditStateOfMothlyPerPK;
 	}
+	
+	public static final JpaEntityMapper<KrcdtEditStateOfMothlyPer> MAPPER = new JpaEntityMapper<>(KrcdtEditStateOfMothlyPer.class);
 
 	/**
 	 * ドメインに変換
