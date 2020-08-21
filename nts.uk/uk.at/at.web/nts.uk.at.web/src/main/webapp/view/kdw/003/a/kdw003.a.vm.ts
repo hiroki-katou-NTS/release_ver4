@@ -2462,7 +2462,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             }
             self.flagCalculation = false;
             self.listErrorMonth = [];
-            self.shareObject(new ShareObject());
+            //self.shareObject(new ShareObject()); 
             character.restore("characterKdw003a").done((obj: Characteristics) => {
                 self.characteristics.employeeId = __viewContext.user.employeeId;
                 self.characteristics.companyId = __viewContext.user.companyId;
