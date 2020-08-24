@@ -94,6 +94,12 @@ public class RouteConfirmStatusPhase {
 	 * @return
 	 */
 	public boolean hasApprovedBy(String approverId) {
+		
+		if (approvalForm == ApprovalForm.SINGLE_APPROVED) {
+			// ２人承認者がいた場合、一方が承認していたら、他方から見ても「自分が承認した」かのように見せたいという要件
+			return hasApproved();
+		}
+		
 		return (hasApproved() && frames.isApprover(approverId))
 				|| frames.hasApprovedByRepresenter(approverId);
 	}

@@ -396,7 +396,7 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 					}
 					
 					val framesOfPhase = frames.stream()
-							.filter(f -> f.get(1) == phaseOrder)
+							.filter(f -> ((BigDecimal)f.get(1)).intValue() == phaseOrder)
 							.collect(toList());
 					
 					if (framesOfPhase.isEmpty()) {
