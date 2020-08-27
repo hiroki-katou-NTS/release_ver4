@@ -62,7 +62,7 @@ public class WwfdtApvPhaseInstanceMonthly extends UkJpaEntity {
 				companyID, 
 				employeeID, 
 				startDate, 
-				instance.getPhaseOrder(), 
+				instance.getApprovalForm().value, 
 				instance.getListAppFrame()
 					.stream()
 					.map(t -> WwfdtApvFrameInstanceMonthly.fromDomain(rootID, instance.getPhaseOrder(), companyID, employeeID, startDate, t))

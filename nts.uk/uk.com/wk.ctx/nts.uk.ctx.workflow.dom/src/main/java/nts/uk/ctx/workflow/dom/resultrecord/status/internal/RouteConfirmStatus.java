@@ -1,6 +1,7 @@
 package nts.uk.ctx.workflow.dom.resultrecord.status.internal;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +67,10 @@ public abstract class RouteConfirmStatus<T> {
 			return ApprovalActionByEmp.NOT_APPROVAL;
 		}
 		
-		return phases.hasApprovedBy(approverId)
+		boolean approved = Stream.concat(Stream.of(approverId), representRequesterIds.stream())
+				.anyMatch(id -> phases.hasApprovedBy(id));
+		
+		return approved
 				? ApprovalActionByEmp.APPROVALED
 				: ApprovalActionByEmp.APPROVAL_REQUIRE;
 	}
