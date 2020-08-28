@@ -270,6 +270,10 @@ public class ConfirmStatusInfoEmp {
 					.map(es -> es.getKey())
 					.findFirst().orElse(null);
 
+				// 外部でremoveIfなどの操作が実行されるため、変更可能なArrayListで作る必要がある
+				List<InformationMonth> inforMonthMutableList = new ArrayList<>();
+				inforMonthMutableList.add(inforMonth);
+				
 				ConfirmInfoResult result = ConfirmInfoResult.builder()
 						.employeeId(employeeId)
 						.period(dateMax)
@@ -277,7 +281,7 @@ public class ConfirmStatusInfoEmp {
 						.lstApplication(application)
 						.lstOut(lstOut)
 						.statusOfEmp(statusOfEmps.get(employeeId).get(0))
-						.informationMonths(Arrays.asList(inforMonth))
+						.informationMonths(inforMonthMutableList)
 						.build();
 				results.add(result);
 			}

@@ -279,6 +279,11 @@ public class ApprovalStatusInfoEmp {
 					.filter(es -> es.getValue().contains(employeeId))
 					.map(es -> es.getKey())
 					.findFirst().orElse(null);
+				
+				// 外部でremoveIfなどの操作が実行されるため、変更可能なArrayListで作る必要がある
+				List<InformationMonth> inforMonthMutableList = new ArrayList<>();
+				inforMonthMutableList.add(inforMonths.get(employeeId));
+				
 				ConfirmInfoResult result = ConfirmInfoResult.builder()
 					.employeeId(employeeId)
 					.period(dateMax)
@@ -286,7 +291,7 @@ public class ApprovalStatusInfoEmp {
 					.lstApplication(application)
 					.lstOut(lstOut)
 					.statusOfEmp(statusOfEmps.get(employeeId).get(0))
-					.informationMonths(Arrays.asList(inforMonths.get(employeeId)))
+					.informationMonths(inforMonthMutableList)
 					.build();
 				results.add(result);
 			}
