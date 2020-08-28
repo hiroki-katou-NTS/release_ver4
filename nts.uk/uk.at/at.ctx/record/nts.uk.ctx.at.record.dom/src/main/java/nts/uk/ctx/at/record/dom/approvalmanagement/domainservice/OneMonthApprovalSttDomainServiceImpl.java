@@ -519,12 +519,7 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 				// 4.職位：序列．並び順（ASC）　⇒　職位コード（ASC）
 				// 5.社員コード：社員コード（ASC）
 			List<EmployeeAffiliationInforDto> listEmpAffInfos = listEmpAffInfo.stream()
-					.sorted(Comparator.comparing(EmployeeAffiliationInforDto::getHierarchyCd, strcmp)
-							.thenComparing(EmployeeAffiliationInforDto::getEmploymentInforCode, strcmp)
-							.thenComparing(EmployeeAffiliationInforDto::getClassificationCode, strcmp)
-							.thenComparing(EmployeeAffiliationInforDto::getOrder)
-							.thenComparing(EmployeeAffiliationInforDto::getPositionCd, strcmp)
-							.thenComparing(EmployeeAffiliationInforDto::getEmployeeCode, strcmp))
+					.sorted(Comparator.comparing(EmployeeAffiliationInforDto::getEmployeeCode, strcmp))
 					.collect(Collectors.toList());
 			// 並び替えた後の「社員所属情報」を返す
 			listEmpAffInfos.forEach(x -> {
