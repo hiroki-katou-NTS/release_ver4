@@ -5,7 +5,6 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,12 +18,14 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
+import lombok.val;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
+import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.workinformation.ScheduleTimeSheet;
@@ -458,68 +459,32 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<WorkInfoOfDailyPerformance> finds(Map<String, List<GeneralDate>> param) {
-		List<WorkInfoOfDailyPerformance> result = new ArrayList<>();
-		String sql = "SELECT * "
-			+ " FROM KRCDT_DAI_PER_WORK_INFO t0 "
-			+ " LEFT OUTER JOIN KRCDT_WORK_SCHEDULE_TIME t1 "
-			+ "     ON t1.SID = t0.SID AND t1.YMD = t0.YMD "
-			+ " WHERE "
-			+ "     t0.SID IN @sid AND "
-			+ "     t0.YMD >= @startDate AND t0.YMD <= @endDate ";
-		CollectionUtil.split(param, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, s -> {
-			List<GeneralDate> dates = s.values().stream().flatMap(List::stream).distinct().collect(Collectors.toList());
-			List<DatePeriod> periods = DatePeriod.create(dates);
-			periods.stream().forEach(period -> {	
-				result.addAll(new NtsStatement(sql, this.jdbcProxy())
-					.paramString("sid", s.keySet().stream().collect(Collectors.toList()))
-					.paramDate("startDate", period.start())
-					.paramDate("endDate", period.end())
-					.getList(rec -> {
-						return this.toDomain(rec);
-					})
-				);
-			});
+		List<Object[]> result = new ArrayList<>();
+		StringBuilder query = new StringBuilder(
+				"SELECT af, c from KrcdtDaiPerWorkInfo af LEFT JOIN af.scheduleTimes c ");
+		query.append(" WHERE af.krcdtDaiPerWorkInfoPK.employeeId IN :employeeId ");
+		query.append(" AND af.krcdtDaiPerWorkInfoPK.ymd IN :date");
+		TypedQueryWrapper<Object[]> tQuery = this.queryProxy().query(query.toString(), Object[].class);
+		CollectionUtil.split(param, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, p -> {
+			result.addAll(tQuery.setParameter("employeeId", p.keySet())
+					.setParameter("date", p.values().stream().flatMap(List::stream).collect(Collectors.toSet()))
+					.getList().stream().filter(c -> {
+						KrcdtDaiPerWorkInfo af = (KrcdtDaiPerWorkInfo) c[0];
+						return p.get(af.krcdtDaiPerWorkInfoPK.employeeId).contains(af.krcdtDaiPerWorkInfoPK.ymd);
+					}).collect(Collectors.toList()));
 		});
-		
-		return grouping(result);
+		return toDomainFromJoin(result);
 	}
 
-	private WorkInfoOfDailyPerformance toDomain(NtsResultRecord rec) {
-		List<ScheduleTimeSheet> scheduleTimeSheets = 
-				rec.getInt("WORK_NO") != null
-					? Arrays.asList(new ScheduleTimeSheet(rec.getInt("WORK_NO"), rec.getInt("ATTENDANCE"), rec.getInt("LEAVE_WORK")))
-					: Collections.emptyList();
-		return new WorkInfoOfDailyPerformance (
-				rec.getString("SID"),
-				new WorkInformation(rec.getString("RECORD_WORK_WORKTIME_CODE"), rec.getString("RECORD_WORK_WORKTYPE_CODE")),
-				new WorkInformation(rec.getString("SCHEDULE_WORK_WORKTIME_CODE"), rec.getString("SCHEDULE_WORK_WORKTYPE_CODE")),
-				EnumAdaptor.valueOf(rec.getInt("CALCULATION_STATE"), CalculationState.class),
-				EnumAdaptor.valueOf(rec.getInt("GO_STRAIGHT_ATR"), NotUseAttribute.class),
-				EnumAdaptor.valueOf(rec.getInt("BACK_STRAIGHT_ATR"), NotUseAttribute.class), 
-				rec.getGeneralDate("YMD"),
-				EnumAdaptor.valueOf(rec.getInt("DAY_OF_WEEK"), DayOfWeek.class),
-				scheduleTimeSheets
-		);
-	}
-
-	private List<WorkInfoOfDailyPerformance> grouping(List<WorkInfoOfDailyPerformance> result) {
-		List<Object[]> keys = result.stream()
-				.map(r -> new Object[] {r.getEmployeeId(), r.getYmd() })
+	private List<WorkInfoOfDailyPerformance> toDomainFromJoin(List<Object[]> result) {
+		return result.stream()
+				.collect(Collectors.groupingBy(c1 -> c1[0],
+						Collectors.collectingAndThen(Collectors.toList(),
+								list -> list.stream().filter(c -> c[1] != null).map(c -> (KrcdtWorkScheduleTime) c[1])
+										.collect(Collectors.toList()))))
+				.entrySet().stream()
+				.map(e -> KrcdtDaiPerWorkInfo.toDomain((KrcdtDaiPerWorkInfo) e.getKey(), e.getValue()))
 				.collect(Collectors.toList());
-		
-		return keys.stream()
-			.map( key -> {
-				WorkInfoOfDailyPerformance parent = result.stream()
-						.filter(r -> r.getEmployeeId().equals(key[0]) && r.getYmd().equals(key[1]))
-						.findFirst().get();
-				List<ScheduleTimeSheet> values =  result.stream()
-				.filter(r -> r.getEmployeeId().equals(key[0]) && r.getYmd().equals(key[1]) && !r.getScheduleTimeSheets().isEmpty())
-				.map(r -> r.getScheduleTimeSheets().get(0))
-				.collect(Collectors.toList());
-				parent.setScheduleTimeSheets(values);
-				return parent;
-			})
-			.collect(Collectors.toList());
 	}
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
@@ -538,11 +503,11 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 	}
 
 	@SneakyThrows
-	private List<WorkInfoOfDailyPerformance> internalQuery(DatePeriod datePeriod, List<String> subList) {		
+	private List<WorkInfoOfDailyPerformance> internalQuery(DatePeriod datePeriod, List<String> subList) {
 		String subIn = NtsStatement.In.createParamsString(subList);
 
 		Map<String, Map<GeneralDate, List<ScheduleTimeSheet>>> scheTimes = new HashMap<>(); 
-		try (PreparedStatement stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_WORK_SCHEDULE_TIME WHERE SID IN (" + subIn + ") AND YMD >= ? AND YMD <= ?")){
+		try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_WORK_SCHEDULE_TIME WHERE SID IN (" + subIn + ") AND YMD >= ? AND YMD <= ?")){
 			for (int i = 0; i < subList.size(); i++) {
 				stmt.setString(i + 1, subList.get(i));
 			}
@@ -562,7 +527,7 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 				return null;
 			});
 		};
-		try (PreparedStatement stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_DAI_PER_WORK_INFO WHERE SID IN (" + subIn + ") AND YMD >= ? AND YMD <= ?")){
+		try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_DAI_PER_WORK_INFO WHERE SID IN (" + subIn + ") AND YMD >= ? AND YMD <= ?")){
 			for (int i = 0; i < subList.size(); i++) {
 				stmt.setString(i + 1, subList.get(i));
 			}
@@ -621,7 +586,7 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 		CollectionUtil.split(dates, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			String subIn = NtsStatement.In.createParamsString(subList);
 			Map<String, Map<GeneralDate, List<ScheduleTimeSheet>>> scheTimes = new HashMap<>(); 
-			try(PreparedStatement stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_WORK_SCHEDULE_TIME "
+			try(val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_WORK_SCHEDULE_TIME "
 					+ "WHERE YMD IN (" + subIn + ") "
 					+ "AND SID = ?")){
 				for (int i = 0; i < subList.size(); i++) {
@@ -645,7 +610,7 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 			} catch (SQLException e1) {
 				throw new RuntimeException(e1);
 			}
-			try (PreparedStatement stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_DAI_PER_WORK_INFO "
+			try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_DAI_PER_WORK_INFO "
 					+ "WHERE YMD IN (" + subIn + ") AND SID = ?")){
 				for (int i = 0; i < subList.size(); i++) {
 					stmt.setDate(i + 1, Date.valueOf(subList.get(i).localDate()));
