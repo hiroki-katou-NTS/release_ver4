@@ -72,6 +72,12 @@ public class DeleteHistoryCmm053Impl implements DeleteHistoryCmm053Service {
 				repoPerson.updatePsApprovalRoot(psAppRoot);
 			}
 		}
+		
+		// 未来日であれば中間データを処理しない
+		if (startDate.after(GeneralDate.today())) {
+			return;
+		}
+		
 		createDailyApprover.createApprover(employeeId, RecordRootType.CONFIRM_WORK_BY_DAY, startDate, startDate);
 		createDailyApprover.createApprover(employeeId, RecordRootType.CONFIRM_WORK_BY_MONTH, startDate, startDate);
 	}
