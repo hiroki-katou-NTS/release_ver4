@@ -90,4 +90,8 @@ public class ApprovalFrame extends DomainObject {
 	public boolean isRepresenter(String employeeId) {
 		return representerID != null && representerID.equals(employeeId);
 	}
+
+	public boolean hasApproved() {
+		return getApprovalAtr() == ApprovalBehaviorAtr.APPROVED;
+	}
 }

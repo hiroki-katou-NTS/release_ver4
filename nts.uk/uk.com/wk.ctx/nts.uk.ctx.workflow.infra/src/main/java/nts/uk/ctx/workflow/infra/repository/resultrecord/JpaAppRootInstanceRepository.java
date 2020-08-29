@@ -324,7 +324,10 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	}
 
 	
-	
+	/**
+	 * 承認者を指定すると、指定外の承認者のFRAMEが取得できないので注意
+	 * FIND_DAY_INSTANCE_APPROVERを参照
+	 */
 	private static final String FIND_DAY_INSTANCE 
 			= " select rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, "
 					+ " ph.PHASE_ORDER, ph.APPROVAL_FORM, "
@@ -344,6 +347,35 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
+	/**
+	 * 承認者で検索する場合、「指定した承認者が含まれるインスタンスの全てのFRAME」を取得する必要がある
+	 * それを可能とするため、WWFDT_DAY_APV_AP_INSTANCEを２回JOINしている
+	 */
+	private static final String FIND_DAY_INSTANCE_APPROVER = " select"
+			+ " rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, "
+			+ " ph.PHASE_ORDER, ph.APPROVAL_FORM, "
+			+ " fr.FRAME_ORDER, fr.CONFIRM_ATR, "
+			+ " ap.APPROVER_CHILD_ID "
+			+ " from WWFDT_DAY_APV_RT_INSTANCE rt"
+			
+			+ " left outer join WWFDT_DAY_APV_AP_INSTANCE ap_filter"
+			+ " on rt.EMPLOYEE_ID = ap_filter.EMPLOYEE_ID"
+			+ " and rt.START_DATE = ap_filter.START_DATE"
+			
+			+ " left outer join WWFDT_DAY_APV_PH_INSTANCE ph"
+			+ " on rt.EMPLOYEE_ID = ph.EMPLOYEE_ID"
+			+ " and rt.START_DATE = ph.START_DATE"
+			
+			+ " left outer join WWFDT_DAY_APV_FR_INSTANCE fr"
+			+ " on rt.EMPLOYEE_ID = fr.EMPLOYEE_ID"
+			+ " and rt.START_DATE = fr.START_DATE"
+			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
+			
+			+ " left outer join WWFDT_DAY_APV_AP_INSTANCE ap"
+			+ " on rt.EMPLOYEE_ID = ap.EMPLOYEE_ID"
+			+ " and rt.START_DATE = ap.START_DATE"
+			+ " and ph.PHASE_ORDER = ap.PHASE_ORDER"
+			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
 	@Override
 	@SneakyThrows
@@ -379,8 +411,8 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	@SneakyThrows
 	public List<AppRootInstance> findAppRootInstanceDailyByApprover(List<String> approverIDLst, DatePeriod period) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(FIND_DAY_INSTANCE);
-		sql.append(" where ap.APPROVER_CHILD_ID in @sids ");
+		sql.append(FIND_DAY_INSTANCE_APPROVER);
+		sql.append(" where ap_filter.APPROVER_CHILD_ID in @sids ");
 		sql.append(" and rt.START_DATE <= @endDate ");
 		sql.append(" and rt.END_DATE >= @startDate ");
 
@@ -403,31 +435,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	@SneakyThrows
 	public List<AppRootInstance> findAppRootInstanceDailyByApproverTarget(String approverID, List<String> employeeIDLst, DatePeriod period) {
 		
-		String sql = " select rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, "
-				+ " ph.PHASE_ORDER, ph.APPROVAL_FORM, "
-				+ " fr.FRAME_ORDER, fr.CONFIRM_ATR, "
-				+ " ap.APPROVER_CHILD_ID "
-				+ " from WWFDT_DAY_APV_RT_INSTANCE rt"
-				
-				+ " left outer join WWFDT_DAY_APV_AP_INSTANCE ap_filter"
-				+ " on rt.EMPLOYEE_ID = ap_filter.EMPLOYEE_ID"
-				+ " and rt.START_DATE = ap_filter.START_DATE"
-				
-				+ " left outer join WWFDT_DAY_APV_PH_INSTANCE ph"
-				+ " on rt.EMPLOYEE_ID = ph.EMPLOYEE_ID"
-				+ " and rt.START_DATE = ph.START_DATE"
-				
-				+ " left outer join WWFDT_DAY_APV_FR_INSTANCE fr"
-				+ " on rt.EMPLOYEE_ID = fr.EMPLOYEE_ID"
-				+ " and rt.START_DATE = fr.START_DATE"
-				+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-				
-				+ " left outer join WWFDT_DAY_APV_AP_INSTANCE ap"
-				+ " on rt.EMPLOYEE_ID = ap.EMPLOYEE_ID"
-				+ " and rt.START_DATE = ap.START_DATE"
-				+ " and ph.PHASE_ORDER = ap.PHASE_ORDER"
-				+ " and fr.FRAME_ORDER = ap.FRAME_ORDER"
-				
+		String sql = FIND_DAY_INSTANCE_APPROVER
 				+ " where rt.START_DATE <= @endDate"
 				+ " and rt.END_DATE >= @startDate"
 				+ " and rt.EMPLOYEE_ID in @sids"

@@ -268,7 +268,6 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 			approvalPhaseState.setApprovalAtr(ApprovalBehaviorAtr.UNAPPROVED);
 			approvalPhaseState.setApprovalForm(appPhaseInstance.getApprovalForm());
 			approvalPhaseState.setPhaseOrder(appPhaseInstance.getPhaseOrder());
-			approvalPhaseState.setApprovalForm(ApprovalForm.EVERYONE_APPROVED);
 			approvalPhaseState.setListApprovalFrame(new ArrayList<>());
 			appPhaseInstance.getListAppFrame().forEach(appFrameInstance -> {
 				ApprovalFrame approvalFrame = new ApprovalFrame();
@@ -296,8 +295,9 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 					.filter(x -> x.getPhaseOrder()==appPhaseConfirm.getPhaseOrder()).findAny();
 			if(opApprovalPhaseState.isPresent()){
 				ApprovalPhaseState approvalPhaseState = opApprovalPhaseState.get();
-				approvalPhaseState.setApprovalAtr(appPhaseConfirm.getAppPhaseAtr());
+				
 				appPhaseConfirm.getListAppFrame().forEach(appFrameConfirm -> {
+					
 					Optional<ApprovalFrame> opApprovalFrame = approvalPhaseState.getListApprovalFrame().stream()
 							.filter(y -> y.getFrameOrder()==appFrameConfirm.getFrameOrder()).findAny();
 					if(opApprovalFrame.isPresent()){
@@ -308,6 +308,17 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 						approvalFrame.setRepresenterID(appFrameConfirm.getRepresenterID().orElse(null));
 					}
 				});
+				
+				boolean phaseApproved;
+				if (approvalPhaseState.getApprovalForm() == ApprovalForm.SINGLE_APPROVED) {
+					phaseApproved = approvalPhaseState.getListApprovalFrame().stream()
+							.anyMatch(f -> f.hasApproved());
+				} else {
+					phaseApproved = approvalPhaseState.getListApprovalFrame().stream()
+							.allMatch(f -> f.hasApproved());
+				}
+				
+				approvalPhaseState.setApprovalAtr(phaseApproved ? ApprovalBehaviorAtr.APPROVED : ApprovalBehaviorAtr.UNAPPROVED);
 			}
 		});
 		return approvalRootState;
