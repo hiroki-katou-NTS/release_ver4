@@ -204,6 +204,24 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 			+ " on fr.APP_ID = ap.APP_ID" 
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
+	
+	private static final String FIND_APP_STATE_APPROVER	=
+			"select rt.CID, rt.APP_ID, rt.EMPLOYEE_ID, rt.APP_DATE, "
+			+ " ph.PHASE_ORDER, ph.APP_PHASE_ATR, ph.APPROVAL_FORM, "
+			+ " fr.FRAME_ORDER, fr.APP_FRAME_ATR, fr.CONFIRM_ATR, fr.APPROVER_ID, fr.REPRESENTER_ID, fr.APPROVAL_DATE, fr.APPROVAL_REASON, "
+			+ " ap.APPROVER_CHILD_ID "
+			+ " from WWFDT_APP_APV_RT_STATE as rt"
+			+ " inner join WWFDT_APP_APV_AP_STATE as ap_filter"
+			+ " on rt.APP_ID = ap_filter.APP_ID"
+			+ " left join WWFDT_APP_APV_PH_STATE as ph"
+			+ " on rt.APP_ID = ph.APP_ID"
+			+ " left join WWFDT_APP_APV_FR_STATE as fr"
+			+ " on ph.APP_ID = fr.APP_ID"
+			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
+			+ " left join WWFDT_APP_APV_AP_STATE as ap"
+			+ " on fr.APP_ID = ap.APP_ID"
+			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER"
+			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
 
 	private static final String FIND_OFFICIAL_APP
@@ -377,12 +395,12 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		}
 
 		StringBuilder sql = new StringBuilder();
-		sql.append(FIND_APP_STATE);
+		sql.append(FIND_APP_STATE_APPROVER);
 		sql.append(" where rt.APP_DATE >= @startDate ");
 		sql.append(" and rt.APP_DATE <= @endDate ");
 		sql.append(" and ph.APP_PHASE_ATR in @phaseAtr ");
 		sql.append(" and fr.APP_FRAME_ATR in @frameAtr ");
-		sql.append(" and ap.APPROVER_CHILD_ID in @approverIDs");
+		sql.append(" and ap_filter.APPROVER_CHILD_ID in @approverIDs");
 		
 		return NtsStatement.In.split(approverIDLst, approverIDs -> {
 			return toDomain(new NtsStatement(sql.toString(), this.jdbcProxy())
