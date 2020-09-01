@@ -93,7 +93,8 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 		public RequireGetSubjectiveStatus(List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period) {
 			//cacheInstance読み込み
 			// 対象者の月別実績の承認ルートを取得する（期間）
-			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(targetEmployeeIds, period);
+			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(
+					targetEmployeeIds, period.end());
 
 			Map<String, Map<DatePeriod, List<AppRootInstance>>> dataInstance = new HashMap<String, Map<DatePeriod, List<AppRootInstance>>>();
 
@@ -141,7 +142,7 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 			
 			// 承認者の月別実績の承認ルートを取得する（対象者指定）（期間）
 			return appRootInstanceRepository.findAppRootInstanceMonthlyByApproverTarget(
-					approverId, Arrays.asList(targetEmployeeId), period);
+					approverId, Arrays.asList(targetEmployeeId), period.end());
 		}
 
 		@Override
@@ -209,7 +210,8 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 		public RequireGetTargetStatus(List<String> targetEmployeeIds, ClosureMonth closureMonth, DatePeriod period) {
 			//cacheInstance読み込み
 			// 対象者の月別実績の承認ルートを取得する（期間）
-			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(targetEmployeeIds, period);
+			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(
+					targetEmployeeIds, period.end());
 
 			Map<String, Map<ClosureMonth, List<AppRootInstance>>> dataInstance = new HashMap<String, Map<ClosureMonth, List<AppRootInstance>>>();
 			for (String targetEmployeeId : targetEmployeeIds) {
@@ -255,7 +257,8 @@ public class ApprovalMonthlyRecordPubImpl implements MonthlyRecordApprovalPub {
 			if (cached.isPresent()) return cached.get();
 			
 			// 対象者の月別実績の承認ルートを取得する（期間）
-			return appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(Arrays.asList(targetEmployeeId), closureMonth.defaultPeriod());
+			return appRootInstanceRepository.findAppRootInstanceMonthlyByTarget(
+					Arrays.asList(targetEmployeeId), closureMonth.defaultPeriod().end());
 		}
 
 		@Override
