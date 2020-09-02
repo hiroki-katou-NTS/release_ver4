@@ -184,7 +184,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	@Override
 	public void delete(String rootStateID) {
 		DELETE_TABLE.forEach(targetTable ->{
-			String sqlDelete = targetTable + " where rt.APP_ID = @appId ";
+			String sqlDelete = targetTable + " where APP_ID = @appId ";
 			jdbcProxy().query(sqlDelete.toString()).paramString("appId", rootStateID).execute();
 		});
 	}
