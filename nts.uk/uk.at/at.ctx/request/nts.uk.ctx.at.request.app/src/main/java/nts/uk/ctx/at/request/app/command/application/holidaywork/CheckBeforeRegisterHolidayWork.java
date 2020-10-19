@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.error.BusinessException;
 import nts.gul.collection.CollectionUtil;
 import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.request.app.find.application.overtime.dto.AppOvertimeDetailDto;
@@ -34,6 +35,12 @@ import nts.uk.ctx.at.request.dom.application.overtime.AttendanceType;
 import nts.uk.ctx.at.request.dom.application.overtime.OvertimeCheckResult;
 import nts.uk.ctx.at.request.dom.application.overtime.service.CaculationTime;
 import nts.uk.ctx.at.request.dom.application.overtime.service.OvertimeService;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
+import nts.uk.ctx.at.shared.dom.worktype.HolidayAtr;
+import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
@@ -50,6 +57,11 @@ public class CheckBeforeRegisterHolidayWork {
 	private DailyAttendanceTimeCaculation dailyAttendanceTimeCaculation;
 	@Inject
 	private OvertimeService overtimeService;
+	@Inject
+	private WorkingConditionItemRepository workingCondition;
+	@Inject
+	private WorkTypeRepository worktypeRepo;
+	
 	public OvertimeCheckResultDto CheckBeforeRegister(CreateHolidayWorkCommand command) {
 		// 会社ID
 		String companyId = AppContexts.user().companyId();
@@ -86,6 +98,7 @@ public class CheckBeforeRegisterHolidayWork {
 		// 2-1.新規画面登録前の処理を実行する
 		newBeforeRegister.processBeforeRegister(app, 0, checkOver1Year, Collections.emptyList());
 		// 登録前エラーチェック
+		this.controlWkTypeOfFlexSatSunHd(appHolidayWork, app);
 		// 計算ボタン未クリックチェック
 		//03-06_計算ボタンチェック
 		beforeCheck.calculateButtonCheck(calculateFlg, app.getCompanyID(), employeeId, 1,
@@ -174,6 +187,7 @@ public class CheckBeforeRegisterHolidayWork {
 		// 登録前エラーチェック
 		//勤務種類、就業時間帯チェックのメッセージを表示
 		this.overtimeService.checkWorkingInfo(companyId, command.getWorkTypeCode(), command.getSiftTypeCode());
+		this.controlWkTypeOfFlexSatSunHd(holidayWorkDomain, appRoot);
 		// 計算ボタン未クリックチェック
 		beforeCheck.calculateButtonCheck(calculateFlg, appRoot.getCompanyID(), employeeId, 1,
 				ApplicationType.BREAK_TIME_APPLICATION, appRoot.getAppDate());
@@ -291,5 +305,37 @@ public class CheckBeforeRegisterHolidayWork {
 			calculations.add(cal);
 		}
 		return calculations;
+	}
+	/**
+	 * フレックス者の土日祝の勤務種類利用制御
+	 * @param hd 休日出勤申請
+	 * @param app 申請
+	 */
+	private void controlWkTypeOfFlexSatSunHd(AppHolidayWork hd, Application_New app) {
+		//社員の労働条件を取得する
+		Optional<WorkingConditionItem> wkingItem = workingCondition.getBySidAndStandardDate(app.getEmployeeID(), app.getAppDate());
+		
+		if(!wkingItem.isPresent() || !wkingItem.get().getLaborSystem().equals(WorkingSystem.FLEX_TIME_WORK)) {
+			return;
+		}
+		
+		//「労働条件項目」１件以上取得できた　AND　ドメインモデル「労働条件項目」．労働制 == フレックス時間勤務
+		//勤務種類を取得する
+		Optional<WorkType> workTypeInfor = worktypeRepo.findByPK(AppContexts.user().companyId(), hd.getWorkTypeCode().toString());
+		
+		if(!workTypeInfor.isPresent() || workTypeInfor.get().getWorkTypeSetList().isEmpty()) return;
+		
+		int dayOfWeek = app.getAppDate().dayOfWeek();
+//		if文：
+//		(Input．休日出勤申請．申請日．Calendar.DAY_OF_WEEK == SATURDAY AND 
+//		取得した休日出勤の設定．休日設定．休日区分 == 法定外休日)
+//		OR
+//		(Input．休日出勤申請．申請日．Calendar.DAY_OF_WEEK == SUNDAY AND 
+//		取得した休日出勤の設定．休日設定．休日区分 == 祝日)
+		HolidayAtr hdSet = workTypeInfor.get().getWorkTypeSetList().get(0).getHolidayAtr();
+		if((dayOfWeek == 6 && hdSet.equals(HolidayAtr.NON_STATUTORY_HOLIDAYS)) ||
+				(dayOfWeek == 7 && hdSet.equals(HolidayAtr.PUBLIC_HOLIDAY))) {
+			throw new BusinessException("Msg_1968");
+		}
 	}
 }
