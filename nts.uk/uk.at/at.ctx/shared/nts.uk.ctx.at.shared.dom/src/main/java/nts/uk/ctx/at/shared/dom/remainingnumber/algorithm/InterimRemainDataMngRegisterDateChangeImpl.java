@@ -67,16 +67,51 @@ public class InterimRemainDataMngRegisterDateChangeImpl implements InterimRemain
 		Optional<ComSubstVacation> comSetting = subRepos.findById(cid);
 		CompensatoryLeaveComSetting leaveComSetting = leaveSetRepos.find(cid);
 		CompanyHolidayMngSetting comHolidaySetting = new CompanyHolidayMngSetting(cid, comSetting, leaveComSetting);
+
+
+		//x作成前に暫定データを全て削除してから、新しい暫定データを作成する
+		List<InterimRemain> getDataBySidDates = inRemainData.getDataBySidDates(sid, lstDate);
+		getDataBySidDates.stream().forEach(x -> {
+
+			inRemainData.deleteById(x.getRemainManaID());
+			//Delete
+			switch (x.getRemainType()) {
+			case ANNUAL:
+				annualHolidayMngRepos.deleteById(x.getRemainManaID());
+				break;
+			case FUNDINGANNUAL:
+				resereLeave.deleteById(x.getRemainManaID());
+				break;
+			case PAUSE:
+				recAbsRepos.deleteInterimAbsMng(x.getRemainManaID());
+				break;
+			case PICKINGUP:
+				recAbsRepos.deleteInterimRecMng(x.getRemainManaID());
+				break;
+			case SUBHOLIDAY:
+				breakDayOffRepos.deleteInterimDayOffMng(x.getRemainManaID());
+				break;
+			case BREAK:
+				breakDayOffRepos.deleteInterimBreakMng(x.getRemainManaID());
+				break;
+			case SPECIAL:
+				specialHoliday.deleteSpecialHoliday(x.getRemainManaID());
+				break;
+			default:
+				break;
+			}
+		});
+
 		for(GeneralDate loopDate : lstDate){
 			DatePeriod datePeriod = new DatePeriod(loopDate, loopDate);
 			//「残数作成元の申請を取得する」
 			List<AppRemainCreateInfor> lstAppData = remainAppData.lstRemainDataFromApp(cid, sid, datePeriod);
 			clearInterimWhenRecordScheAppNotData(sid, lstDate, lstRecordData, lstScheData, lstAppData);
 			//指定期間の暫定残数管理データを作成する
-			InterimRemainCreateDataInputPara inputData = new InterimRemainCreateDataInputPara(cid, 
-					sid, 
-					datePeriod, 
-					lstRecordData, 
+			InterimRemainCreateDataInputPara inputData = new InterimRemainCreateDataInputPara(cid,
+					sid,
+					datePeriod,
+					lstRecordData,
 					lstScheData,
 					lstAppData,
 					false);
@@ -100,7 +135,7 @@ public class InterimRemainDataMngRegisterDateChangeImpl implements InterimRemain
 			List<GeneralDate> lstDelete = new ArrayList<>();
 			lstDate.stream().forEach(x -> {
 				List<AppRemainCreateInfor> lstAppDateNotDelete = lstAppData.stream().filter(a -> a.getAppDate().equals(x)
-							|| (a.getStartDate().isPresent() && a.getEndDate().isPresent() 
+							|| (a.getStartDate().isPresent() && a.getEndDate().isPresent()
 								&& a.getStartDate().get().beforeOrEquals(x) && a.getEndDate().get().afterOrEquals(x)))
 						.collect(Collectors.toList());
 				if(lstAppDateNotDelete.isEmpty()) {
@@ -110,7 +145,7 @@ public class InterimRemainDataMngRegisterDateChangeImpl implements InterimRemain
 			//スケジュールのデータがないし実績データがないし、申請を削除の場合暫定データがあったら削除します。
 			List<InterimRemain> getDataBySidDates = inRemainData.getDataBySidDates(sid, !lstDelete.isEmpty() ? lstDelete : lstDate);
 			getDataBySidDates.stream().forEach(x -> {
-				
+
 				inRemainData.deleteById(x.getRemainManaID());
 				//Delete
 				switch (x.getRemainType()) {
@@ -140,7 +175,7 @@ public class InterimRemainDataMngRegisterDateChangeImpl implements InterimRemain
 				}
 			});
 			if(lstAppData.isEmpty()) {
-				return;	
+				return;
 			}
 		}
 	}
