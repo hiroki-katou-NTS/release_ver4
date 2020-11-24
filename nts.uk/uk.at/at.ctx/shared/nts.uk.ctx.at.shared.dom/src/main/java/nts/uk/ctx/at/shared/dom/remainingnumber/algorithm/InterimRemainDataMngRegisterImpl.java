@@ -103,7 +103,7 @@ public class InterimRemainDataMngRegisterImpl implements InterimRemainDataMngReg
 //				&& lstAnnualHolidayCreate.isEmpty()) {
 //			return;
 //		}
-		if(lstInterimDataBefore.isEmpty()) {
+		if(lstAnnualHolidayCreate.isEmpty()) {
 			return;
 		}
 		DailyInterimRemainMngData earchData = dataInput.getEarchData();
