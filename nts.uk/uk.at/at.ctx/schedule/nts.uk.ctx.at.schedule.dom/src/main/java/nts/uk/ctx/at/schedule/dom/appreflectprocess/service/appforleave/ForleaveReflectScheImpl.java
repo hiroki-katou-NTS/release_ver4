@@ -13,6 +13,7 @@ import nts.uk.ctx.at.schedule.dom.schedule.workschedulestate.WorkScheduleState;
 import nts.uk.ctx.at.schedule.dom.schedule.workschedulestate.WorkScheduleStateRepository;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
+import nts.uk.ctx.at.shared.dom.worktype.service.WorkTypeIsClosedService;
 
 @Stateless
 public class ForleaveReflectScheImpl implements ForleaveReflectSche{
@@ -24,12 +25,18 @@ public class ForleaveReflectScheImpl implements ForleaveReflectSche{
 	private BasicScheduleRepository basicScheRepo;
 	@Inject
 	private WorkScheduleStateRepository workScheReposi;
+	@Inject
+	private WorkTypeIsClosedService workTypeRepo;
 	@Override
 	public void forlearveReflectSche(WorkChangecommonReflectParamSche param) {
 		CommonReflectParamSche reflectParam = param.getCommon();
 		GeneralDate appDate = reflectParam.getAppDate();
 		BasicSchedule scheData = basicScheRepo.find(reflectParam.getEmployeeId(), appDate).get();
-		List<WorkScheduleState> lstState = workScheReposi.findByDateAndEmpId(reflectParam.getEmployeeId(), appDate);			
+		List<WorkScheduleState> lstState = workScheReposi.findByDateAndEmpId(reflectParam.getEmployeeId(), appDate);
+		//1日休日の判断
+		if(workTypeRepo.checkHoliday(scheData.getWorkTypeCode())) {
+			return;
+		}
 		//勤種の反映
 		//勤務種類を反映する
 		updateRelect.updateScheWorkType(scheData, lstState, reflectParam.getWorktypeCode());
