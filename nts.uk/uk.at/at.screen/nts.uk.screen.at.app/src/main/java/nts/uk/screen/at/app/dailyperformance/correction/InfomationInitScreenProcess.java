@@ -147,11 +147,12 @@ public class InfomationInitScreenProcess {
 		//screenDto.setLstEmployee(converEmployeeList(employeeInfoAdapter));
 		//get All Workplace employee
 		//Map<String, String> wplNameMap = repo.getListWorkplaceAllEmp(changeEmployeeIds, screenDto.getDateRange().getEndDate());
-		screenDto.setLstEmployee(findAllEmployee.findAllEmployee(changeEmployeeIds, dateRange.getEndDate()));
+		GeneralDate dateReferWpl = (dateRange.getEndDate().after(GeneralDate.today())) ? GeneralDate.today() : dateRange.getEndDate();
+		screenDto.setLstEmployee(findAllEmployee.findAllEmployee(changeEmployeeIds, dateReferWpl));
 		// only get detail infomation employee when mode 2, 3 extract
 
-		val timeStart1 = System.currentTimeMillis();
-		Map<String, WorkPlaceHistTemp> WPHMap = repo.getWplByListSidAndPeriod(companyId, changeEmployeeIds, screenDto.getDateRange().getEndDate());
+		//val timeStart1 = System.currentTimeMillis();
+		Map<String, WorkPlaceHistTemp> WPHMap = repo.getWplByListSidAndPeriod(companyId, changeEmployeeIds, dateReferWpl);
 		//set name workplace
 		screenDto.getLstEmployee().stream().map(x -> {
 			val wph = WPHMap.get(x.getId());
