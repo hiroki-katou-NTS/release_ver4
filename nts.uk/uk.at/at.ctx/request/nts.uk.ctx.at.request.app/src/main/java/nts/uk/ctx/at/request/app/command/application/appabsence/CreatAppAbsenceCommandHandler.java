@@ -232,13 +232,13 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 				command.getWorkTimeCode());
 		//アルゴリズム「7-1_申請日の矛盾チェック」を実行する
 		if (isInsert) {
-			for (int i = 0; startDate.compareTo(endDate) + i <= 0; i++) {
-				GeneralDate appDate = startDate.addDays(i);
+			GeneralDate appDate = startDate; 
+			while(appDate.beforeOrEquals(endDate)) {
 				checkContradictionAppDate(companyID, sID, appDate,
 						EnumAdaptor.valueOf(command.getAllDayHalfDayLeaveAtr(), AllDayHalfDayLeaveAtr.class),
 						command.isCheckContradiction());
+				appDate = appDate.addDays(1);
 			}
-
 		}
 		
 		//選択する休暇種類をチェックする-(check holidayType đang chọn)

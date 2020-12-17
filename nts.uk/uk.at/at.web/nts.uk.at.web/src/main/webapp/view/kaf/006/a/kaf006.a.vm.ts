@@ -802,9 +802,23 @@ module nts.uk.at.view.kaf006.a.viewmodel {
                         paramInsert.checkOver1Year = false;
                              service.createAbsence(paramInsert).done((data) => {
                                 self.sendMail(data);
-                            }).fail((res) => {
-                                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
-                                        .then(function() { nts.uk.ui.block.clear(); });
+                            }).fail((res1) => {
+								if (res1.messageId == "Msg_1520" || res1.messageId == "Msg_1522") {
+			                        dialog.confirm({ messageId: res1.messageId, messageParams: res1.parameterIds }).ifYes(() => {
+			                            paramInsert.checkContradiction = true;
+			                            service.createAbsence(paramInsert).done((data) => {
+			                                self.sendMail(data);
+			                            }).fail((res2) => {
+			                                dialog.alertError({ messageId: res2.messageId, messageParams: res2.parameterIds })
+			                                    .then(function() { nts.uk.ui.block.clear(); });
+			                            });
+			                        }).ifNo(() => {
+			                            nts.uk.ui.block.clear();
+			                        });
+			                    } else {
+			                        dialog.alertError({ messageId: res1.messageId, messageParams: res1.parameterIds })
+			                            .then(function() { nts.uk.ui.block.clear(); });
+			                    }
                             });
                         }).ifNo(() => {
                             nts.uk.ui.block.clear();
@@ -816,8 +830,8 @@ module nts.uk.at.view.kaf006.a.viewmodel {
                             paramInsert.checkContradiction = true;
                             service.createAbsence(paramInsert).done((data) => {
                                 self.sendMail(data);
-                            }).fail((res) => {
-                                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                            }).fail((res1) => {
+                                dialog.alertError({ messageId: res1.messageId, messageParams: res1.parameterIds })
                                     .then(function() { nts.uk.ui.block.clear(); });
                             });
                         }).ifNo(() => {
