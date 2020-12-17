@@ -104,7 +104,7 @@ public class JpaClosureEmploymentRepository extends JpaRepository implements Clo
 		CollectionUtil.split(employmentCDs, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {
 			result.addAll(new NtsStatement(sql, this.jdbcProxy())
 				.paramString("companyId", companyId)
-				.paramString("employmentCDs", employmentCDs)
+				.paramString("employmentCDs", splitData)
 				.getList(rec -> {
 					return convertToDomain(new KclmtClosureEmployment(
 							new KclmpClosureEmploymentPK(rec.getString("CID"),rec.getString("EMPLOYMENT_CD")),
