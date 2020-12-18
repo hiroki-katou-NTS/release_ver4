@@ -236,8 +236,20 @@ public class AppListInitialImpl implements AppListInitialRepository{
 		//休暇申請: get full info(1);
 		for (Application_New app : lstAbsence) {
 			Integer day = 0;
+			// INPUT．申請.申請開始日とINPUT．申請.申請終了日をチェックする
 			if(app.getStartDate().isPresent()&& app.getEndDate().isPresent()){
-				day = app.getStartDate().get().daysTo(app.getEndDate().get()) + 1;
+				if(app.getStartDate().get().equals(app.getEndDate().get())) {
+					// 休暇日数＝1
+					day = 1;
+				} else {
+					DatePeriod period = new DatePeriod(app.getStartDate().get(), app.getEndDate().get());
+					// 申請期間から休日の申請日を取得する
+					List<GeneralDate> holidayDateLst = otherCommonAlgorithm.lstDateIsHoliday(companyId, app.getEmployeeID(), period);
+					// 休暇日数＝INPUT．申請.申請終了日 - INPUT．申請.申請開始日 + 1 - 取得した日付一覧<List>．count
+					List<GeneralDate> dateLst = period.datesBetween();
+					dateLst.removeAll(holidayDateLst);
+					day = dateLst.size();
+				}
 			}
 			AppAbsenceFull appAbsence = repoAppDetail.getAppAbsenceInfo(companyId, app.getAppID(), day);
 			lstAppAbsence.add(appAbsence);
