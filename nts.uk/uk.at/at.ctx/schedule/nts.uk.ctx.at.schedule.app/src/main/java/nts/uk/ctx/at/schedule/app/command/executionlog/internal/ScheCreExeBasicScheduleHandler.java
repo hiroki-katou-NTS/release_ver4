@@ -5,9 +5,13 @@
 package nts.uk.ctx.at.schedule.app.command.executionlog.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -42,6 +46,7 @@ import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.service.DateRegistedEmp
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletime.PersonFeeTime;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletime.WorkScheduleTime;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletimezone.BounceAtr;
+import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletimezone.WorkScheduleTimeZone;
 import nts.uk.ctx.at.schedule.dom.schedule.commonalgorithm.ScheduleMasterInformationDto;
 import nts.uk.ctx.at.schedule.dom.schedule.commonalgorithm.ScheduleMasterInformationService;
 import nts.uk.ctx.at.schedule.dom.schedule.schedulemaster.ScheMasterInfo;
@@ -347,6 +352,8 @@ public class ScheCreExeBasicScheduleHandler {
 		return command;
 	}
 
+	
+	private final List<Integer> ITEMID = Arrays.asList(28, 29, 31, 34, 41, 44);
 	/**
 	 * 再設定する情報を取得する
 	 * 
@@ -359,9 +366,24 @@ public class ScheCreExeBasicScheduleHandler {
 	public void resetAllDataToCommandSave(BasicScheduleResetCommand command, GeneralDate toDate,
 			EmployeeGeneralInfoImported empGeneralInfo, List<BusinessTypeOfEmpDto> listBusTypeOfEmpHis,
 			List<BasicSchedule> listBasicSchedule, DateRegistedEmpSche dateRegistedEmpSche) {
+		
+		BasicSchedule oldData = listBasicSchedule.stream()
+				.filter(x -> x.getEmployeeId().equals(command.getEmployeeId()) && x.getDate().equals(toDate))
+				.findFirst().orElse(null);
+		Map<Integer, String> dataHandEdit = new HashMap<>();
+		if (oldData != null) {
+			List<Integer> lstEdit = oldData.getWorkScheduleStates().stream()
+					.filter(x -> ITEMID.contains(x.getScheduleItemId()) && x.correctHand())
+					.map(x -> x.getScheduleItemId()).collect(Collectors.toList());
+			lstEdit.stream().forEach(value -> {
+				dataHandEdit.put(value, getValueItemId(oldData, value));
+			});
+			
+			
+		}
 		String employeeId = command.getEmployeeId();
-		String workTypeCode = command.getWorkTypeCode();
-		String workTimeCode = command.getWorkingCode();
+		String workTypeCode = dataHandEdit.containsKey(28) ? dataHandEdit.get(28) : command.getWorkTypeCode();
+		String workTimeCode = dataHandEdit.containsKey(29) ? dataHandEdit.get(29) : command.getWorkingCode();
 		// add command save
 		BasicScheduleSaveCommand commandSave = new BasicScheduleSaveCommand();
 		commandSave.setWorktypeCode(workTypeCode);
@@ -386,9 +408,12 @@ public class ScheCreExeBasicScheduleHandler {
 		List<Integer> childCareStartTime = new ArrayList<>();
 		List<Integer> childCareEndTime = new ArrayList<>();
 
+		AtomicInteger count = new AtomicInteger(0);
 		commandSave.getWorkScheduleTimeZones().forEach(x -> {
-			startClock.add(x.getScheduleStartClock().v());
-			endClock.add(x.getScheduleEndClock().v());
+			//x.getScheduleCnt()
+			startClock.add(getValueTime(31 + count.get()*10, x.getScheduleStartClock().v(), dataHandEdit));
+			endClock.add(getValueTime(34 + count.get()*10, x.getScheduleEndClock().v(), dataHandEdit));
+			count.incrementAndGet();
 		});
 
 		commandSave.getWorkScheduleBreaks().forEach(x -> {
@@ -404,6 +429,7 @@ public class ScheCreExeBasicScheduleHandler {
 		ScTimeParam param = new ScTimeParam(employeeId, toDate, new WorkTypeCode(workTypeCode),
 				new WorkTimeCode(workTimeCode), startClock, endClock, breakStartTime, breakEndTime, childCareStartTime,
 				childCareEndTime);
+		
 		if(this.saveScheduleTime(command.getCompanySetting(), param, commandSave, command.getExecutionId()) == null)
 			return;
 		
@@ -415,6 +441,47 @@ public class ScheCreExeBasicScheduleHandler {
 				dateRegistedEmpSche);
 	}
 
+	private Integer getValueTime(Integer id, Integer valueNew, Map<Integer, String> dataHandEdit) {
+		if (dataHandEdit.containsKey(id)) {
+			return dataHandEdit.get(id) == null ? null : Integer.parseInt(dataHandEdit.get(id));
+		} else {
+			return valueNew;
+		}
+	}
+	
+	private String getValueItemId(BasicSchedule data, Integer itemId) {
+		
+		switch (itemId) {
+		case 28:
+			
+			return data.getWorkTypeCode();
+
+		case 29:
+
+			return data.getWorkTimeCode();
+
+		case 31:
+			return data.getWorkScheduleTimeZones().stream().filter(c -> c.getScheduleCnt() == 1).findFirst()
+					.map(x -> String.valueOf(x.getScheduleStartClock().v())).orElse(null);
+		case 34:
+
+			return data.getWorkScheduleTimeZones().stream().filter(c -> c.getScheduleCnt() == 1).findFirst()
+					.map(x -> String.valueOf(x.getScheduleEndClock().v())).orElse(null);
+		case 41:
+
+			return data.getWorkScheduleTimeZones().stream().filter(c -> c.getScheduleCnt() == 2).findFirst()
+					.map(x -> String.valueOf(x.getScheduleStartClock().v())).orElse(null);
+		case 44:
+
+			return data.getWorkScheduleTimeZones().stream().filter(c -> c.getScheduleCnt() == 2).findFirst()
+					.map(x -> String.valueOf(x.getScheduleEndClock().v())).orElse(null);
+
+		default:
+			return null;
+		}
+		
+	}
+	
 	/**
 	 * Reset created data.
 	 *

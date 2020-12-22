@@ -337,12 +337,12 @@ public class ScheCreExeMonthlyPatternHandler {
 		}
 
 		// 手修正保護判定をする
-		boolean valueIsProtectHandCorrect = this.isProtectHandCorrect(workingConditionItem.getEmployeeId(),
-				dateInPeriod,
-				command.getContent().getReCreateContent().getRebuildTargetDetailsAtr().getProtectHandCorrection());
-		if (valueIsProtectHandCorrect) {
-			return true;
-		}
+//		boolean valueIsProtectHandCorrect = this.isProtectHandCorrect(workingConditionItem.getEmployeeId(),
+//				dateInPeriod,
+//				command.getContent().getReCreateContent().getRebuildTargetDetailsAtr().getProtectHandCorrection());
+//		if (valueIsProtectHandCorrect) {
+//			return true;
+//		}
 
 		return false;
 	}
