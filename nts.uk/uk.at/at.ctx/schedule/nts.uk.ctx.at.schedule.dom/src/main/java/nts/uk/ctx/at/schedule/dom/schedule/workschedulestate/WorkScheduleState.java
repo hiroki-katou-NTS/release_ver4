@@ -27,4 +27,8 @@ public class WorkScheduleState extends AggregateRoot {
 		return new WorkScheduleState(EnumAdaptor.valueOf(scheduleEditState, ScheduleEditState.class),
 				scheduleItemId, ymd, sId);
 	}
+	
+	public boolean correctHand() {
+		return scheduleEditState != ScheduleEditState.REFLECT_APPLICATION;
+	}
 }

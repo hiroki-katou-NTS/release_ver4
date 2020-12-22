@@ -31,5 +31,10 @@ public class EditStateOfDailyPerformance extends AggregateRoot {
 	/** 編集状態: 日別実績の編集状態 */
 	@Setter
 	private EditStateSetting editStateSetting;
+	
+	public boolean isHandCorrect() {
+		return this.editStateSetting == EditStateSetting.HAND_CORRECTION_MYSELF
+				|| this.editStateSetting == EditStateSetting.HAND_CORRECTION_OTHER;
+	}
 
 }

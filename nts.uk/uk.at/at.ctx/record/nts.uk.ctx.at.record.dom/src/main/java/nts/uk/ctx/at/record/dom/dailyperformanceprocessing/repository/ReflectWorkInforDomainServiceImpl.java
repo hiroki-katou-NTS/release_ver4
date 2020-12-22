@@ -54,11 +54,14 @@ import nts.uk.ctx.at.record.dom.affiliationinformation.WorkTypeOfDailyPerformanc
 import nts.uk.ctx.at.record.dom.affiliationinformation.primitivevalue.ClassificationCode;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.AffiliationInforOfDailyPerforRepository;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.WorkTypeOfDailyPerforRepository;
+import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemConvertFactory;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeSheet;
+import nts.uk.ctx.at.record.dom.breakorgoout.OutingTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.enums.BreakType;
 import nts.uk.ctx.at.record.dom.breakorgoout.primitivevalue.BreakFrameNo;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
+import nts.uk.ctx.at.record.dom.breakorgoout.repository.OutingTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.calculationattribute.AutoCalcSetOfDivergenceTime;
 import nts.uk.ctx.at.record.dom.calculationattribute.CalAttrOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.calculationattribute.enums.DivergenceTimeAttr;
@@ -66,12 +69,18 @@ import nts.uk.ctx.at.record.dom.calculationattribute.repo.CalAttrOfDailyPerforma
 import nts.uk.ctx.at.record.dom.calculationsetting.StampReflectionManagement;
 import nts.uk.ctx.at.record.dom.calculationsetting.enums.AutoStampForFutureDayClass;
 import nts.uk.ctx.at.record.dom.calculationsetting.repository.StampReflectionManagementRepository;
+import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.AttendanceLeavingGateOfDaily;
+import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
+import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.AttendanceLeavingGateOfDailyRepo;
+import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.PCLogOnInfoOfDailyRepo;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployee;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployeeHistory;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.repository.BusinessTypeEmpOfHistoryRepository;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.repository.BusinessTypeOfEmployeeRepository;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.AffiliationInforState;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.StampBeforeReflection;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.PreOvertimeReflectService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.AutomaticStampSetDetailOutput;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.ClosureOfDailyPerOutPut;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.MasterList;
@@ -81,6 +90,8 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.ReflectStampOu
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.TimeActualStampOutPut;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.TimeLeavingWorkOutput;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.WorkStampOutPut;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.converter.DailyRecordToAttendanceItemConverter;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.jobtitle.affiliate.AffJobTitleAdapter;
@@ -106,6 +117,7 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.Err
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageResource;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionContent;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
+import nts.uk.ctx.at.record.dom.worktime.TemporaryTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
@@ -117,6 +129,7 @@ import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanc
 import nts.uk.ctx.at.shared.dom.WorkInformation;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemIdContainer;
 import nts.uk.ctx.at.shared.dom.attendance.util.enu.DailyDomainGroup;
+import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
 import nts.uk.ctx.at.shared.dom.bonuspay.primitives.WorkingTimesheetCode;
 import nts.uk.ctx.at.shared.dom.bonuspay.repository.BPSettingRepository;
 import nts.uk.ctx.at.shared.dom.bonuspay.repository.BPUnitUseSettingRepository;
@@ -172,6 +185,8 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeSet;
 import nts.uk.shr.com.history.DateHistoryItem;
 import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.time.TimeWithDayAttr;
+
+
 
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @Stateless
@@ -310,6 +325,19 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 	
 	@Inject
 	private ReflectStampDomainService reflectStampDomainService;
+	
+	@Inject
+	private AttendanceItemConvertFactory attendanceItemConvertFactory;
+	
+	
+	@Inject
+	private PCLogOnInfoOfDailyRepo pcLogOnInfoOfDailyRepo;
+	
+	@Inject
+	private AttendanceLeavingGateOfDailyRepo attendanceLeavingGateOfDailyRepo;
+	
+	@Inject
+	private OutingTimeOfDailyPerformanceRepository outingTimeOfDailyPerformanceRepository;
 
 	@PostConstruct
 	public void init() {
@@ -435,11 +463,62 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 					
 					//「再作成フラグ」を更新する : 再作成フラグ　=　する（更新自動実行）
 //					recreateFlag = RecreateFlag.UPDATE_AUTO_EXECUTION;
+		
+					DailyRecordToAttendanceItemConverter converter = attendanceItemConvertFactory
+							.createDailyConverter();
+			
+					DailyRecordToAttendanceItemConverter converter2 = attendanceItemConvertFactory
+							.createDailyConverter();
+					List<Integer> attItemIdsConverter = new ArrayList<>();
+					List<EditStateOfDailyPerformance> attItemIdStateOfTimeLeaving =  new ArrayList<>();
 					
 					Optional<TimeLeavingOfDailyPerformance> timeLeaving = Optional.empty();
 					if ( recreateFlag ==  RecreateFlag.UPDATE_AUTO_EXECUTION) {
 						timeLeaving = this.timeLeavingOfDailyPerformanceRepository.findByKey(employeeId, day);
 					}
+					
+					// 日別実績のドメインモデルを退避する
+					StampBeforeReflection stampBeforeReflection = new StampBeforeReflection();
+					// 日別実績の出退勤
+					Optional<TimeLeavingOfDailyPerformance> timeleaving = this.timeLeavingOfDailyPerformanceRepository
+							.findByKey(employeeId, day);
+					stampBeforeReflection.setTimeLeavingOfDailyPerformance(timeleaving.orElse(null));
+
+					// 日別実績の外出時間帯
+					Optional<OutingTimeOfDailyPerformance> outingTime = this.outingTimeOfDailyPerformanceRepository
+							.findByEmployeeIdAndDate(employeeId, day);
+					stampBeforeReflection.setOutingTimeOfDailyPerformance(outingTime.orElse(null));
+
+					// 日別実績の臨時出退勤
+					Optional<TemporaryTimeOfDailyPerformance> temporaryTime = this.temporaryTimeOfDailyPerformanceRepository
+							.findByKey(employeeId, day);
+					stampBeforeReflection.setTemporaryTimeOfDailyPerformance(temporaryTime.orElse(null));
+
+					// 日別実績の入退門
+					Optional<AttendanceLeavingGateOfDaily> attendanceLeaving = this.attendanceLeavingGateOfDailyRepo
+							.find(employeeId, day);
+					stampBeforeReflection.setAttendanceLeavingGateOfDaily(attendanceLeaving.orElse(null));
+
+					// 日別実績のPCログオン情報
+					Optional<PCLogOnInfoOfDaily> pCLogOn = this.pcLogOnInfoOfDailyRepo.find(employeeId, day);
+					stampBeforeReflection.setPcLogOnInfoOfDaily(pCLogOn.orElse(null));
+
+					// to show clear attendance item
+					List<Integer> timeleavingAttItemIds = AttendanceItemIdContainer
+							.getItemIdByDailyDomains(DailyDomainGroup.ATTENDACE_LEAVE);
+					List<Integer> outingTimeAttItemIds = AttendanceItemIdContainer
+							.getItemIdByDailyDomains(DailyDomainGroup.OUTING_TIME);
+					List<Integer> temporaryTimeAttItemIds = AttendanceItemIdContainer
+							.getItemIdByDailyDomains(DailyDomainGroup.TEMPORARY_TIME);
+					List<Integer> attLeavingAttItemIds = AttendanceItemIdContainer
+							.getItemIdByDailyDomains(DailyDomainGroup.ATTENDANCE_LEAVE_GATE);
+					List<Integer> pcLogOnAttItemIds = AttendanceItemIdContainer
+							.getItemIdByDailyDomains(DailyDomainGroup.PC_LOG_INFO);
+					attItemIdsConverter.addAll(timeleavingAttItemIds);
+					attItemIdsConverter.addAll(outingTimeAttItemIds);
+					attItemIdsConverter.addAll(temporaryTimeAttItemIds);
+					attItemIdsConverter.addAll(attLeavingAttItemIds);
+					attItemIdsConverter.addAll(pcLogOnAttItemIds);
 					
 //					if (!editStateOfDailyPerformances.isEmpty()) {
 //						// 日別実績を削除する
@@ -459,6 +538,7 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 //
 //						timeLeaving = this.timeLeavingOfDailyPerformanceRepository.findByKey(employeeId, day);
 //					}
+					
 					
 					WorkInfoOfDailyPerformance workInfoOfDailyPerformance = this.self.reflectWithNoInfoImport(companyId, employeeId, day, empCalAndSumExecLogID, reCreateAttr,
 							reCreateWorkType, stampReflectionManagement,
@@ -488,6 +568,50 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 									 Optional.empty(),Optional.empty(), Optional.empty(),recreateFlag);
 						}
 					}
+					// ドメインモデル「日別実績の編集状態」を取得する
+					attItemIdStateOfTimeLeaving = this.editStateOfDailyPerformanceRepository
+							.findByItems(employeeId,day, attItemIdsConverter);
+					
+					// set data in converter, for update value of
+					// attendance item id
+					// set data of stampBeforeReflection in converter
+					
+					converter.withTimeLeaving(stampBeforeReflection.getTimeLeavingOfDailyPerformance())
+							.employeeId(employeeId).workingDate(day);
+					converter.withOutingTime(stampBeforeReflection.getOutingTimeOfDailyPerformance());
+					converter.withTemporaryTime(stampBeforeReflection.getTemporaryTimeOfDailyPerformance());
+					converter
+							.withAttendanceLeavingGate(stampBeforeReflection.getAttendanceLeavingGateOfDaily());
+					converter.withPCLogInfo(stampBeforeReflection.getPcLogOnInfoOfDaily());
+
+					// set data of stampOutPut in converter
+					converter2.withTimeLeaving(
+									stampOutput.getReflectStampOutput().getTimeLeavingOfDailyPerformance())
+							.employeeId(employeeId).workingDate(day);
+					converter2.withOutingTime(
+							stampOutput.getReflectStampOutput().getOutingTimeOfDailyPerformance());
+					converter2.withTemporaryTime(
+							stampOutput.getReflectStampOutput().getTemporaryTimeOfDailyPerformance());
+					converter2.withAttendanceLeavingGate(
+							stampOutput.getReflectStampOutput().getAttendanceLeavingGateOfDaily());
+					converter2.withPCLogInfo(stampOutput.getReflectStampOutput().getPcLogOnInfoOfDaily());
+					
+					for(int itemId : attItemIdsConverter){
+						if (attItemIdStateOfTimeLeaving.stream().anyMatch(item -> item.getAttendanceItemId() == itemId)) {
+							// get itemValue of Id
+							Optional<ItemValue> itemValue = converter.convert(itemId);
+							// merge value of Id to converter2
+							if (itemValue.isPresent()) {
+								converter2.merge(itemValue.get());
+							}								
+						}
+					}
+					stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(converter2.timeLeaving().orElse(null));
+					stampOutput.getReflectStampOutput().setOutingTimeOfDailyPerformance(converter2.outingTime().orElse(null));
+					stampOutput.getReflectStampOutput().setTemporaryTimeOfDailyPerformance(converter2.temporaryTime().orElse(null));
+					stampOutput.getReflectStampOutput().setAttendanceLeavingGateOfDaily(converter2.attendanceLeavingGate().orElse(null));
+					stampOutput.getReflectStampOutput().setPcLogOnInfoOfDaily(converter2.pcLogInfo().orElse(null));	
+					
 					// this.registerDailyPerformanceInfoService.registerDailyPerformanceInfo(companyId,
 					// employeeId, day,
 					// stampOutput, null, workInfoOfDailyPerformance,

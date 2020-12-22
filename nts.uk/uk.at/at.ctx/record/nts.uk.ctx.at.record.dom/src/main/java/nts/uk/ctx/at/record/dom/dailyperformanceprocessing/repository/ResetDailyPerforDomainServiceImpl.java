@@ -3,6 +3,7 @@ package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -172,6 +173,15 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 			List<ErrMessageInfo> errMesInfos = new ArrayList<>();
 			ClosureOfDailyPerOutPut closureOfDailyPerOutPut = new ClosureOfDailyPerOutPut();
 			WorkInfoOfDailyPerformance dailyPerformance = null;
+			
+			DailyRecordToAttendanceItemConverter converter = attendanceItemConvertFactory
+					.createDailyConverter();
+
+			DailyRecordToAttendanceItemConverter converter2 = attendanceItemConvertFactory
+					.createDailyConverter();
+			List<Integer> attItemIdsConverter = new ArrayList<>();
+			List<EditStateOfDailyPerformance> attItemIdStateOfTimeLeaving =  new ArrayList<>();
+			
 			if (executionLog.isPresent()) {
 				if (executionLog.get().getDailyCreationSetInfo().isPresent()) {
 					if (executionLog.get().getDailyCreationSetInfo().get().getPartResetClassification().isPresent()) {
@@ -367,7 +377,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 									.getItemIdByDailyDomains(DailyDomainGroup.ATTENDANCE_LEAVE_GATE);
 							List<Integer> pcLogOnAttItemIds = AttendanceItemIdContainer
 									.getItemIdByDailyDomains(DailyDomainGroup.PC_LOG_INFO);
-							List<Integer> attItemIds = new ArrayList<>();
+//							List<Integer> attItemIds = new ArrayList<>();
 							// attItemIds.addAll(AttendanceItemIdContainer
 							// .getItemIdByDailyDomains(DailyDomainGroup.ATTENDACE_LEAVE));
 							// attItemIds.addAll(AttendanceItemIdContainer
@@ -378,11 +388,11 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 							// .getItemIdByDailyDomains(DailyDomainGroup.ATTENDANCE_LEAVE_GATE));
 							// attItemIds.addAll(AttendanceItemIdContainer
 							// .getItemIdByDailyDomains(DailyDomainGroup.PC_LOG_INFO));
-							attItemIds.addAll(timeleavingAttItemIds);
-							attItemIds.addAll(outingTimeAttItemIds);
-							attItemIds.addAll(temporaryTimeAttItemIds);
-							attItemIds.addAll(attLeavingAttItemIds);
-							attItemIds.addAll(pcLogOnAttItemIds);
+							attItemIdsConverter.addAll(timeleavingAttItemIds);
+							attItemIdsConverter.addAll(outingTimeAttItemIds);
+							attItemIdsConverter.addAll(temporaryTimeAttItemIds);
+							attItemIdsConverter.addAll(attLeavingAttItemIds);
+							attItemIdsConverter.addAll(pcLogOnAttItemIds);
 
 							// 日別実績のドメインモデルを削除する
 							// 日別実績の出退勤
@@ -416,16 +426,16 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 							// ****
 							
 							if(stampOutput.getErrMesInfos().isEmpty()) {
-
-							DailyRecordToAttendanceItemConverter converter = attendanceItemConvertFactory
-									.createDailyConverter();
-
-							DailyRecordToAttendanceItemConverter converter2 = attendanceItemConvertFactory
-									.createDailyConverter();
+//
+//							DailyRecordToAttendanceItemConverter converter = attendanceItemConvertFactory
+//									.createDailyConverter();
+//
+//							DailyRecordToAttendanceItemConverter converter2 = attendanceItemConvertFactory
+//									.createDailyConverter();
 
 							// ドメインモデル「日別実績の編集状態」を取得する
-							List<EditStateOfDailyPerformance> attItemIdStateOfTimeLeaving = this.editStateOfDailyPerformanceRepository
-									.findByItems(employeeID, processingDate, attItemIds);
+							attItemIdStateOfTimeLeaving = this.editStateOfDailyPerformanceRepository
+									.findByItems(employeeID, processingDate, attItemIdsConverter);
 
 							// set data in converter, for update value of
 							// attendance item id
@@ -451,25 +461,6 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 									stampOutput.getReflectStampOutput().getAttendanceLeavingGateOfDaily());
 							converter2.withPCLogInfo(stampOutput.getReflectStampOutput().getPcLogOnInfoOfDaily());
 							
-							// ---------------------
-							// neu nhu attItemIdStateOfTimeLeaving chua gia tri cua Id nao, thi Id do lay
-							// gia tri cua Old, còn nếu k chua thì lấy New			
-														
-							for(int itemId : attItemIds){
-								if (attItemIdStateOfTimeLeaving.stream().anyMatch(item -> item.getAttendanceItemId() == itemId)) {
-									// get itemValue of Id
-									Optional<ItemValue> itemValue = converter.convert(itemId);
-									// merge value of Id to converter2
-									if (itemValue.isPresent()) {
-										converter2.merge(itemValue.get());
-									}								
-								}
-							}
-							stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(converter2.timeLeaving().orElse(null));
-							stampOutput.getReflectStampOutput().setOutingTimeOfDailyPerformance(converter2.outingTime().orElse(null));
-							stampOutput.getReflectStampOutput().setTemporaryTimeOfDailyPerformance(converter2.temporaryTime().orElse(null));
-							stampOutput.getReflectStampOutput().setAttendanceLeavingGateOfDaily(converter2.attendanceLeavingGate().orElse(null));
-							stampOutput.getReflectStampOutput().setPcLogOnInfoOfDaily(converter2.pcLogInfo().orElse(null));
 							// 社員の労働条件を取得する
 							Optional<WorkingConditionItem> workingConditionItem = this.workingConditionService.findWorkConditionByEmployee(employeeID, processingDate);
 							if(workingConditionItem.isPresent()){
@@ -520,7 +511,27 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 					}
 				}
 			}
-
+			
+			// ---------------------
+			// neu nhu attItemIdStateOfTimeLeaving chua gia tri cua Id nao, thi Id do lay
+			// gia tri cua Old, còn nếu k chua thì lấy New			
+										
+			for(int itemId : attItemIdsConverter){
+				if (attItemIdStateOfTimeLeaving.stream().anyMatch(item -> item.getAttendanceItemId() == itemId)) {
+					// get itemValue of Id
+					Optional<ItemValue> itemValue = converter.convert(itemId);
+					// merge value of Id to converter2
+					if (itemValue.isPresent()) {
+						converter2.merge(itemValue.get());
+					}								
+				}
+			}
+			stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(converter2.timeLeaving().orElse(null));
+			stampOutput.getReflectStampOutput().setOutingTimeOfDailyPerformance(converter2.outingTime().orElse(null));
+			stampOutput.getReflectStampOutput().setTemporaryTimeOfDailyPerformance(converter2.temporaryTime().orElse(null));
+			stampOutput.getReflectStampOutput().setAttendanceLeavingGateOfDaily(converter2.attendanceLeavingGate().orElse(null));
+			stampOutput.getReflectStampOutput().setPcLogOnInfoOfDaily(converter2.pcLogInfo().orElse(null));	
+			
 			if (errMesInfos.isEmpty()
 					&& ((stampOutput.getErrMesInfos() != null && stampOutput.getErrMesInfos().isEmpty())
 							|| stampOutput.getErrMesInfos() == null)) {
