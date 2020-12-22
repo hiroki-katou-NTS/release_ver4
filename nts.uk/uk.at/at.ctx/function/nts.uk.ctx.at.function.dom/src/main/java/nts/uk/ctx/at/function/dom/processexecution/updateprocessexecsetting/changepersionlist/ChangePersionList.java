@@ -36,9 +36,13 @@ public class ChangePersionList {
 		Set<String> setEmpIds = new HashSet<String>();
 		// ・社員ID（異動者、勤務種別変更者のみ）（List）
 		List<String> noLeaderEmpIdList = empIds;
-		refinementProcess.refinementProcess(companyId, empIds, setEmpIds, newEmpIdList, startDate, procExec);
+		// 社員ID（休職者・休業者）（List）
+		List<String> listLeaveOfAbsence = new ArrayList<>();
+		refinementProcess.refinementProcess(companyId, empIds, setEmpIds, newEmpIdList, startDate, procExec,listLeaveOfAbsence);
 		setEmpIds.addAll(newEmpIdList);
+		setEmpIds.addAll(listLeaveOfAbsence);
 		noLeaderEmpIdList.removeAll(new ArrayList<>(newEmpIdList));
+		noLeaderEmpIdList.removeAll(new ArrayList<>(listLeaveOfAbsence));
 		return new ListLeaderOrNotEmp(new ArrayList<>(setEmpIds), noLeaderEmpIdList);
 	}
 

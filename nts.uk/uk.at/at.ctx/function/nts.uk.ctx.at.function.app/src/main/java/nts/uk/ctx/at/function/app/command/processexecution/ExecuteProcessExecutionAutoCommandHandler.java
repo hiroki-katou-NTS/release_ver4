@@ -43,6 +43,7 @@ import nts.uk.ctx.at.function.dom.adapter.appreflectmanager.AppReflectManagerAda
 import nts.uk.ctx.at.function.dom.adapter.appreflectmanager.ProcessStateReflectImport;
 import nts.uk.ctx.at.function.dom.adapter.dailymonthlyprocessing.DailyMonthlyprocessAdapterFn;
 import nts.uk.ctx.at.function.dom.adapter.dailymonthlyprocessing.ExeStateOfCalAndSumImportFn;
+import nts.uk.ctx.at.function.dom.adapter.temporaryabsence.takeleaveemployeeandperiod.TakeLeaveEmpAndPeriodAdapter;
 import nts.uk.ctx.at.function.dom.adapter.worklocation.RecordWorkInfoFunAdapter;
 import nts.uk.ctx.at.function.dom.adapter.worklocation.WorkInfoOfDailyPerFnImport;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.createextractionprocess.CreateExtraProcessService;
@@ -91,6 +92,7 @@ import nts.uk.ctx.at.record.dom.affiliationinformation.wktypeinfochangeperiod.Wk
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDailyResultDomainServiceImpl.ProcessState;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDailyResultEmployeeDomainService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.DailyCalculationEmployeeService;
+import nts.uk.ctx.at.record.dom.dailyresult.findperiodchangeleavehis.FindPeriodChangeLeaveHis;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.MonthlyAggregationEmployeeService;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.getprocessingdate.GetProcessingDate;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.CalExeSettingInfor;
@@ -128,6 +130,7 @@ import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.BasicScheduleRepository
 import nts.uk.ctx.at.shared.dom.common.CompanyId;
 import nts.uk.ctx.at.shared.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmpDto;
 import nts.uk.ctx.at.shared.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmpHisAdaptor;
+import nts.uk.ctx.at.shared.dom.dailyresult.findperiodchangeleavehis.TakeLeaveEmpAndPeriodShared;
 import nts.uk.ctx.at.shared.dom.ot.frame.NotUseAtr;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainDataMngRegisterDateChange;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
@@ -286,6 +289,12 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
     
     @Inject
 	private GetProcessingDate getProcessingDate;
+    
+    @Inject
+	private TakeLeaveEmpAndPeriodAdapter takeLeaveEmpAndPeriodAdapter;
+	
+	@Inject
+	private FindPeriodChangeLeaveHis findPeriodChangeLeaveHis;
     
 	public static int MAX_DELAY_PARALLEL = 0;
 	
@@ -1619,7 +1628,20 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 								//勤務種別情報変更期間を求める
 								listDatePeriodWorktype = wkTypeInfoChangePeriod.getWkTypeInfoChangePeriod(empLeader, datePeriod, listBusinessTypeOfEmpDto, true);
 							}
-							listDatePeriodAll.addAll(createListAllPeriod(listDatePeriodWorkplace,listDatePeriodWorktype));
+							//INPUT．「休職・休業者再作成」をチェックする (INPUT．「休職・休業者再作成」は固定TRUEで対応お願いします) chưa có nên để tạm true
+							List<DatePeriod> listPeriod = new ArrayList<>();
+							boolean recreateLeave = true;
+							if(recreateLeave) {
+								//社員（List）と期間から休職休業を取得する
+								List<TakeLeaveEmpAndPeriodShared> listTakeLeaveEmpAndPeriod = takeLeaveEmpAndPeriodAdapter
+										.takeLeaveEmpAndPeriodPub(Arrays.asList(empLeader), datePeriod);
+								//休職休業履歴変更期間を求める
+								listPeriod = findPeriodChangeLeaveHis.findPeriodChangeLeaveHis(
+										empLeader, datePeriod, listTakeLeaveEmpAndPeriod, recreateLeave);
+							}
+							
+							
+							listDatePeriodAll.addAll(createListAllPeriod(createListAllPeriod(listDatePeriodWorkplace,listDatePeriodWorktype),listPeriod));
 							//取り除いた期間をOUTPUT「承認結果の反映対象期間（List）」に追加する
 							listApprovalPeriodByEmp.add(new ApprovalPeriodByEmp(empLeader,listDatePeriodAll));
 							try {

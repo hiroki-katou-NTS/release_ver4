@@ -1,6 +1,5 @@
 package nts.uk.ctx.at.function.dom.processexecution.updateprocessreexeccondition.refinementprocess;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -15,9 +14,11 @@ import nts.uk.ctx.at.function.dom.adapter.AffWorkplaceHistoryImport;
 import nts.uk.ctx.at.function.dom.adapter.WorkplaceWorkRecordAdapter;
 import nts.uk.ctx.at.function.dom.adapter.dailyperformanceformat.businesstype.BusinessTypeEmpOfHistAdapter;
 import nts.uk.ctx.at.function.dom.adapter.dailyperformanceformat.businesstype.BusinessTypeOfEmpHistImport;
+import nts.uk.ctx.at.function.dom.adapter.employeebasic.SyEmployeeFnAdapter;
 import nts.uk.ctx.at.function.dom.processexecution.ProcessExecution;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.history.DateHistoryItem;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 絞り込み処理
@@ -34,7 +35,10 @@ public class RefinementProcess {
 	@Inject
 	private BusinessTypeEmpOfHistAdapter businessTypeEmpOfHistAdapter;
 	
-	public void refinementProcess(String companyId, List<String> empIds,Set<String> setEmpIds,List<String> newEmpIdList, GeneralDate startDate, ProcessExecution procExec) {
+	@Inject
+	private SyEmployeeFnAdapter syEmployeeFnAdapter;
+	
+	public void refinementProcess(String companyId, List<String> empIds,Set<String> setEmpIds,List<String> newEmpIdList, GeneralDate startDate, ProcessExecution procExec,List<String> listLeaveOfAbsence) {
 		if (procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTransfer()) {
 			// 異動者の絞り込み todo request list 189
 			List<AffWorkplaceHistoryImport> list = workplaceWorkRecordAdapter.getWorkplaceBySidsAndBaseDate(empIds,
@@ -52,6 +56,14 @@ public class RefinementProcess {
 			// 勤務種別の絞り込み
 			this.refineWorkType(companyId, empIds, startDate, newEmpIdList);
 		}
+		
+		//休職者・休業者を再作成するか判定 (INPUT．「休職・休業者再作成」は固定TRUEで対応お願いします) chưa có nên để tạm true
+		boolean recreateLeave = true;
+		if(recreateLeave) {
+			//休職者・休業者の絞り込み
+			listLeaveOfAbsence.addAll(narrowingDownEmployeesLeave(empIds, new DatePeriod(startDate, GeneralDate.ymd(9999, 12, 31))));
+		}
+			
 	}
 	
 	// 勤務種別の絞り込み
@@ -73,5 +85,10 @@ public class RefinementProcess {
 				}
 			}
 		}
+	}
+	
+	////休職者・休業者の絞り込み 
+	public	List<String> narrowingDownEmployeesLeave(List<String> emps,DatePeriod period){
+		return syEmployeeFnAdapter.filterSidLstByDatePeriodAndSids(emps, period);
 	}
 }
