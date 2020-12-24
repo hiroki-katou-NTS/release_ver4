@@ -1463,8 +1463,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 
 		// 27-再作成対象区分 → 対象者のみ
 		reCreateContent.setRebuildTargetAtr(RebuildTargetAtr.TARGET_ONLY);
-		// 28-休職休業者を再作成 → falseとする
-		rebuildTargetDetailsAtr.setRecreateEmployeeOffWork(false);
+		// 28-休職休業者を再作成 → falseとする  ->> true (bug:113051)   
+		rebuildTargetDetailsAtr.setRecreateEmployeeOffWork(true);
 		// 29-・直行直帰者を再作成 → falseとする
 		rebuildTargetDetailsAtr.setRecreateDirectBouncer(false);
 		// 30短時間勤務者を再作成 → falseとする
