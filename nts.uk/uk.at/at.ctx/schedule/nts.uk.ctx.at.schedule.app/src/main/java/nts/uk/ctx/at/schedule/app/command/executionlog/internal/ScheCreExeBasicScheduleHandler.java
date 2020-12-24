@@ -353,7 +353,7 @@ public class ScheCreExeBasicScheduleHandler {
 	}
 
 	
-	private final List<Integer> ITEMID = Arrays.asList(28, 29, 31, 34, 41, 44);
+	private final List<Integer> ITEMID = Arrays.asList(1, 2, 3, 4);
 	/**
 	 * 再設定する情報を取得する
 	 * 
@@ -382,8 +382,8 @@ public class ScheCreExeBasicScheduleHandler {
 			
 		}
 		String employeeId = command.getEmployeeId();
-		String workTypeCode = dataHandEdit.containsKey(28) ? dataHandEdit.get(28) : command.getWorkTypeCode();
-		String workTimeCode = dataHandEdit.containsKey(29) ? dataHandEdit.get(29) : command.getWorkingCode();
+		String workTypeCode = dataHandEdit.containsKey(1) ? dataHandEdit.get(1) : command.getWorkTypeCode();
+		String workTimeCode = dataHandEdit.containsKey(2) ? dataHandEdit.get(2) : command.getWorkingCode();
 		// add command save
 		BasicScheduleSaveCommand commandSave = new BasicScheduleSaveCommand();
 		commandSave.setWorktypeCode(workTypeCode);
@@ -408,12 +408,10 @@ public class ScheCreExeBasicScheduleHandler {
 		List<Integer> childCareStartTime = new ArrayList<>();
 		List<Integer> childCareEndTime = new ArrayList<>();
 
-		AtomicInteger count = new AtomicInteger(0);
 		commandSave.getWorkScheduleTimeZones().forEach(x -> {
 			//x.getScheduleCnt()
-			startClock.add(getValueTime(31 + count.get()*10, x.getScheduleStartClock().v(), dataHandEdit));
-			endClock.add(getValueTime(34 + count.get()*10, x.getScheduleEndClock().v(), dataHandEdit));
-			count.incrementAndGet();
+			startClock.add(getValueTime(3, x.getScheduleStartClock().v(), dataHandEdit));
+			endClock.add(getValueTime(4, x.getScheduleEndClock().v(), dataHandEdit));
 		});
 
 		commandSave.getWorkScheduleBreaks().forEach(x -> {
@@ -467,15 +465,6 @@ public class ScheCreExeBasicScheduleHandler {
 
 			return data.getWorkScheduleTimeZones().stream().filter(c -> c.getScheduleCnt() == 1).findFirst()
 					.map(x -> String.valueOf(x.getScheduleEndClock().v())).orElse(null);
-		case 41:
-
-			return data.getWorkScheduleTimeZones().stream().filter(c -> c.getScheduleCnt() == 2).findFirst()
-					.map(x -> String.valueOf(x.getScheduleStartClock().v())).orElse(null);
-		case 44:
-
-			return data.getWorkScheduleTimeZones().stream().filter(c -> c.getScheduleCnt() == 2).findFirst()
-					.map(x -> String.valueOf(x.getScheduleEndClock().v())).orElse(null);
-
 		default:
 			return null;
 		}
