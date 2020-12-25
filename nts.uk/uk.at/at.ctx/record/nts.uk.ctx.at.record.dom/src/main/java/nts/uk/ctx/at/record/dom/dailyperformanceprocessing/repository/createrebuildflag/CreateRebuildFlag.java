@@ -43,9 +43,9 @@ public class CreateRebuildFlag {
 	 * 
 	 * return  RecreateFlag  再作成フラグ
 	 */
-	public RecreateFlag createRebuildFlag(String employeeId, GeneralDate ymd, ExecutionType executionType,
+	public RecreateFlag createRebuildFlag(String companyId, String employeeId, GeneralDate ymd, ExecutionType executionType,
 			boolean recreateByWorkTypeChange, boolean reCreateWorkPlace, Optional<String> empCalAndSumExecLogId,
-			Optional<WorkInfoOfDailyPerformance> workInfoOfDailyPerformance) {
+			Optional<WorkInfoOfDailyPerformance> workInfoOfDailyPerformance, boolean reCreateRestTime) {
 		//「再作成フラグ」を作成する - 再作成フラグ　=　しない
 		RecreateFlag recreateFlag = RecreateFlag.DO_NOT;
 		
@@ -62,9 +62,9 @@ public class CreateRebuildFlag {
 			return recreateFlag;
 		}
 		//勤務種別変更時に再作成するかどうかを判断
-		ExitStatus exitStatus = reflectWorkInforDomainServiceImpl.reCreateWorkType(employeeId, ymd,
+		ExitStatus exitStatus = reflectWorkInforDomainServiceImpl.reCreateWorkType(companyId, employeeId, ymd,
 				empCalAndSumExecLogId.isPresent() ? empCalAndSumExecLogId.get() : null, recreateByWorkTypeChange,
-				reCreateWorkPlace);
+				reCreateWorkPlace, reCreateRestTime);
 		if (exitStatus == ExitStatus.DO_NOT_RECREATE) {
 			return recreateFlag;
 		}

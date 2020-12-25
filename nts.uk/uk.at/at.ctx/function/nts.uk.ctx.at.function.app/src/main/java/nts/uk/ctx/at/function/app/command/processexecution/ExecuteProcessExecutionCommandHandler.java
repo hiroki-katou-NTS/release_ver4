@@ -3247,7 +3247,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 					.isRecreateTransfer();
 			// 実行設定.日別実績の作成・計算.対象者区分.休職者・休業者を再作成
 
-			boolean reCreateRestTime = false; // TODO : chua lam
+			boolean reCreateRestTime = true; // TODO : chua lam
 			// ⑤社員の日別実績を作成する
 			processState1 = this.createDailyService.createDailyResultEmployeeWithNoInfoImport(asyncContext, empId,
 					period, companyId, empCalAndSumExeLogId, Optional.ofNullable(dailyCreateLog), reCreateWorkType,

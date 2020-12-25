@@ -286,8 +286,8 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 								employeeGeneralInfoImport,recreateFlag,optDaily);
 					} else {
 						// 再作成フラグの作成
-						recreateFlag = createRebuildFlag.createRebuildFlag(employeeId, day, reCreateAttr, reCreateWorkType,
-								reCreateWorkPlace, Optional.of(empCalAndSumExecLogID), optDaily);
+						recreateFlag = createRebuildFlag.createRebuildFlag(companyId, employeeId, day, reCreateAttr, reCreateWorkType,
+								reCreateWorkPlace, Optional.of(empCalAndSumExecLogID), optDaily, reCreateRestTime);
 						this.reflectWorkInforDomainService.reflectWorkInformation(companyId, employeeId, day,
 								empCalAndSumExecLogID, reCreateAttr, reCreateWorkType, reCreateWorkPlace,
 								employeeGeneralInfoImport, stampReflectionManagement, mapWorkingConditionItem,
@@ -295,8 +295,8 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 					}
 				} else {
 					// 再作成フラグの作成
-					recreateFlag = createRebuildFlag.createRebuildFlag(employeeId, day, reCreateAttr, reCreateWorkType,
-							reCreateWorkPlace, Optional.of(empCalAndSumExecLogID), optDaily);
+					recreateFlag = createRebuildFlag.createRebuildFlag(companyId, employeeId, day, reCreateAttr, reCreateWorkType,
+							reCreateWorkPlace, Optional.of(empCalAndSumExecLogID), optDaily, reCreateRestTime);
 					this.reflectWorkInforDomainService.reflectWorkInformation(companyId, employeeId, day,
 							empCalAndSumExecLogID, reCreateAttr, reCreateWorkType, reCreateWorkPlace, employeeGeneralInfoImport,
 							stampReflectionManagement, mapWorkingConditionItem, mapDateHistoryItem,
@@ -466,16 +466,16 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 									empCalAndSumExecLogID, reCreateAttr, null, null,recreateFlag,optDaily);
 						} else {
 							// 再作成フラグの作成
-							recreateFlag = createRebuildFlag.createRebuildFlag(employeeId, day, reCreateAttr, reCreateWorkType,
-									reCreateWorkPlace, Optional.of(empCalAndSumExecLogID), optDaily);
+							recreateFlag = createRebuildFlag.createRebuildFlag(companyId, employeeId, day, reCreateAttr, reCreateWorkType,
+									reCreateWorkPlace, Optional.of(empCalAndSumExecLogID), optDaily, reCreateRestTime);
 							this.reflectWorkInforDomainService.reflectWorkInformationWithNoInfoImport(companyId,
 									employeeId, day, empCalAndSumExecLogID, reCreateAttr, reCreateWorkType, reCreateWorkPlace,
 									stampReflectionManagement,recreateFlag,optDaily);
 						}
 					} else {
 						// 再作成フラグの作成
-						recreateFlag = createRebuildFlag.createRebuildFlag(employeeId, day, reCreateAttr, reCreateWorkType,
-								reCreateWorkPlace, Optional.of(empCalAndSumExecLogID), optDaily);
+						recreateFlag = createRebuildFlag.createRebuildFlag(companyId, employeeId, day, reCreateAttr, reCreateWorkType,
+								reCreateWorkPlace, Optional.of(empCalAndSumExecLogID), optDaily, reCreateRestTime);
 						this.reflectWorkInforDomainService.reflectWorkInformationWithNoInfoImport(companyId, employeeId,
 								day, empCalAndSumExecLogID, reCreateAttr, reCreateWorkType, reCreateWorkPlace, stampReflectionManagement,recreateFlag,optDaily);
 					}

@@ -123,6 +123,6 @@ public interface ReflectWorkInforDomainService {
 			Optional<StampReflectionManagement> stampReflectionManagement, TimeLeavingOfDailyPerformance timeLeavingOptional,RecreateFlag recreateFlag
 			,Optional<WorkInfoOfDailyPerformance> optDaily);
 	
-	public ExitStatus reCreateWorkType(String employeeId, GeneralDate day, String empCalAndSumExecLogID,
-			boolean reCreateWorkType, boolean reCreateWorkPlace);
+	public ExitStatus reCreateWorkType(String companyId, String employeeId, GeneralDate day, String empCalAndSumExecLogID,
+			boolean reCreateWorkType, boolean reCreateWorkPlace, boolean reCreateRestTime);
 }
