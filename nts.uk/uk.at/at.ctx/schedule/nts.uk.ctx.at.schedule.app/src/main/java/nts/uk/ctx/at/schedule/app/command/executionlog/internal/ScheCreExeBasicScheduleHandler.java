@@ -450,18 +450,18 @@ public class ScheCreExeBasicScheduleHandler {
 	private String getValueItemId(BasicSchedule data, Integer itemId) {
 		
 		switch (itemId) {
-		case 28:
+		case 1:
 			
 			return data.getWorkTypeCode();
 
-		case 29:
+		case 2:
 
 			return data.getWorkTimeCode();
 
-		case 31:
+		case 3:
 			return data.getWorkScheduleTimeZones().stream().filter(c -> c.getScheduleCnt() == 1).findFirst()
 					.map(x -> String.valueOf(x.getScheduleStartClock().v())).orElse(null);
-		case 34:
+		case 4:
 
 			return data.getWorkScheduleTimeZones().stream().filter(c -> c.getScheduleCnt() == 1).findFirst()
 					.map(x -> String.valueOf(x.getScheduleEndClock().v())).orElse(null);
