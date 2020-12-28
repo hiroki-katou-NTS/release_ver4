@@ -48,6 +48,7 @@ import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.personalfee.WorkSchedul
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workschedulebreak.WorkScheduleBreak;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletime.PersonFeeTime;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletime.WorkScheduleTime;
+import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletimezone.BounceAtr;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletimezone.WorkScheduleTimeZone;
 import nts.uk.ctx.at.schedule.dom.schedule.schedulemaster.ScheMasterInfo;
 import nts.uk.ctx.at.schedule.dom.schedule.workschedulestate.WorkScheduleState;
@@ -72,6 +73,7 @@ import nts.uk.ctx.at.schedule.infra.entity.schedule.schedulemaster.KscdtScheMast
 import nts.uk.ctx.at.schedule.infra.repository.schedule.basicschedule.childcareschedule.JpaChildCareScheduleGetMemento;
 import nts.uk.ctx.at.schedule.infra.repository.schedule.basicschedule.childcareschedule.JpaChildCareScheduleSetMememto;
 import nts.uk.ctx.at.schedule.infra.repository.schedule.basicschedule.personalfee.JpaWorkSchedulePersonFeeGetMemento;
+import nts.uk.shr.com.time.TimeWithDayAttr;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.shr.infra.data.jdbc.JDBCUtil;
 
@@ -1257,5 +1259,15 @@ public class JpaBasicScheduleRepository extends JpaRepository implements BasicSc
 		schedule.workTimeCode = worktimeCode;
 		this.commandProxy().update(schedule);
 		this.getEntityManager().flush();
+	}
+
+	@Override
+	public List<WorkScheduleTimeZone> findScheduleTimeZone(String employeeId, GeneralDate baseDate) {
+		List<KscdtWorkScheduleTimeZone> lstEntity = this.findAllWorkScheduleTimeZone(employeeId, baseDate);
+		return lstEntity.stream()
+				.map(x -> new WorkScheduleTimeZone(x.kscdtWorkScheduleTimeZonePk.scheduleCnt,
+						new TimeWithDayAttr(x.scheduleStartClock), new TimeWithDayAttr(x.scheduleEndClock),
+						BounceAtr.valueOf(x.bounceAtr)))
+				.collect(Collectors.toList());
 	}
 }

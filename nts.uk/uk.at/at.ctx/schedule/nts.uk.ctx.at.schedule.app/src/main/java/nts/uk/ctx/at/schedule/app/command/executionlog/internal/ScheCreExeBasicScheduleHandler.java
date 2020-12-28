@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -46,12 +45,12 @@ import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.service.DateRegistedEmp
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletime.PersonFeeTime;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletime.WorkScheduleTime;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletimezone.BounceAtr;
-import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletimezone.WorkScheduleTimeZone;
 import nts.uk.ctx.at.schedule.dom.schedule.commonalgorithm.ScheduleMasterInformationDto;
 import nts.uk.ctx.at.schedule.dom.schedule.commonalgorithm.ScheduleMasterInformationService;
 import nts.uk.ctx.at.schedule.dom.schedule.schedulemaster.ScheMasterInfo;
 import nts.uk.ctx.at.schedule.dom.schedule.workschedulestate.ScheduleEditState;
 import nts.uk.ctx.at.schedule.dom.schedule.workschedulestate.WorkScheduleState;
+import nts.uk.ctx.at.schedule.dom.schedule.workschedulestate.WorkScheduleStateRepository;
 import nts.uk.ctx.at.schedule.dom.scheduleitemmanagement.ScheduleItem;
 import nts.uk.ctx.at.schedule.dom.scheduleitemmanagement.ScheduleItemManagementRepository;
 import nts.uk.ctx.at.shared.app.command.worktime.predset.dto.PrescribedTimezoneSettingDto;
@@ -109,6 +108,9 @@ public class ScheCreExeBasicScheduleHandler {
 	@Inject
 	private ScheduleErrorLogRepository scheduleErrorLogRepository;
 	
+	@Inject
+	private WorkScheduleStateRepository workScheduleStateRepository;
+	
 	/** The Constant DEFAULT_VALUE. */
 	private static final int DEFAULT_VALUE = 0;
 
@@ -145,11 +147,30 @@ public class ScheCreExeBasicScheduleHandler {
 				.filter(x -> (x.getEmployeeId().equals(employeeId) && x.getPeriod().contains(dateInPeriod)))
 				.findFirst();
 
+		List<WorkScheduleState> scheduleStates = this.workScheduleStateRepository.findByDateAndEmpId(employeeId,
+				dateInPeriod);
+
+		BasicSchedule oldData = listBasicSchedule.stream()
+				.filter(x -> x.getEmployeeId().equals(employeeId) && x.getDate().equals(dateInPeriod)).findFirst()
+				.orElse(null);
+		Map<Integer, String> dataHandEdit = new HashMap<>();
+		if (oldData != null) {
+			List<Integer> lstEdit = scheduleStates.stream().filter(x -> ITEMID.contains(x.getScheduleItemId()))
+					.map(x -> x.getScheduleItemId()).collect(Collectors.toList());
+			if (lstEdit.contains(3) || lstEdit.contains(4)) {
+				oldData.setWorkScheduleTimeZones(
+						basicScheduleRepository.findScheduleTimeZone(employeeId, dateInPeriod));
+			}
+			lstEdit.stream().forEach(value -> {
+				dataHandEdit.put(value, getValueItemId(oldData, value));
+			});
+		}
+
 		// add command save
 		BasicScheduleSaveCommand commandSave = new BasicScheduleSaveCommand();
-		commandSave.setWorktypeCode(worktypeDto.getWorktypeCode());
+		commandSave.setWorktypeCode(dataHandEdit.containsKey(1) ? dataHandEdit.get(1) : worktypeDto.getWorktypeCode());
 		commandSave.setEmployeeId(employeeId);
-		commandSave.setWorktimeCode(workTimeCode);
+		commandSave.setWorktimeCode(dataHandEdit.containsKey(2) ? dataHandEdit.get(2) :workTimeCode);
 		commandSave.setYmd(dateInPeriod);
 		
 		// add childCare
@@ -174,9 +195,9 @@ public class ScheCreExeBasicScheduleHandler {
 //		if (!this.scheCreExeErrorLogHandler.checkExistError(command.toBaseCommand(dateInPeriod), employeeId)) {
 
 		WorkTimeSetGetterCommand commandGetter = new WorkTimeSetGetterCommand();
-		commandGetter.setWorktypeCode(worktypeDto.getWorktypeCode());
+		commandGetter.setWorktypeCode(dataHandEdit.containsKey(1) ? dataHandEdit.get(1) : worktypeDto.getWorktypeCode());
 		commandGetter.setCompanyId(command.getCompanyId());
-		commandGetter.setWorkingCode(workTimeCode);
+		commandGetter.setWorkingCode(dataHandEdit.containsKey(2) ? dataHandEdit.get(2) : workTimeCode);
 
 		Optional<PrescribedTimezoneSetting> optionalWorkTimeSet = this.scheCreExeWorkTimeHandler
 				.getScheduleWorkHour(commandGetter);
@@ -219,9 +240,9 @@ public class ScheCreExeBasicScheduleHandler {
 		List<Integer> childCareEndTime = new ArrayList<>();
 
 		commandSave.getWorkScheduleTimeZones().forEach(x -> {
-			startClock.add(x.getScheduleStartClock().v());
-			endClock.add(x.getScheduleEndClock().v());
-		});
+			startClock.add(getValueTime(3, x.getScheduleStartClock().v(), dataHandEdit));
+			endClock.add(getValueTime(4, x.getScheduleEndClock().v(), dataHandEdit));
+		});		
 
 		commandSave.getWorkScheduleBreaks().forEach(x -> {
 			breakStartTime.add(x.getScheduledStartClock().v());
@@ -236,6 +257,8 @@ public class ScheCreExeBasicScheduleHandler {
 		ScTimeParam param = new ScTimeParam(employeeId, dateInPeriod, new WorkTypeCode(worktypeDto.getWorktypeCode()),
 				workTimeCode != null ? new WorkTimeCode(workTimeCode) : null, startClock, endClock, breakStartTime, breakEndTime, childCareStartTime,
 				childCareEndTime);
+		
+
 		if (this.saveScheduleTime(command.getCompanySetting(), param, commandSave, command.getExecutionId()) == null)
 			return;
         
@@ -249,6 +272,8 @@ public class ScheCreExeBasicScheduleHandler {
 //				listBasicSchedule, 
 //				command.getIsDeleteBeforInsert(), 
 				dateRegistedEmpSche);
+
+		this.workScheduleStateRepository.updateOrInsert(scheduleStates);
 	}
 
 	/**
@@ -375,12 +400,14 @@ public class ScheCreExeBasicScheduleHandler {
 			List<Integer> lstEdit = oldData.getWorkScheduleStates().stream()
 					.filter(x -> ITEMID.contains(x.getScheduleItemId()) && x.correctHand())
 					.map(x -> x.getScheduleItemId()).collect(Collectors.toList());
+			if (lstEdit.contains(3) || lstEdit.contains(4)) {
+				oldData.setWorkScheduleTimeZones(
+						basicScheduleRepository.findScheduleTimeZone(command.getEmployeeId(), toDate));
+			}
 			lstEdit.stream().forEach(value -> {
 				dataHandEdit.put(value, getValueItemId(oldData, value));
 			});
-			
-			
-		}
+			}
 		String employeeId = command.getEmployeeId();
 		String workTypeCode = dataHandEdit.containsKey(1) ? dataHandEdit.get(1) : command.getWorkTypeCode();
 		String workTimeCode = dataHandEdit.containsKey(2) ? dataHandEdit.get(2) : command.getWorkingCode();

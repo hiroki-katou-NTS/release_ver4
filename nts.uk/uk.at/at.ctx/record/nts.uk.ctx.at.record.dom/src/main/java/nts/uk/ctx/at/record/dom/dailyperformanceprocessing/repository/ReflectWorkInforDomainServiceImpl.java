@@ -820,6 +820,8 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 		}
 	}
 
+	private static final List<Integer> LEAV_NO = Arrays.asList(2, 3, 4, 5, 6, 7, 8, 9, 10);
+
 	/**
 	 * 勤務種別変更時に再作成する
 	 * 
@@ -832,8 +834,9 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Override
-	public ExitStatus reCreateWorkType(String companyId, String employeeId, GeneralDate day, String empCalAndSumExecLogID,
-			boolean reCreateWorkType, boolean reCreateWorkPlace, boolean reCreateRestTime) {
+	public ExitStatus reCreateWorkType(String companyId, String employeeId, GeneralDate day,
+			String empCalAndSumExecLogID, boolean reCreateWorkType, boolean reCreateWorkPlace,
+			boolean reCreateRestTime) {
 		ExitStatus exitStatus = ExitStatus.DO_NOT_RECREATE;
 
 		/**
@@ -921,7 +924,7 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 				}
 			}
 		}
-		
+
 		if (reCreateRestTime == true) {
 			// 社員（List）と期間から休職休業を取得する
 			List<TakeLeaveEmpAndPeriodShared> listTakeLeaveEmpAndPeriod = takeLeaveEmpAndPeriodAdapter
@@ -937,14 +940,23 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 			if (!workTypeOpt.isPresent())
 				return ExitStatus.DO_NOT_RECREATE;
 
-			val takeLeav = listTakeLeaveEmpAndPeriod.stream().filter(
-					x -> x.getPeriod().start().beforeOrEquals(day) && x.getPeriod().end().afterOrEquals(day))
+			val takeLeav = listTakeLeaveEmpAndPeriod.stream()
+					.filter(x -> x.getPeriod().start().beforeOrEquals(day) && x.getPeriod().end().afterOrEquals(day))
 					.findFirst();
 
-			if (takeLeav.get().getTempAbsenceHisItemShared().getTempAbsenceFrNo() != workTypeOpt.get()
-					.getWorkTypeSetList().stream().filter(x -> x.getWorkAtr() == WorkAtr.OneDay).findFirst()
-					.map(x -> x.getCloseAtr().value).orElse(Integer.MAX_VALUE)) {
-				return  ExitStatus.RECREATE;
+			// 休職
+			if (takeLeav.get().getTempAbsenceHisItemShared().getTempAbsenceFrNo() == 1
+					&& workTypeOpt.get().getDailyWork().getOneDay() != WorkTypeClassification.LeaveOfAbsence) {
+				return ExitStatus.RECREATE;
+			}
+
+			// 休業
+			if (LEAV_NO.contains(takeLeav.get().getTempAbsenceHisItemShared().getTempAbsenceFrNo())
+					&& !(workTypeOpt.get().getDailyWork().getOneDay() == WorkTypeClassification.Closure
+							&& takeLeav.get().getTempAbsenceHisItemShared().getTempAbsenceFrNo() == workTypeOpt.get()
+									.getWorkTypeSetList().stream().filter(x -> x.getWorkAtr() == WorkAtr.OneDay)
+									.findFirst().map(x -> (x.getCloseAtr().value + 2)).orElse(Integer.MAX_VALUE))) {
+				return ExitStatus.RECREATE;
 			}
 
 		}
