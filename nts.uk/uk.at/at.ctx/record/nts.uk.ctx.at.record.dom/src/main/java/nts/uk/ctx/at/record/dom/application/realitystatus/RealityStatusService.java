@@ -293,11 +293,8 @@ public class RealityStatusService {
 //		・締め日＝A画面で指定した締めIDの締め日
 //		・基準日＝期間終了日（起動時パラメータ）
 		List<EmpPerformMonthParamImport> lstParam = new ArrayList<>();
-		GeneralDate tmpDate = baseDate.addDays(1);
-		int monthTmp = tmpDate.month();
-		int month = baseDate.month();
 		int day = baseDate.day();
-		Boolean lastDayOfMonth = monthTmp - 1 == month ? true : false;
+		Boolean lastDayOfMonth = baseDate.lastDateInMonth() == day;
 		ClosureDate closureDate = new ClosureDate(lastDayOfMonth ? 1 : day, lastDayOfMonth);
 		for (String emp : lstEmp) {
 			lstParam.add(new EmpPerformMonthParamImport(baseDate.yearMonth(), closureID, closureDate, baseDate, emp));
