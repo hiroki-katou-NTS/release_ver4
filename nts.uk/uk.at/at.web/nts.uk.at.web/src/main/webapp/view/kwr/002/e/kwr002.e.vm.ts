@@ -38,6 +38,7 @@ module nts.uk.com.view.kwr002.e {
                     new model.SelectionType(16, nts.uk.resource.getMessage("Msg_1209", [])),
                     new model.SelectionType(17, nts.uk.resource.getMessage("Msg_1210", [])),
                     new model.SelectionType(18, nts.uk.resource.getMessage("Msg_1211", [])),
+                    new model.SelectionType(22, nts.uk.resource.getMessage("Msg_1633", [])),
                 ]);
                 self.selectionTypeValue = ko.observable(0);
                 self.selectionTypeValue.subscribe(function(codeChange) {

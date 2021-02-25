@@ -84,10 +84,12 @@ public class AttendanceRecordExportFinder {
 				dto.setColumnIndex(item.getColumnIndex());
 				dto.setExportAtr(item.getExportAtr().value);
 				dto.setUserAtr(item.getUseAtr());
+				
 				if (item.getUpperPosition().isPresent())
 					dto.setUpperPosition(item.getUpperPosition().get().getNameDisplay());
 				else
 					dto.setUpperPosition("");
+				
 				if (item.getLowerPosition().isPresent())
 					dto.setLowwerPosition(item.getLowerPosition().get().getNameDisplay());
 				else

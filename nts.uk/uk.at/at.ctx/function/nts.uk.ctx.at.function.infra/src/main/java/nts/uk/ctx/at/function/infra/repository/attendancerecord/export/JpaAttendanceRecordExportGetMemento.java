@@ -106,7 +106,7 @@ public class JpaAttendanceRecordExportGetMemento implements AttendanceRecordExpo
 						.of(new SingleAttendanceRecord(new JpaSingleAttendanceRecordGetMemento(upperEntity, null)));
 			// 16<= Attribute <= 18
 			if (this.upperEntity.getAttribute().compareTo(new BigDecimal(15)) == 1
-					&& this.upperEntity.getAttribute().compareTo(new BigDecimal(19)) == -1)
+					&& this.upperEntity.getAttribute().compareTo(new BigDecimal(19)) == -1 || this.lowerEntity.getAttribute().equals(new BigDecimal(22)))
 				return Optional.of(
 						new CalculateAttendanceRecord(new JpaCalculateAttendanceRecordGetMemento(upperEntity, null)));
 		}
@@ -129,9 +129,9 @@ public class JpaAttendanceRecordExportGetMemento implements AttendanceRecordExpo
 					&& this.lowerEntity.getAttribute().compareTo(new BigDecimal(16)) == -1)
 				return Optional
 						.of(new SingleAttendanceRecord(new JpaSingleAttendanceRecordGetMemento(lowerEntity, null)));
-			// 16<= Attribute <= 18
+			// 16<= Attribute <= 18 OR = Attribute = 22
 			if (this.lowerEntity.getAttribute().compareTo(new BigDecimal(15)) == 1
-					&& this.lowerEntity.getAttribute().compareTo(new BigDecimal(19)) == -1)
+					&& this.lowerEntity.getAttribute().compareTo(new BigDecimal(19)) == -1 || this.lowerEntity.getAttribute().equals(new BigDecimal(22)))
 				return Optional.of(
 						new CalculateAttendanceRecord(new JpaCalculateAttendanceRecordGetMemento(lowerEntity, null)));
 		}

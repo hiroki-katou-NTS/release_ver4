@@ -16,7 +16,10 @@ public enum CalculateItemAttributes {
 
 	/** The money amount. */
 	// 金額
-	MONEY_AMOUNT(18, "金額");
+	MONEY_AMOUNT(18, "金額"),
+	
+	// 日数
+	DAILY_TIME(22, "日数");
 
 	/** The value. */
 	public final int value;
