@@ -106,7 +106,7 @@ public class JpaAttendanceRecordExportGetMemento implements AttendanceRecordExpo
 						.of(new SingleAttendanceRecord(new JpaSingleAttendanceRecordGetMemento(upperEntity, null)));
 			// 16<= Attribute <= 18
 			if (this.upperEntity.getAttribute().compareTo(new BigDecimal(15)) == 1
-					&& this.upperEntity.getAttribute().compareTo(new BigDecimal(19)) == -1 || this.lowerEntity.getAttribute().equals(new BigDecimal(22)))
+					&& this.upperEntity.getAttribute().compareTo(new BigDecimal(19)) == -1 || this.upperEntity.getAttribute().equals(new BigDecimal(22)))
 				return Optional.of(
 						new CalculateAttendanceRecord(new JpaCalculateAttendanceRecordGetMemento(upperEntity, null)));
 		}
