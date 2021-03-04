@@ -1137,9 +1137,7 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 				sumInt = sum.intValue();
 				return sumInt.toString() + " 回";
 			case 12:
-				String dff = "###,###,###.#";
-				
-				return new DecimalFormat(dff).format(sum) + "日";
+				return String.format("%.1f日", sum);
 			case 13:
 				sumInt = sum.intValue();
 				DecimalFormat format = new DecimalFormat("###,###,###");
