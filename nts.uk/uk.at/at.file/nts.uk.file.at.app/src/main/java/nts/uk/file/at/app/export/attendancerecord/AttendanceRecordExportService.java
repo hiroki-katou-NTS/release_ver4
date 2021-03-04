@@ -1137,12 +1137,9 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 				sumInt = sum.intValue();
 				return sumInt.toString() + " 回";
 			case 12:
-				String dff = "###,###,###";
-				String dPath = sum.toString().split("\\.")[1];
+				String dff = "###,###,###.#";
 				
-				DecimalFormat dfi = new DecimalFormat(dff + ( dPath.equals("0") ? "" : "." + dPath.replaceAll("\\d", "#")));
-				
-				return dfi.format(sum) + "日";
+				return new DecimalFormat(dff).format(sum) + "日";
 			case 13:
 				sumInt = sum.intValue();
 				DecimalFormat format = new DecimalFormat("###,###,###");
