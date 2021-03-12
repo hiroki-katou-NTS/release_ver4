@@ -333,7 +333,7 @@ public class CheckBeforeRegisterHolidayWork {
 //		(Input．休日出勤申請．申請日．Calendar.DAY_OF_WEEK == SUNDAY AND 
 //		取得した休日出勤の設定．休日設定．休日区分 == 祝日)
 		HolidayAtr hdSet = workTypeInfor.get().getWorkTypeSetList().get(0).getHolidayAtr();
-		if((dayOfWeek == 6 && hdSet.equals(HolidayAtr.NON_STATUTORY_HOLIDAYS)) ||
+		if((dayOfWeek != 7 && hdSet.equals(HolidayAtr.NON_STATUTORY_HOLIDAYS)) ||
 				(dayOfWeek == 7 && hdSet.equals(HolidayAtr.PUBLIC_HOLIDAY))) {
 			throw new BusinessException("Msg_1968");
 		}
