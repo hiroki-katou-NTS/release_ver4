@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.shared.dom.yearholidaygrant;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -144,9 +145,12 @@ public class GrantHdTblSet extends AggregateRoot {
 		
 		// 付与条件を取得
 		GrantCondition target = null;
-		this.grantConditions.sort((a, b) -> a.getConditionNo() - b.getConditionNo());
 		// fix bug 113793
-		List<GrantCondition> lstGrant = this.grantConditions;
+		//this.grantConditionsをcloneする
+		List<GrantCondition> lstGrant = new ArrayList<>(this.grantConditions);
+		//cloneしたインスタンスでsortする。
+		lstGrant.sort((a, b) -> a.getConditionNo() - b.getConditionNo());
+		//cloneしてsortしたインスタンスでループ処理を行う。
 		for (val grantCondition : lstGrant){
 			if (grantCondition.getUseConditionAtr() != UseConditionAtr.USE) continue;
 			if (grantCondition.getConditionValue() == null) break;
