@@ -2910,6 +2910,14 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             var dataSource = $("#dpGrid").mGrid("dataSource");
             nts.uk.ui.block.invisible();
             nts.uk.ui.block.grayout();
+            
+            if(_.find(dataSource, function(o) { return o.sign == false; }) != null){
+                nts.uk.ui.dialog.error({ messageId: 'Msg_2170' }).then(() => {
+                    nts.uk.ui.block.clear();    
+                });
+                  
+                return;
+            }
             let dataRowEnd = dataSource[dataSource.length - 1];
             if (self.showFlex()) {
                 self.insertUpdate("Tight").done((loadContinue: boolean) => {
