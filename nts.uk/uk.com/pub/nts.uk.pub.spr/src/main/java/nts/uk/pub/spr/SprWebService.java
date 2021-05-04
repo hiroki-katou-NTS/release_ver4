@@ -1,6 +1,5 @@
 package nts.uk.pub.spr;
 
-import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,7 +80,7 @@ public class SprWebService {
 						for (int i = 0; i < reason.length(); i++) {
 							reasonBytes[i] = (byte)(reason.codePointAt(i));
 						}
-						reasonReal = new String(reasonBytes, "Windows-31J");
+						reasonReal = new String(reasonBytes);
 					}
 				}
 			}
@@ -96,13 +95,13 @@ public class SprWebService {
 					applicationIDReal, 
 					reasonReal,
 					stampProtectionReal);
-		} catch (UnsupportedEncodingException e1) {
-			val html = new StringBuilder();
-		    html.append("<!DOCTYPE html>");
-		    html.append("<html><head><meta charset=\"UTF-8\"></head><body>");
-		    html.append(""+ e1.getMessage() +"");
-		    html.append("</body></html>");            
-		    return html.toString();
+//		} catch (UnsupportedEncodingException e1) {
+//			val html = new StringBuilder();
+//		    html.append("<!DOCTYPE html>");
+//		    html.append("<html><head><meta charset=\"UTF-8\"></head><body>");
+//		    html.append(""+ e1.getMessage() +"");
+//		    html.append("</body></html>");            
+//		    return html.toString();
 		} catch (nts.arc.error.BusinessException ex){
 		    val html = new StringBuilder();
 		    html.append("<!DOCTYPE html>");
