@@ -133,7 +133,7 @@ public class SprLoginFormImpl implements SprLoginFormService {
 			throw new BusinessException("Msg_1011", "Msg_1026");
 		}
 		// 遷移先画面(menu)をチェックする
-		if(menuValue > 6 | menuValue < 0){
+		if(menuValue > 7 | menuValue < 0){
 			throw new BusinessException("Msg_1011", menuCD);
 		}
 	}

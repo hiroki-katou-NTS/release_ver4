@@ -73,7 +73,7 @@ public class SprWebService {
 		LoginUserContextSpr loginUserContextSpr = null;
 		try {
 			Integer menuCD = Integer.valueOf(menuCode);
-			if(menuCD==1||menuCD==2){
+			if(menuCD==1||menuCD==2||menuCD==7){
 				if(!Strings.isNullOrEmpty(reason)){
 					if(!Strings.isNullOrEmpty(reason.trim())){
 						byte[] reasonBytes = new byte[reason.length()];

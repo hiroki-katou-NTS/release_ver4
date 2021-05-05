@@ -170,6 +170,18 @@ __viewContext.ready(function() {
 //        nts.uk.characteristics.save('AppListExtractCondition', paramSave);
         nts.uk.request.jump("at", "/view/kaf/000/b/index.xhtml", { 'listAppMeta': [applicationID], 'currentApp': applicationID });
 		break;
+	case 7:
+        nts.uk.request.jump("at", "/view/kaf/005/a/index.xhtml?a=2", 
+            {
+                uiType: 2,
+                appDate: date,
+                startTime: starttime,
+                endTime: endtime,
+                applicationReason: reason,
+                employeeID: nts.uk.util.isNullOrEmpty(employeeID) ? null : employeeID
+            }
+        );
+		break;
 	default:
         nts.uk.request.jump("com", "/view/ccg/008/a/index.xhtml");
 	}
