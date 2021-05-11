@@ -80,7 +80,7 @@ public class SprWebService {
 						for (int i = 0; i < reason.length(); i++) {
 							reasonBytes[i] = (byte)(reason.codePointAt(i));
 						}
-						reasonReal = new String(reasonBytes, "UTF-8");
+						reasonReal = new String(reasonBytes, "Windows-31J");
 					}
 				}
 			}
