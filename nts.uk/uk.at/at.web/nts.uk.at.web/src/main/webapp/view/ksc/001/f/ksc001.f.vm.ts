@@ -3,6 +3,7 @@ module nts.uk.at.view.ksc001.f {
 import ScheduleExecutionLogSaveRespone = nts.uk.at.view.ksc001.b.service.model.ScheduleExecutionLogSaveRespone;
 import ScheduleExecutionLogDto = service.model.ScheduleExecutionLogDto;
 import ScheduleErrorLogDto = service.model.ScheduleErrorLogDto;
+import kibanTimer = nts.uk.ui.sharedvm.KibanTimer;
     export module viewmodel {
 
         export class ScreenModel {
@@ -23,6 +24,7 @@ import ScheduleErrorLogDto = service.model.ScheduleErrorLogDto;
             isError: KnockoutObservable<boolean>;
             isFinish: KnockoutObservable<boolean>;
             inputData: ScheduleExecutionLogSaveRespone;
+			elapseTime: kibanTimer = new kibanTimer('elapseTime', 100);
             
             constructor() {
                 var self = this;
@@ -158,7 +160,7 @@ import ScheduleErrorLogDto = service.model.ScheduleErrorLogDto;
             private updateState() {
                 let self = this;
                 // start count time
-                $('.countdown').startCount();
+                self.elapseTime.start(); 
                 
                 nts.uk.deferred.repeat(conf => conf
                 .task(() => {
@@ -169,7 +171,7 @@ import ScheduleErrorLogDto = service.model.ScheduleErrorLogDto;
                         }
                         // finish task
                         if (res.succeeded || res.failed || res.cancelled) {
-                            $('.countdown').stopCount();
+                            self.elapseTime.end(); 
                             self.updateInfoStatus();
                             self.isFinish(true);
                             self.reloadPage();
@@ -205,7 +207,7 @@ import ScheduleErrorLogDto = service.model.ScheduleErrorLogDto;
                 }
                 // interrupt process import then close dialog
                 nts.uk.request.asyncTask.requestToCancel(self.taskId()).done(function() {
-                    $('.countdown').stopCount();
+                    self.elapseTime.end(); 
                     self.updateInfoStatus();
                     self.isFinish(true);
                     self.reloadPage();
