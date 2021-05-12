@@ -71,23 +71,22 @@ public class GetRsvLeaNumCriteriaDateImpl implements GetRsvLeaNumCriteriaDate {
 		val closureStartOpt = this.getClosureStartForEmployee.algorithm(employeeId);
 		if (!closureStartOpt.isPresent()) return Optional.empty();
 		val closureStart = closureStartOpt.get();
-		
+
 		// 「基準日」と「締め開始日」を比較
 		GeneralDate adjustDate = criteria;
 		if (criteria.before(closureStart)) adjustDate = closureStart;
 		
-		// 集計終了日　←　「補正後基準日」+1年-1日
-		GeneralDate aggrEnd = adjustDate.addYears(1).addDays(-1);
-		
-		// 「次回年休付与を計算」を実行
-		val nextAnnualLeaveGrants = this.calcNextAnnualLeaveGrantNum.algorithm(
-				companyId, employeeId, Optional.of(new DatePeriod(adjustDate, aggrEnd)));
-		if (nextAnnualLeaveGrants.size() > 0){
-			// 次回付与日前日　←　先頭の「次回年休付与」．付与年月日-1日
-			GeneralDate prevNextGrant = nextAnnualLeaveGrants.get(0).getGrantDate().addDays(-1);
-			if (prevNextGrant.before(aggrEnd)){
-				// 集計終了日　←　次回付与日前日
-				aggrEnd = prevNextGrant;
+		//2021.05.11　HoaTT
+		//→ 積休残数表示の基準日を「次回年休付与日」→「システム日付を含む締めの終了日」に変更する
+		GeneralDate closureEnd = closureStart.addMonths(1).addDays(-1);
+		GeneralDate aggrEnd = closureEnd;
+		GeneralDate sysDate = GeneralDate.today();
+		if(closureEnd.before(sysDate)) {//thang chot cu hon
+			GeneralDate closurePresentS = GeneralDate.ymd(sysDate.year(), sysDate.month(),closureStart.day());
+			if(closurePresentS.after(sysDate)) {
+				aggrEnd = closurePresentS.addDays(-1);
+			}else {
+				aggrEnd = closurePresentS.addMonths(1).addDays(-1);
 			}
 		}
 		
