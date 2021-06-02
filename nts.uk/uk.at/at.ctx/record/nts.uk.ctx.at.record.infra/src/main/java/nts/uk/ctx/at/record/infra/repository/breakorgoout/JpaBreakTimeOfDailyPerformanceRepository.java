@@ -231,16 +231,21 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 		try {
 			Statement statementI = con.createStatement();
 			for (BreakTimeSheet breakTimeSheet : breakTimes.getBreakTimeSheets()) {
-				String insertTableSQL = "INSERT INTO KRCDT_DAI_BREAK_TIME_TS ( SID , YMD , BREAK_TYPE, BREAK_FRAME_NO , STR_STAMP_TIME , END_STAMP_TIME ) "
-						+ "VALUES( '" + breakTimes.getEmployeeId() + "' , '" + breakTimes.getYmd() + "' , "
-						+ breakTimes.getBreakType().value + " , " + breakTimeSheet.getBreakFrameNo().v() + " , "
-						+ breakTimeSheet.getStartTime().valueAsMinutes() + " , "
-						+ breakTimeSheet.getEndTime().valueAsMinutes() + " )";
-				statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTableSQL));
+				internalInsert(breakTimes, statementI, breakTimeSheet);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private void internalInsert(BreakTimeOfDailyPerformance breakTimes, Statement statementI,
+			BreakTimeSheet breakTimeSheet) throws SQLException {
+		String insertTableSQL = "INSERT INTO KRCDT_DAI_BREAK_TIME_TS ( SID , YMD , BREAK_TYPE, BREAK_FRAME_NO , STR_STAMP_TIME , END_STAMP_TIME ) "
+				+ "VALUES( '" + breakTimes.getEmployeeId() + "' , '" + breakTimes.getYmd() + "' , "
+				+ breakTimes.getBreakType().value + " , " + breakTimeSheet.getBreakFrameNo().v() + " , "
+				+ breakTimeSheet.getStartTime().valueAsMinutes() + " , "
+				+ breakTimeSheet.getEndTime().valueAsMinutes() + " )";
+		statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTableSQL));
 	}
 
 	@Override
@@ -481,20 +486,51 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 	public void updateForEachOfType(BreakTimeOfDailyPerformance breakTime) {
 		Connection con = this.getEntityManager().unwrap(Connection.class);
 		try {
+			Statement statementU = con.createStatement();
+			
 			for (BreakTimeSheet breakTimeSheet : breakTime.getBreakTimeSheets()) {
 
-				String updateTableSQL = " UPDATE KRCDT_DAI_BREAK_TIME_TS SET STR_STAMP_TIME = "
-						+ breakTimeSheet.getStartTime().valueAsMinutes() + " , END_STAMP_TIME = "
-						+ breakTimeSheet.getEndTime().valueAsMinutes() + " WHERE SID = '" + breakTime.getEmployeeId()
-						+ "' AND YMD = '" + breakTime.getYmd() + "'" + " AND BREAK_TYPE = "
-						+ breakTime.getBreakType().value + " AND BREAK_FRAME_NO = "
-						+ breakTimeSheet.getBreakFrameNo().v();
-				Statement statementU = con.createStatement();
-				statementU.executeUpdate(updateTableSQL);
+				internalUpdate(breakTime, statementU, breakTimeSheet);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public void updateOrInsertForEachOfType(BreakTimeOfDailyPerformance breakTime, BreakTimeOfDailyPerformance oldBreak) {
+		Connection con = this.getEntityManager().unwrap(Connection.class);
+		try {
+			Statement statementU = con.createStatement();
+			boolean isSameBreak = oldBreak.getEmployeeId().equals(breakTime.getEmployeeId()) && 
+					oldBreak.getYmd().equals(breakTime.getYmd()) &&
+					oldBreak.getBreakType() == breakTime.getBreakType();
+			
+			for (BreakTimeSheet breakTimeSheet : breakTime.getBreakTimeSheets()) {
+
+				boolean sameNo = oldBreak.getBreakTimeSheets().stream().filter(c -> c.getBreakFrameNo().equals(breakTimeSheet.getBreakFrameNo()))
+						.findFirst().isPresent();
+				
+				if (isSameBreak && sameNo) {
+					internalUpdate(breakTime, statementU, breakTimeSheet);
+				} else {
+					internalInsert(breakTime, statementU, breakTimeSheet);
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void internalUpdate(BreakTimeOfDailyPerformance breakTime, Statement statementU, BreakTimeSheet breakTimeSheet)
+			throws SQLException {
+		String updateTableSQL = " UPDATE KRCDT_DAI_BREAK_TIME_TS SET STR_STAMP_TIME = "
+				+ breakTimeSheet.getStartTime().valueAsMinutes() + " , END_STAMP_TIME = "
+				+ breakTimeSheet.getEndTime().valueAsMinutes() + " WHERE SID = '" + breakTime.getEmployeeId()
+				+ "' AND YMD = '" + breakTime.getYmd() + "'" + " AND BREAK_TYPE = "
+				+ breakTime.getBreakType().value + " AND BREAK_FRAME_NO = "
+				+ breakTimeSheet.getBreakFrameNo().v();
+		statementU.executeUpdate(updateTableSQL);
 	}
 
 }
