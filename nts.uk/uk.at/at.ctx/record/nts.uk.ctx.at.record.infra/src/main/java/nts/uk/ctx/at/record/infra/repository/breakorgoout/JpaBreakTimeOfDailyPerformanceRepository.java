@@ -517,6 +517,16 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 					internalInsert(breakTime, statementU, breakTimeSheet);
 				}
 			}
+			
+			for (BreakTimeSheet breakTimeSheet : oldBreak.getBreakTimeSheets()) {
+
+				boolean sameNo = breakTime.getBreakTimeSheets().stream().filter(c -> c.getBreakFrameNo().equals(breakTimeSheet.getBreakFrameNo()))
+						.findFirst().isPresent();
+				
+				if (isSameBreak && !sameNo) {
+					internalDelete(breakTime, statementU, breakTimeSheet);
+				} 
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -533,4 +543,13 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 		statementU.executeUpdate(updateTableSQL);
 	}
 
+	private void internalDelete(BreakTimeOfDailyPerformance breakTime, Statement statementU, BreakTimeSheet breakTimeSheet)
+			throws SQLException {
+		String deleteTableSQL = " DELETE FROM KRCDT_DAI_BREAK_TIME_TS "
+				+ " WHERE SID = '" + breakTime.getEmployeeId()
+				+ "' AND YMD = '" + breakTime.getYmd() + "'" + " AND BREAK_TYPE = "
+				+ breakTime.getBreakType().value + " AND BREAK_FRAME_NO = "
+				+ breakTimeSheet.getBreakFrameNo().v();
+		statementU.executeUpdate(deleteTableSQL);
+	}
 }
