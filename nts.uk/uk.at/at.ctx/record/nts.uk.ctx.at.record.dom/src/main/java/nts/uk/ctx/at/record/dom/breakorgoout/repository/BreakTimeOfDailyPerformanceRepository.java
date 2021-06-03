@@ -37,4 +37,6 @@ public interface BreakTimeOfDailyPerformanceRepository {
 	void deleteByBreakType(String employeeId, GeneralDate ymd, int breakType);
 	
 	void updateForEachOfType(BreakTimeOfDailyPerformance breakTime);
+	
+	void updateOrInsertForEachOfType(BreakTimeOfDailyPerformance breakTime, BreakTimeOfDailyPerformance oldBreak);
 }

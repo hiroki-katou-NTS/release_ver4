@@ -211,7 +211,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		//日別実績の休憩時間帯
 		BreakTimeOfDailyPerformance breakTimeInfor = null; 
 		if(integrationOfDaily.getAttendanceLeave().isPresent()) {
-			breakTimeInfor = breaktimeSevice.reflectBreakTime(companyId, 
+			breakTimeInfor = breaktimeSevice.correctBreakTimeByTimeLeaveAndWorkInfo(companyId, 
 					sid, 
 					ymd, 
 					null,

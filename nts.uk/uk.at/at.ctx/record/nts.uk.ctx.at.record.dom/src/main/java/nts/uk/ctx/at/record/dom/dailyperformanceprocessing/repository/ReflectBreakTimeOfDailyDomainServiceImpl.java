@@ -18,6 +18,8 @@ import nts.uk.ctx.at.record.dom.breakorgoout.enums.BreakType;
 import nts.uk.ctx.at.record.dom.breakorgoout.primitivevalue.BreakFrameNo;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.BreakTimeZoneSettingOutPut;
+import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.workinformation.ScheduleTimeSheet;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
@@ -102,37 +104,22 @@ public class ReflectBreakTimeOfDailyDomainServiceImpl implements ReflectBreakTim
 
 	@Inject
 	private BreakTimeOfDailyPerformanceRepository breakTimeOfDailyPerformanceRepo;
+	
+	@Inject
+	private BreakTimeOfDailyPerformanceCorrectService correctService;
+	@Inject
+	private EditStateOfDailyPerformanceRepository editStateRepo;
 
 	@Override
-	public BreakTimeOfDailyPerformance reflectBreakTimeZone(String companyId, String employeeID,
+	public BreakTimeOfDailyPerformance correctBreakTimeByTimeLeaveAndWorkInfo(String companyId, String employeeID,
 			GeneralDate processingDate, String empCalAndSumExecLogID,
 			TimeLeavingOfDailyPerformance timeLeavingOfDailyPerformance, WorkInfoOfDailyPerformance WorkInfo) {
-		Optional<BreakTimeOfDailyPerformance> breakOpt = this.breakTimeOfDailyPerformanceRepo.find(employeeID,
-				processingDate, 0);
-		if (breakOpt.isPresent()) {
-			return null;
-		}
-		// 休憩時間帯設定を確認する
-		List<TimeLeavingWork> timeLeavingWorks = null;
-		if (timeLeavingOfDailyPerformance != null && timeLeavingOfDailyPerformance.getTimeLeavingWorks() != null
-				&& !timeLeavingOfDailyPerformance.getTimeLeavingWorks().isEmpty()) {
-			timeLeavingWorks = timeLeavingOfDailyPerformance.getTimeLeavingWorks();
-		} else {
-			Optional<TimeLeavingOfDailyPerformance> TimeLeavingOptional = this.timeLeavingRepo.findByKey(employeeID,
-					processingDate);
-			if (TimeLeavingOptional.isPresent()) {
-				TimeLeavingOfDailyPerformance timeLeavingOfDailyPerformance2 = TimeLeavingOptional.get();
-				List<TimeLeavingWork> timeLeavingWorks2 = timeLeavingOfDailyPerformance2.getTimeLeavingWorks();
-				if (timeLeavingWorks2 != null && !timeLeavingWorks2.isEmpty()) {
-					timeLeavingWorks = timeLeavingWorks2;
-				}
-			}
-		}
-		if (timeLeavingWorks == null) {
-			return null;
-		}
-		return this.reflectBreakTime(companyId, employeeID, processingDate, empCalAndSumExecLogID,
-				timeLeavingOfDailyPerformance, WorkInfo);
+		
+		Optional<BreakTimeOfDailyPerformance> breakOpt = this.breakTimeOfDailyPerformanceRepo.find(employeeID, processingDate, 0);
+		List<EditStateOfDailyPerformance> editStates = this.editStateRepo.findByKey(employeeID, processingDate);
+		
+		return correctService.correct(companyId, WorkInfo, editStates, Optional.ofNullable(timeLeavingOfDailyPerformance), 
+				breakOpt, Optional.empty()).orElse(null);
 	}
 
 	@Override
@@ -765,115 +752,4 @@ public class ReflectBreakTimeOfDailyDomainServiceImpl implements ReflectBreakTim
 		return 0;
 	}
 
-	/**
-	 * 大塚モードの休憩時間帯取得
-	 * 
-	 * @param companyId
-	 * @param employeeID
-	 * @param processingDate
-	 * @param WorkInfo
-	 * @return
-	 */
-	@Override
-	public Optional<BreakTimeOfDailyPerformance> getBreakTime(String companyId, String employeeID,
-			GeneralDate processingDate, WorkInfoOfDailyPerformance WorkInfo) {
-		// Optional<BreakTimeOfDailyPerformance> breakOpt =
-		// this.breakTimeOfDailyPerformanceRepo.find(employeeID,
-		// processingDate, 0);
-		// if (breakOpt.isPresent()) {
-		// return Optional.empty();
-		// }
-		BreakTimeZoneSettingOutPut breakTimeZoneSettingOutPut = new BreakTimeZoneSettingOutPut();
-
-		// 休憩時間帯設定を確認する
-		boolean checkBreakTimeSetting = this.checkBreakTimeSetting(companyId, employeeID, processingDate, null,
-				WorkInfo, breakTimeZoneSettingOutPut);
-		if (!checkBreakTimeSetting) {
-			return Optional.empty();
-		}
-		List<DeductionTime> lstTimezone = breakTimeZoneSettingOutPut.getLstTimezone();
-		Collections.sort(lstTimezone, new Comparator<DeductionTime>() {
-			public int compare(DeductionTime o1, DeductionTime o2) {
-				int t1 = o1.getStart().v();
-				int t2 = o2.getStart().v();
-				if (t1 == t2)
-					return 0;
-				return t1 < t2 ? -1 : 1;
-			}
-		});
-		List<BreakTimeSheet> lstBreakTime = new ArrayList<BreakTimeSheet>();
-		int size = lstTimezone.size();
-		// 大塚モードの場合はこのifの中の処理を適用、現状は常に大塚モード
-		if (true) {
-			for (int i = 0; i < size; i++) {
-				DeductionTime timeZone = lstTimezone.get(i);
-				// 時間帯．休憩枠NO
-				int frameNo = i + 1;
-				lstBreakTime.add(new BreakTimeSheet(new BreakFrameNo(frameNo), timeZone.getStart(), timeZone.getEnd(),
-						new AttendanceTime(0)));
-			}
-		}
-		// 休憩種類 ← 「就業時間帯から参照」
-		return Optional.of(
-				new BreakTimeOfDailyPerformance(employeeID, BreakType.REFER_WORK_TIME, lstBreakTime, processingDate));
-	}
-
-	/**
-	 * 大塚モードの休憩時間帯取得
-	 * 
-	 * @param companyId
-	 * @param employeeID
-	 * @param processingDate
-	 * @param WorkInfo
-	 * @return
-	 */
-	@Override
-	public Optional<BreakTimeOfDailyPerformance> getBreakTime(String companyId, String employeeID,
-			GeneralDate processingDate, WorkInfoOfDailyPerformance WorkInfo, List<ErrorAlarmWorkRecord> errorMaster) {
-		return getBreakTime(companyId, employeeID, processingDate, WorkInfo, errorMaster, Optional.empty());
-	}
-
-	public Optional<BreakTimeOfDailyPerformance> getBreakTime(String companyId, String employeeID,
-			GeneralDate processingDate, WorkInfoOfDailyPerformance WorkInfo, List<ErrorAlarmWorkRecord> errorMaster,
-			Optional<WorkTimeSetting> workTime) {
-		// Optional<BreakTimeOfDailyPerformance> breakOpt =
-		// this.breakTimeOfDailyPerformanceRepo.find(employeeID,
-		// processingDate, 0);
-		// if (breakOpt.isPresent()) {
-		// return Optional.empty();
-		// }
-		BreakTimeZoneSettingOutPut breakTimeZoneSettingOutPut = new BreakTimeZoneSettingOutPut();
-
-		// 休憩時間帯設定を確認する
-		boolean checkBreakTimeSetting = this.checkBreakTimeSetting(companyId, employeeID, processingDate, null,
-				WorkInfo, breakTimeZoneSettingOutPut, errorMaster, workTime);
-		if (!checkBreakTimeSetting) {
-			return Optional.empty();
-		}
-		List<DeductionTime> lstTimezone = breakTimeZoneSettingOutPut.getLstTimezone();
-		Collections.sort(lstTimezone, new Comparator<DeductionTime>() {
-			public int compare(DeductionTime o1, DeductionTime o2) {
-				int t1 = o1.getStart().v();
-				int t2 = o2.getStart().v();
-				if (t1 == t2)
-					return 0;
-				return t1 < t2 ? -1 : 1;
-			}
-		});
-		List<BreakTimeSheet> lstBreakTime = new ArrayList<BreakTimeSheet>();
-		int size = lstTimezone.size();
-		// 大塚モードの場合はこのifの中の処理を適用、現状は常に大塚モード
-		if (true) {
-			for (int i = 0; i < size; i++) {
-				DeductionTime timeZone = lstTimezone.get(i);
-				// 時間帯．休憩枠NO
-				int frameNo = i + 1;
-				lstBreakTime.add(new BreakTimeSheet(new BreakFrameNo(frameNo), timeZone.getStart(), timeZone.getEnd(),
-						new AttendanceTime(0)));
-			}
-		}
-		// 休憩種類 ← 「就業時間帯から参照」
-		return Optional.of(
-				new BreakTimeOfDailyPerformance(employeeID, BreakType.REFER_WORK_TIME, lstBreakTime, processingDate));
-	}
 }

@@ -1,6 +1,5 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -12,6 +11,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.affiliationinformation.AffiliationInforOfDailyPerfor;
 import nts.uk.ctx.at.record.dom.affiliationinformation.WorkTypeOfDailyPerformance;
@@ -170,8 +170,10 @@ public class RegisterDailyPerformanceInfoService {
 			// breakTimeOfDailyPerformance - JDBC only insert
 			if (stampOutput.getBreakTimeOfDailyPerformance() != null
 					&& !stampOutput.getBreakTimeOfDailyPerformance().getBreakTimeSheets().isEmpty()) {
-				if (this.breakTimeOfDailyPerformanceRepository.find(employeeID, day, 0).isPresent()) {
-					this.breakTimeOfDailyPerformanceRepository.updateForEachOfType(stampOutput.getBreakTimeOfDailyPerformance());
+				val oldData = this.breakTimeOfDailyPerformanceRepository.find(employeeID, day, 0).orElse(null);
+				if (oldData != null) {
+					this.breakTimeOfDailyPerformanceRepository.updateOrInsertForEachOfType(
+							stampOutput.getBreakTimeOfDailyPerformance(), oldData);
 				} else {
 					this.breakTimeOfDailyPerformanceRepository.insert(stampOutput.getBreakTimeOfDailyPerformance());
 					//dailyRecordAdUpService.adUpBreakTime(Arrays.asList(stampOutput.getBreakTimeOfDailyPerformance()));

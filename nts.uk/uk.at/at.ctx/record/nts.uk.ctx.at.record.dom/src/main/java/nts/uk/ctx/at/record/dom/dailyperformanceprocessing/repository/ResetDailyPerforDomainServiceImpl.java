@@ -321,7 +321,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 									} else {
 										// 就業時間帯の休憩時間帯を日別実績に反映する
 										breakTimeOfDailyPerformance = this.reflectBreakTimeOfDailyDomainService
-												.reflectBreakTime(companyID, employeeID, processingDate,
+												.correctBreakTimeByTimeLeaveAndWorkInfo(companyID, employeeID, processingDate,
 														empCalAndSumExecLogID,
 														timeLeavingOpt.isPresent() ? timeLeavingOpt.get() : null,
 														workInfoOfDailyPerformanceUpdate);
@@ -329,7 +329,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 								} else {
 									// 就業時間帯の休憩時間帯を日別実績に反映する
 									breakTimeOfDailyPerformance = this.reflectBreakTimeOfDailyDomainService
-											.reflectBreakTime(companyID, employeeID, processingDate,
+											.correctBreakTimeByTimeLeaveAndWorkInfo(companyID, employeeID, processingDate,
 													empCalAndSumExecLogID,
 													timeLeavingOpt.isPresent() ? timeLeavingOpt.get() : null,
 													workInfoOfDailyPerformanceUpdate);
