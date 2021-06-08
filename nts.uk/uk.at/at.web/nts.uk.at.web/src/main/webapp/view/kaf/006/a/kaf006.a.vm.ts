@@ -39,7 +39,7 @@ module nts.uk.at.view.kaf006.a.viewmodel {
         holidayTypeCode: KnockoutObservable<number> = ko.observable(0);
         typeOfDutys: KnockoutObservableArray<common.TypeOfDuty> = ko.observableArray([]);
         selectedTypeOfDuty: KnockoutObservable<any> = ko.observable(null);
-        displayHalfDayValue: KnockoutObservable<boolean> = ko.observable(false);
+        displayHalfDayValue: KnockoutObservable<boolean> = ko.observable(true);
         changeWorkHourValue: KnockoutObservable<boolean> = ko.observable(false);
         changeWorkHourValueFlg: KnockoutObservable<boolean> = ko.observable(false);
         //        displayChangeWorkHour:  KnockoutObservable<boolean> = ko.observable(false);
