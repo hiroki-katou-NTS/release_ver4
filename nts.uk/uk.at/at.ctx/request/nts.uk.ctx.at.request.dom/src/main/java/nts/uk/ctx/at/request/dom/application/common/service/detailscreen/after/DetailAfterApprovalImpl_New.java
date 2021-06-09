@@ -16,7 +16,6 @@ import nts.uk.ctx.at.request.dom.application.ReflectedState_New;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workflow.ApprovalRootStateAdapter;
 import nts.uk.ctx.at.request.dom.application.common.service.other.OtherCommonAlgorithm;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.MailResult;
-import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
 //import nts.uk.ctx.at.request.dom.applicationreflect.service.AppReflectManager;
 import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSetting;
 import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSettingRepository;
@@ -46,11 +45,8 @@ public class DetailAfterApprovalImpl_New implements DetailAfterApproval_New {
 	private OtherCommonAlgorithm otherCommonAlgorithm;
 	
 	@Override
-	public ProcessResult doApproval(String companyID, String appID, String employeeID, String memo, String appReason, boolean isUpdateAppReason) {
-		boolean isProcessDone = true;
-		boolean isAutoSendMail = false;
-		List<String> autoSuccessMail = new ArrayList<>();
-		List<String> autoFailMail = new ArrayList<>();
+	public ApprovalProcessAfterResult doApprovalSimple(String companyID, String appID, String employeeID, String memo,
+			String appReason, boolean isUpdateAppReason) {
 		Application_New application = applicationRepository.findByID(companyID, appID).get();
 		if(isUpdateAppReason){
 			application.setAppReason(new AppReason(appReason));
@@ -93,6 +89,14 @@ public class DetailAfterApprovalImpl_New implements DetailAfterApproval_New {
 			application.getReflectionInformation().setStateReflectionReal(ReflectedState_New.NOTREFLECTED);
 			applicationRepository.update(application);
 		}
+		return new ApprovalProcessAfterResult(application, allApprovalFlg, phaseNumber, reflectAppId);
+	}
+	
+	@Override
+	public ProcessMailResult processMail(String companyID, String appID, String employeeID, Application_New application, Boolean allApprovalFlg, Integer phaseNumber) {
+		boolean isAutoSendMail = false;
+		List<String> autoSuccessMail = new ArrayList<>();
+		List<String> autoFailMail = new ArrayList<>();
 		AppTypeDiscreteSetting discreteSetting = discreteRepo.getAppTypeDiscreteSettingByAppType(companyID, application.getAppType().value).get();
 		// 承認処理時に自動でメールを送信するが trueの場合
 		if (discreteSetting.getSendMailWhenApprovalFlg().equals(AppCanAtr.CAN)) {
@@ -121,7 +125,7 @@ public class DetailAfterApprovalImpl_New implements DetailAfterApproval_New {
 				autoFailMail.addAll(applicantResult.getFailList());
 			}
 		}
-		return new ProcessResult(isProcessDone, isAutoSendMail, autoSuccessMail, autoFailMail, appID, reflectAppId);
+	return new ProcessMailResult(autoSuccessMail, autoFailMail, isAutoSendMail);
 	}
 
 }
