@@ -58,6 +58,7 @@ import nts.uk.ctx.at.shared.dom.specialholiday.specialholidayevent.service.MaxDa
 import nts.uk.ctx.at.shared.dom.specialholiday.specialholidayevent.service.SpecialHolidayEventAlgorithm;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -94,6 +95,8 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 	private OtherCommonAlgorithm otherCommonAlg;	
 	@Inject
 	private DetailBeforeUpdate detailBeforeUpdate;
+	@Inject
+	private WorkTypeRepository wkTypeRepo;
 	@Override
 	protected ProcessResult handle(CommandHandlerContext<CreatAppAbsenceCommand> context) {
 		CreatAppAbsenceCommand command = context.getCommand();
@@ -302,12 +305,30 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 		int holidayAppType = command.getHolidayAppType();
 		if(hdAppSet.isPresent()){
 			HdAppSet hdSet = hdAppSet.get();
-			//Bug#100448
-			//Bug#101701
-			chkSubHoliday = hdSet.getRegisShortLostHd().value == 1 && holidayAppType == 1 ? true : false;//休暇申請設定．代休残数不足登録できる
-			chkPause = hdSet.getRegisInsuff().value == 1 && holidayAppType == 7 ? true : false;//休暇申請設定．振休残数不足登録できる
-			chkAnnual = hdSet.getRegisNumYear().value == 1 && holidayAppType == 0 ? true : false;//休暇申請設定．年休残数不足登録できる
-			chkFundingAnnual = hdSet.getRegisShortReser().value == 1 && holidayAppType == 4 ? true : false;//休暇申請設定．積立年休残数不足登録できる
+			WorkType workType = wkTypeRepo.findByPK(companyID, command.getWorkTypeCode()).get();
+			WorkTypeClassification workTypeOneDay = workType.getDailyWork().getOneDay();
+			WorkTypeClassification workTypeMorning = workType.getDailyWork().getMorning();
+			WorkTypeClassification workTypeAfternoon = workType.getDailyWork().getAfternoon();
+			
+			chkAnnual = hdSet.getRegisNumYear().value == 1 && 
+					((workType.isOneDay() && workTypeOneDay.isAnnualLeave()) ||
+					(!workType.isOneDay() && (workTypeMorning.isAnnualLeave() || workTypeAfternoon.isAnnualLeave())));//休暇申請設定．年休残数不足登録できる
+			
+			chkFundingAnnual = hdSet.getRegisShortReser().value == 1 && 
+					((workType.isOneDay() && workTypeOneDay.isYearlyReserved()) ||
+					(!workType.isOneDay() && (workTypeMorning.isYearlyReserved() || workTypeAfternoon.isYearlyReserved())));//休暇申請設定．積立年休残数不足登録できる
+			
+			chkSubHoliday = hdSet.getRegisShortLostHd().value == 1 && 
+					((workType.isOneDay() && workTypeOneDay.isSubstituteHoliday()) ||
+					(!workType.isOneDay() && (workTypeMorning.isSubstituteHoliday() || workTypeAfternoon.isSubstituteHoliday())));//休暇申請設定．代休残数不足登録できる
+			
+			chkPause = hdSet.getRegisInsuff().value == 1 && 
+					((workType.isOneDay() && workTypeOneDay.isPause()) ||
+					(!workType.isOneDay() && (workTypeMorning.isPause() || workTypeAfternoon.isPause())));//休暇申請設定．振休残数不足登録できる
+			
+			chkSpecial = (workType.isOneDay() && workTypeOneDay.isSpecialHoliday()) ||
+					(!workType.isOneDay() && (workTypeMorning.isSpecialHoliday() || workTypeAfternoon.isSpecialHoliday()));
+			
 //			chkPublicHoliday = hdSet.getRegisLackPubHd().value == 1 && holidayAppType == 1 ? true : false;//休暇申請設定．公休残数不足登録できる
 		}
 		//社員の当月の期間を算出する - 4.社員の当月の期間を算出する
