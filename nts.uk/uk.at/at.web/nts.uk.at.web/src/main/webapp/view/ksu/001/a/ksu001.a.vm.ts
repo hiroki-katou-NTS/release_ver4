@@ -683,7 +683,10 @@ module nts.uk.at.view.ksu001.a.viewmodel {
                 // set stick single
                 $("#extable").exTable("stickData", __viewContext.viewModel.viewO.nameWorkTimeType());
                 $("#extable").exTable("stickMode", "single");
-
+                
+                // fix bug #117021
+                if ($("#extable").width() == 0)
+                    $("#extable").width(1);
 
                 /**
                  * update text for row 2 of detailHeader
