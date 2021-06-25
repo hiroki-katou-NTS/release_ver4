@@ -104,12 +104,16 @@ public class SprAppStatusImpl implements SprAppStatusService {
 			AppOvertimeStatusSprExport appOvertimeStatusSpr1 = this.getOverTimeAppInfo(loopDate, employeeID, 0);
 			// 通常残業申請状況確認
 			AppOvertimeStatusSprExport appOvertimeStatusSpr2 = this.getOverTimeAppInfo(loopDate, employeeID, 1);
+			//早出残業・通常残業申請状況確認
+			AppOvertimeStatusSprExport appOvertimeStatusSpr3 = this.getOverTimeAppInfo(loopDate, employeeID, 2);
 			appOvertimeStatusSprList.add(new AppStatusSpr(
 					loopDate, 
 					appOvertimeStatusSpr1.getStatus(), 
 					appOvertimeStatusSpr2.getStatus(), 
+					appOvertimeStatusSpr3.getStatus(), 
 					Optional.ofNullable(appOvertimeStatusSpr1.getApplicationID()), 
-					Optional.ofNullable(appOvertimeStatusSpr2.getApplicationID())));
+					Optional.ofNullable(appOvertimeStatusSpr2.getApplicationID()),
+					Optional.ofNullable(appOvertimeStatusSpr3.getApplicationID())));
 		}
 		return appOvertimeStatusSprList;
 	}
@@ -125,7 +129,7 @@ public class SprAppStatusImpl implements SprAppStatusService {
 		
 		// ドメインモデル「申請.反映情報.実績反映状態」をチェックする
 		// 取得残業区分をチェック
-		if(overTimeAtr==0||overTimeAtr==1){
+		//if(overTimeAtr==0||overTimeAtr==1){
 			switch (appOverTimeSpr.getStateReflectionReal()) {
 			case 1:
 				return new AppOvertimeStatusSprExport(2, appOverTimeSpr.getAppID());
@@ -142,8 +146,8 @@ public class SprAppStatusImpl implements SprAppStatusService {
 			default:
 				return new AppOvertimeStatusSprExport(1, appOverTimeSpr.getAppID());
 			}
-		}
-		return new AppOvertimeStatusSprExport(0, null);
+		//}
+		//return new AppOvertimeStatusSprExport(0, null);
 	}
 
 }
