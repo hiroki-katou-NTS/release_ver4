@@ -76,16 +76,18 @@ public class SprStubHelper {
 		String date;
 		int status1;
 		int status2;
+		int status3;
 		String applicationID1;
 		String applicationID2;
+		String applicationID3;
 		
 		public static List<RequestApplicationStatusResult> create() {
 			
 			return Arrays.asList(
-					new RequestApplicationStatusResult("2018/04/01", 0, 0, null, null),
-					new RequestApplicationStatusResult("2018/04/02", 1, 0, "56f9bf80-2dea-46b8-adf9-58a03ab87902", null),
-					new RequestApplicationStatusResult("2018/04/03", 0, 4, null, "b401f47e-bbfc-454b-ac15-86acbe0509ac"),
-					new RequestApplicationStatusResult("2018/04/04", 2, 3, "12c4abc6-3cbd-4e07-ace9-f1d5dfbf8b23", "6cb57689-941a-4fe8-b1fe-7ea8cbde7473"));
+					new RequestApplicationStatusResult("2018/04/01", 0, 0,0, null, null,null),
+					new RequestApplicationStatusResult("2018/04/02", 1, 0, 0,"56f9bf80-2dea-46b8-adf9-58a03ab87902", null, null),
+					new RequestApplicationStatusResult("2018/04/03", 0, 4, 0,null, "b401f47e-bbfc-454b-ac15-86acbe0509ac",null),
+					new RequestApplicationStatusResult("2018/04/04", 2, 3, 0,"12c4abc6-3cbd-4e07-ace9-f1d5dfbf8b23", "6cb57689-941a-4fe8-b1fe-7ea8cbde7473",null));
 		}
 	}
 	

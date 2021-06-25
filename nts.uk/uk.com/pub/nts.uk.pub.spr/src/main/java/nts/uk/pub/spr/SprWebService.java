@@ -216,8 +216,10 @@ public class SprWebService {
 						x.getDate().toString("yyyy/MM/dd"), 
 						x.getStatus1(), 
 						x.getStatus2(), 
+						x.getStatus3(),
 						x.getApplicationID1().map(y -> y.toString()).orElse(null), 
-						x.getApplicationID2().map(y -> y.toString()).orElse(null)))
+						x.getApplicationID2().map(y -> y.toString()).orElse(null),
+						x.getApplicationID3().map(y -> y.toString()).orElse(null)))
 				.collect(Collectors.toList());
 		
 		return new SprStubHelper.StatusContainer<>(requestAppStatusList);
