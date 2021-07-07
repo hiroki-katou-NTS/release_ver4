@@ -60,6 +60,7 @@ import nts.uk.ctx.at.shared.dom.common.CompanyId;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
 import nts.uk.shr.com.history.DateHistoryItem;
+import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.program.ProgramIdConsts;
 
 @Stateless
@@ -303,17 +304,7 @@ public class DivTimeSysFixedCheckService {
 
 	public List<EmployeeDailyPerError> removeconfirm(String comId, String empId, GeneralDate tarD, 
 			List<EmployeeDailyPerError> errors, Optional<IdentityProcessUseSet> iPUSOpt, Optional<ApprovalProcessingUseSetting>  approvalSet) {
-		List<EmployeeDailyPerError> divEr67 = errors.stream().filter(c -> c.getErrorAlarmWorkRecordCode() != null
-				&& (c.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_6.value)
-				|| c.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_7.value)
-				|| c.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_1.value)
-				|| c.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_2.value)
-				|| c.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_3.value)
-				|| c.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_4.value)
-				|| c.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_5.value)
-				|| c.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_9.value)
-				|| c.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_10.value)
-				|| c.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_8.value))
+		List<EmployeeDailyPerError> divEr67 = errors.stream().filter(c -> isDivergenceEr(c)
 				&& c.getDate().equals(tarD) && c.getEmployeeID().equals(empId)).collect(Collectors.toList());
 		
 		if (!divEr67.isEmpty()) {
@@ -337,6 +328,25 @@ public class DivTimeSysFixedCheckService {
 //				}
 		}
 		return errors;
+	}
+
+	private boolean isDivergenceEr(EmployeeDailyPerError er) {
+		boolean isDivEr = er.getErrorAlarmWorkRecordCode() != null
+				&& (er.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_6.value)
+				|| er.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_7.value)
+				|| er.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_1.value)
+				|| er.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_2.value)
+				|| er.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_3.value)
+				|| er.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_4.value)
+				|| er.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_5.value)
+				|| er.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_9.value)
+				|| er.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_10.value)
+				|| er.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_8.value));
+		
+		val mes = er.getErrorAlarmMessage().map(m -> m.v()).orElse("");
+		boolean isMsg1298 = mes.equals("Msg_1298") || mes.equals(TextResource.localize("Msg_1298"));
+		
+		return isDivEr || isMsg1298;
 	}
 	
 	/** 日の本人確認を解除する */
