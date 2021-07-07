@@ -541,9 +541,10 @@ public class ValidatorDataDailyRes {
 		for (IntegrationOfDaily d : dailyResults) {
 			List<EmployeeDailyPerError> employeeError = d.getEmployeeError();
 			for (EmployeeDailyPerError err : employeeError) {
-				if (err != null && err.getErrorAlarmWorkRecordCode().v().startsWith("D") && checkErrorOdd(err.getErrorAlarmWorkRecordCode().v())
-						&& (!err.getErrorAlarmMessage().isPresent()
-								|| !err.getErrorAlarmMessage().get().v().equals(TextResource.localize("Msg_1298")))) {
+				
+				val isDivEr = err != null && err.getErrorAlarmWorkRecordCode().v().startsWith("D") && checkErrorOdd(err.getErrorAlarmWorkRecordCode().v());
+				val isMsg1298 = err != null && err.getErrorAlarmMessage().map(c -> c.v()).orElse("").equals(TextResource.localize("Msg_1298"));
+				if (isDivEr || isMsg1298) {
 					if (err.getAttendanceItemList().isEmpty()) {
 						divergenceErrors.add(new DPItemValue("", err.getEmployeeID(), err.getDate(), 0));
 					} else {
