@@ -914,8 +914,8 @@ public class DailyModifyResCommandFacade {
 				for(WorkType wt : lstWType) {
 				//lstWType.stream().forEach(wt -> {
 					val wtTemp = checkInGroupWorkPer(wt);
-					if (!wtTemp.isEmpty()) {
-						lstWTClassification.addAll(wtTemp.stream().map(x -> convertError(x)).collect(Collectors.toList()));
+					if (wtTemp != null) {
+						lstWTClassification.add(convertError(wtTemp));
 						onlyErrorOld = false;
 						val itemRow = lstItemEdits.stream().filter(it -> it.getEmployeeId().equals(emp) && it.getItemId() == 28
 								&& it.getValue().equals(wt.getWorkTypeCode().v())).map(x -> Pair.of(x.getEmployeeId(), x.getDate())).collect(Collectors.toSet());
@@ -926,7 +926,7 @@ public class DailyModifyResCommandFacade {
 
 			}
 			//boolean hasErrorInDB = !lstEmpMonthError.stream().filter(x -> x.getErrorType()).collect(Collectors.toList()).isEmpty();
-			lstEmpMonthError = lstWTClassification.isEmpty() ? lstEmpMonthError : lstEmpMonthError.stream().filter(lstErrorTemp -> lstWTClassification.contains(lstErrorTemp.getErrorType())).collect(Collectors.toList());
+//			lstEmpMonthError = lstWTClassification.isEmpty() ? lstEmpMonthError : lstEmpMonthError.stream().filter(lstErrorTemp -> lstWTClassification.contains(lstErrorTemp.getErrorType())).collect(Collectors.toList());
 			
 			monthPer.addAll(lstEmpMonthError);
 		//});
@@ -935,35 +935,29 @@ public class DailyModifyResCommandFacade {
 		return new LeaveDayErrorDto(onlyErrorOld, monthPer, detailEmployeeError);
 	}
 	
-	private List<WorkTypeClassification> checkInGroupWorkPer(WorkType wt) {
-		List<WorkTypeClassification> lstClassifi = new ArrayList<>();
+	private WorkTypeClassification checkInGroupWorkPer(WorkType wt) {
 		if (wt.getDailyWork() == null)
-			return lstClassifi;
+			return null;
 
 		WorkTypeUnit unit = wt.getDailyWork().getWorkTypeUnit();
 		if (unit == WorkTypeUnit.OneDay) {
 			val oneDay = wt.getDailyWork().getOneDay();
 			if (oneDay == WorkTypeClassification.AnnualHoliday || oneDay == WorkTypeClassification.SpecialHoliday
-					|| oneDay == WorkTypeClassification.SubstituteHoliday || oneDay == WorkTypeClassification.Pause) {
-				lstClassifi.add(oneDay);
-				return lstClassifi;
-			}
+					|| oneDay == WorkTypeClassification.SubstituteHoliday || oneDay == WorkTypeClassification.Pause)
+				return oneDay;
 			// AnnualHoliday , SpecialHoliday, SubstituteHoliday, Pause
 		} else {
 			val morDay = wt.getDailyWork().getMorning();
 			val aftDay = wt.getDailyWork().getAfternoon();
 			if (morDay == WorkTypeClassification.AnnualHoliday || morDay == WorkTypeClassification.SpecialHoliday
-					|| morDay == WorkTypeClassification.SubstituteHoliday || morDay == WorkTypeClassification.Pause) {
-				lstClassifi.add(morDay);
-			}
+					|| morDay == WorkTypeClassification.SubstituteHoliday || morDay == WorkTypeClassification.Pause)
+				return morDay;
 
 			if (aftDay == WorkTypeClassification.AnnualHoliday || aftDay == WorkTypeClassification.SpecialHoliday
-					|| aftDay == WorkTypeClassification.SubstituteHoliday || aftDay == WorkTypeClassification.Pause) {
-				lstClassifi.add(aftDay);
-			}
-			return lstClassifi;
+					|| aftDay == WorkTypeClassification.SubstituteHoliday || aftDay == WorkTypeClassification.Pause)
+				return aftDay;
 		}
-		return lstClassifi;
+		return null;
 	}
 
 	private ErrorType convertError(WorkTypeClassification wtc) {
@@ -1227,7 +1221,7 @@ public class DailyModifyResCommandFacade {
 		// monthParam);
 	    List<EmployeeMonthlyPerError> errorYearHoliday = pairError.getErrorMonth().stream().collect(Collectors.toList());
 	    Set<Pair<String, GeneralDate>> detailEmployeeError = new HashSet<>();
-		if (!errorMonth.isEmpty()) {
+		if (!errorMonth.isEmpty() || !pairError.getDetailEmployeeError().isEmpty()) {
 			resultErrorMonth.putAll(errorMonth);
 			detailEmployeeError.addAll(pairError.getDetailEmployeeError());
 			hasError =  true;
@@ -1297,7 +1291,7 @@ public class DailyModifyResCommandFacade {
 		//val errorMonth = validatorDataDaily.errorMonthNew();
 		//val errorMonth = validatorDataDaily.errorMonth(resultIU.getLstMonthDomain(), monthParam);
 	    Set<Pair<String, GeneralDate>> detailEmployeeError = new HashSet<>();
-		if (!errorMonth.isEmpty()) {
+		if (!errorMonth.isEmpty() || !pairError.getDetailEmployeeError().isEmpty()) {
 			resultError.putAll(errorMonth);
 			detailEmployeeError.addAll(pairError.getDetailEmployeeError());
 			hasError = true;
