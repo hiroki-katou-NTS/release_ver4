@@ -926,7 +926,7 @@ public class DailyModifyResCommandFacade {
 
 			}
 			//boolean hasErrorInDB = !lstEmpMonthError.stream().filter(x -> x.getErrorType()).collect(Collectors.toList()).isEmpty();
-//			lstEmpMonthError = lstWTClassification.isEmpty() ? lstEmpMonthError : lstEmpMonthError.stream().filter(lstErrorTemp -> lstWTClassification.contains(lstErrorTemp.getErrorType())).collect(Collectors.toList());
+			lstEmpMonthError = lstWTClassification.isEmpty() ? lstEmpMonthError : lstEmpMonthError.stream().filter(lstErrorTemp -> lstWTClassification.contains(lstErrorTemp.getErrorType())).collect(Collectors.toList());
 			
 			monthPer.addAll(lstEmpMonthError);
 		//});
@@ -1221,7 +1221,7 @@ public class DailyModifyResCommandFacade {
 		// monthParam);
 	    List<EmployeeMonthlyPerError> errorYearHoliday = pairError.getErrorMonth().stream().collect(Collectors.toList());
 	    Set<Pair<String, GeneralDate>> detailEmployeeError = new HashSet<>();
-		if (!errorMonth.isEmpty() || !pairError.getDetailEmployeeError().isEmpty()) {
+		if (!errorMonth.isEmpty()) {
 			resultErrorMonth.putAll(errorMonth);
 			detailEmployeeError.addAll(pairError.getDetailEmployeeError());
 			hasError =  true;
@@ -1291,7 +1291,7 @@ public class DailyModifyResCommandFacade {
 		//val errorMonth = validatorDataDaily.errorMonthNew();
 		//val errorMonth = validatorDataDaily.errorMonth(resultIU.getLstMonthDomain(), monthParam);
 	    Set<Pair<String, GeneralDate>> detailEmployeeError = new HashSet<>();
-		if (!errorMonth.isEmpty() || !pairError.getDetailEmployeeError().isEmpty()) {
+		if (!errorMonth.isEmpty()) {
 			resultError.putAll(errorMonth);
 			detailEmployeeError.addAll(pairError.getDetailEmployeeError());
 			hasError = true;
