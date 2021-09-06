@@ -27,6 +27,7 @@ public interface AppRootInstanceRepository {
 	 */
 	public void deleteMonthlyFromDate(String employeeID, GeneralDate recordDate);
 
+	public Optional<AppRootInstance> findDayInsByID(String rootID);
 	
 	/**
 	 * 対象者の日別実績の承認ルートを取得する（単一日）
@@ -85,6 +86,8 @@ public interface AppRootInstanceRepository {
 	 * @return
 	 */
 	public List<AppRootInstance> findAppRootInstanceDailyByApproverTarget(String approverID, List<String> employeeIDLst, DatePeriod period);
+	
+	public Optional<AppRootInstance> findMonInsByID(String rootID);
 	
 	/**
 	 * 対象者の月別実績の承認ルートを取得する（単一日）

@@ -376,6 +376,23 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 			+ " and rt.START_DATE = ap.START_DATE"
 			+ " and ph.PHASE_ORDER = ap.PHASE_ORDER"
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
+	
+	@Override
+	@SneakyThrows
+	public Optional<AppRootInstance> findDayInsByID(String rootID) {
+		StringBuilder sql = new StringBuilder();
+		sql.append(FIND_DAY_INSTANCE);
+		sql.append(" where rt.ROOT_ID = @rootID ");
+
+		List<AppRootInstance> appRootInstanceLst = toDomain(jdbcProxy().query(sql.toString())
+				.paramString("rootID", rootID)
+				.getList(rec -> createFullJoinAppRootInstanceDaily(rec)));
+		if(CollectionUtil.isEmpty(appRootInstanceLst)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(appRootInstanceLst.get(0));
+		}
+	}
 
 	@Override
 	@SneakyThrows
@@ -504,6 +521,22 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
+	@Override
+	@SneakyThrows
+	public Optional<AppRootInstance> findMonInsByID(String rootID) {
+		StringBuilder sql = new StringBuilder();
+		sql.append(FIND_MON_INSTANCE);
+		sql.append(" where rt.ROOT_ID = @rootID ");
+
+		List<AppRootInstance> appRootInstanceLst = toDomain(jdbcProxy().query(sql.toString())
+				.paramString("rootID", rootID)
+				.getList(rec -> createFullJoinAppRootInstanceMonthly(rec)));
+		if(CollectionUtil.isEmpty(appRootInstanceLst)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(appRootInstanceLst.get(0));
+		}
+	}
 
 	@Override
 	@SneakyThrows

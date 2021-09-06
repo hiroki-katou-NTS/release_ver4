@@ -133,9 +133,15 @@ public class CreateDailyApproverImpl implements CreateDailyApprover {
 		Optional<AppRootInstance> opAppRootInstanceConflict;
 		if(rootType == RecordRootType.CONFIRM_WORK_BY_DAY) {
 			opAppRootInstanceConflict= appRootInstanceRepository.findAppRootInstanceDailyNewestBelow(employeeID, recordDate);
+			opAppRootInstanceConflict = opAppRootInstanceConflict.isPresent() 
+					? appRootInstanceRepository.findDayInsByID(opAppRootInstanceConflict.get().getRootID())
+					: Optional.empty();
 		}
 		else {
 			opAppRootInstanceConflict = appRootInstanceRepository.findAppRootInstanceMonthlyNewestBelow(employeeID, recordDate);
+			opAppRootInstanceConflict = opAppRootInstanceConflict.isPresent() 
+					? appRootInstanceRepository.findMonInsByID(opAppRootInstanceConflict.get().getRootID())
+					: Optional.empty();
 		}
 		return opAppRootInstanceConflict;
 	}
