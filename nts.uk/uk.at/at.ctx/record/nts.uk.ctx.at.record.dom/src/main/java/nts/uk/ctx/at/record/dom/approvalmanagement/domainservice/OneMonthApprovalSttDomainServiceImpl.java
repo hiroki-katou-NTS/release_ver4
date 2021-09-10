@@ -18,6 +18,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import lombok.val;
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
@@ -52,6 +54,8 @@ import nts.uk.ctx.at.record.dom.approvalmanagement.dtos.DateApprovalStatusDto;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dtos.EmployeeAffiliationInforDto;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dtos.OneMonthApprovalStatusDto;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.approval.ApprovalStatusActualDayChange;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.EmployeeGeneralInfoService;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
@@ -121,9 +125,13 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 	@Inject
 	private InitSwitchSetAdapter initSwitchSetAdapter;
 
+	@Inject
+	private ApprovalStatusActualDayChange approvalStatusActualDayChange;
 	
 	private List<ApprovalEmployeeDto> buildApprovalEmployeeData(List<Identification> listIdentification,
-			List<EmployeeDto> lstEmployee, ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport) {
+			List<EmployeeDto> lstEmployee, ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport,List<ApprovalStatusActualResult> approvalResults) {
+		
+		Map<Pair<String, GeneralDate>, ApprovalStatusActualResult> mapApprovalResults = approvalResults.stream().collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x, (x, y) -> x));
 
 		List<ApprovalEmployeeDto> lstApprovalEmployee = new ArrayList<>();
 		List<ApprovalRootSituation> lstApproval = approvalRootOfEmployeeImport.getApprovalRootSituations();
@@ -137,6 +145,9 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 
 			List<DateApprovalStatusDto> lstDateApprovalStatusDto = lstApproval.stream()
 					.filter(f -> empQ.getSid().equals(f.getTargetID())).map(apv -> {
+						
+						ApprovalStatusActualResult dataApproval = mapApprovalResults.get(Pair.of(apv.getTargetID(), apv.getAppDate()));
+						
 						ApprovalStatus status = apv.getApprovalStatus();
 						ApproverEmployeeState state = apv.getApprovalAtr();
 						ApprovalActionByEmpl aproval = status.getApprovalActionByEmpl();
@@ -158,7 +169,7 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 									|| ApproverEmployeeState.PHASE_PASS.equals(state)) {
 								dateApvS.setStatus(0);
 							} else if (ApproverEmployeeState.PHASE_DURING.equals(state)) {
-								if (ApprovalActionByEmpl.APPROVALED.equals(aproval)) {
+								if (ApprovalActionByEmpl.APPROVALED.equals(aproval) || dataApproval.isStatus()) {
 									dateApvS.setStatus(0);
 								} else if (ApprovalActionByEmpl.APPROVAL_REQUIRE.equals(aproval)) {
 									dateApvS.setStatus(1);
@@ -569,9 +580,11 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			// RequestList228
 			// List<EmployeeDto> listEmployeeInfo =
 			// atEmployeeAdapter.getByListSID(lstEmployees);
-
+			List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDayChange.processApprovalStatus(
+					AppContexts.user().companyId(), AppContexts.user().employeeId(), listEmployeeInfo.stream().map(c->c.getSid()).collect(Collectors.toList()),
+					Optional.of(datePeriod), Optional.empty(), 1);
 			List<ApprovalEmployeeDto> buildApprovalEmployeeData = buildApprovalEmployeeData(listIdentification,
-					listEmployeeInfo, approvalRootOfEmployeeImportTemp);
+					listEmployeeInfo, approvalRootOfEmployeeImportTemp,approvalResults);
 			if (buildApprovalEmployeeData.isEmpty()) {
 				oneMonthApprovalStatusDto.setMessageID("Msg_875");
 				return oneMonthApprovalStatusDto;
