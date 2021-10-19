@@ -245,7 +245,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		// 計算できる状態にあるかのチェック①(勤務情報、会社共通の設定、個人共通の設定)
 		if (integrationOfDaily.getAffiliationInfor() == null || companyCommonSetting == null
 				|| personCommonSetting == null) {
-			return ManageCalcStateAndResult.failCalc(integrationOfDaily);
+			return ManageCalcStateAndResult.failCalc(integrationOfDaily, attendanceItemConvertFactory);
 		}
 
 		// 20190607
@@ -362,7 +362,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				integrationOfDaily = recordAllZeroValueIntegration;
 			}
 
-			return ManageCalcStateAndResult.failCalc(integrationOfDaily);
+			return ManageCalcStateAndResult.failCalc(integrationOfDaily, attendanceItemConvertFactory);
 		}
 
 		val copyCalcAtr = integrationOfDaily.getCalAttr();
@@ -380,7 +380,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		// 実績が入力されていなくてもor実績側が休日でも、予定時間は計算する必要があるため
 		if (!record.getCalculatable() && (!record.getWorkType().isPresent())) {
 			integrationOfDaily.setCalAttr(copyCalcAtr);
-			return ManageCalcStateAndResult.failCalc(integrationOfDaily);
+			return ManageCalcStateAndResult.failCalc(integrationOfDaily, attendanceItemConvertFactory);
 		}
 
 		// 実際の計算処理

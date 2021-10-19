@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.personnelcostsetting.PersonnelCostSettingAdapter;
+import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemConvertFactory;
 import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemService;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDailyResultDomainServiceImpl.ProcessState;
@@ -50,7 +51,6 @@ import nts.uk.ctx.at.shared.dom.statutory.worktime.sharedNew.DailyUnit;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
-import nts.uk.ctx.at.shared.dom.worktime.common.WorkSystemAtr;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.history.DateHistoryItem;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -116,6 +116,9 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 	/** リポジトリ：就業計算と集計実行ログ */
 	@Inject
 	private EmpCalAndSumExeLogRepository empCalAndSumExeLogRepository;
+	
+	@Inject
+	private AttendanceItemConvertFactory attendanceItemConvertFactory;
 	
 	private Optional<BsEmploymentHistoryImport> c(String companyId, String employeeId, GeneralDate targetDate) {
 		return this.shareEmploymentAdapter.findEmploymentHistory(companyId, employeeId, targetDate);
@@ -361,7 +364,7 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 													 List<ClosureStatusManagement> closureList,
 													 Optional<String> logId ) {
 		/***会社共通処理***/
-		if(integrationOfDailys.isEmpty()) return new ManageProcessAndCalcStateResult(ProcessState.SUCCESS, integrationOfDailys.stream().map(tc -> ManageCalcStateAndResult.failCalc(tc)).collect(Collectors.toList()));
+		if(integrationOfDailys.isEmpty()) return new ManageProcessAndCalcStateResult(ProcessState.SUCCESS, integrationOfDailys.stream().map(tc -> ManageCalcStateAndResult.failCalc(tc, attendanceItemConvertFactory)).collect(Collectors.toList()));
 		//社員毎の実績に纏める
 		Map<String,List<IntegrationOfDaily>> recordPerEmpId = getPerEmpIdRecord(integrationOfDailys);
 		String comanyId = AppContexts.user().companyId();
