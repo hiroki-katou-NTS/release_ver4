@@ -199,10 +199,12 @@ public class ConfirmStatusInfoEmp {
 					.getProgress(emplist, mergePeriodClr.getClosureMonth(), mergePeriodClr.getPeriod());
 
 			for (String employeeId : emplist) {
-				inforMonths.put(employeeId, new InformationMonth(
-						mergePeriodClr,
-						lstConfirmMonth.stream().filter(cm -> employeeId.equals(cm.getEmployeeId())).collect(Collectors.toList()),
-						lstApprovalMonthStatus.stream().filter(ams -> employeeId.equals(ams.getEmployeeId())).collect(Collectors.toList())));
+				if(!inforMonths.containsKey(employeeId)){
+					inforMonths.put(employeeId, new InformationMonth(
+							mergePeriodClr,
+							lstConfirmMonth.stream().filter(cm -> employeeId.equals(cm.getEmployeeId())).collect(Collectors.toList()),
+							lstApprovalMonthStatus.stream().filter(ams -> employeeId.equals(ams.getEmployeeId())).collect(Collectors.toList())));
+				}
 			}
 		}
 
