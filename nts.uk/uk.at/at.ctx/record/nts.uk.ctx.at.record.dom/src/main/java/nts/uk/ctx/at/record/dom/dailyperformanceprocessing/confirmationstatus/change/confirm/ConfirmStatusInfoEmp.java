@@ -20,6 +20,7 @@ import nts.uk.ctx.at.record.dom.adapter.application.ApplicationRecordImport;
 import nts.uk.ctx.at.record.dom.adapter.company.StatusOfEmployeeExport;
 import nts.uk.ctx.at.record.dom.application.realitystatus.RealityStatusService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.CommonProcess;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.approval.InformationMonthDto;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.AggrPeriodEachActualClosure;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriod;
@@ -186,7 +187,8 @@ public class ConfirmStatusInfoEmp {
 				});
 		}
 
-		Map<String, InformationMonth> inforMonths = new HashMap<>();
+		Map<String,  List<InformationMonth>> inforMonths = new HashMap<>();
+		List<InformationMonthDto> listInfo = new ArrayList<>();
 		for (AggrPeriodEachActualClosure mergePeriodClr : aggrPeriods.keySet()) {
 			List<String> emplist = new ArrayList<>(aggrPeriods.get(mergePeriodClr));
 
@@ -199,14 +201,18 @@ public class ConfirmStatusInfoEmp {
 					.getProgress(emplist, mergePeriodClr.getClosureMonth(), mergePeriodClr.getPeriod());
 
 			for (String employeeId : emplist) {
-				if(!inforMonths.containsKey(employeeId)){
-					inforMonths.put(employeeId, new InformationMonth(
-							mergePeriodClr,
-							lstConfirmMonth.stream().filter(cm -> employeeId.equals(cm.getEmployeeId())).collect(Collectors.toList()),
-							lstApprovalMonthStatus.stream().filter(ams -> employeeId.equals(ams.getEmployeeId())).collect(Collectors.toList())));
-				}
+				listInfo.add(new InformationMonthDto(
+					employeeId, 
+					mergePeriodClr,
+					lstConfirmMonth.stream().filter(cm -> employeeId.equals(cm.getEmployeeId())).collect(Collectors.toList()),
+					lstApprovalMonthStatus.stream().filter(ams -> employeeId.equals(ams.getEmployeeId())).collect(Collectors.toList())));
 			}
 		}
+		
+		Map<String, List<InformationMonthDto>> mapInfoMonths = listInfo.stream().collect(Collectors.groupingBy(i -> i.sid));
+		mapInfoMonths.entrySet().stream().forEach(m -> {
+			inforMonths.put(m.getKey(), m.getValue().stream().map(x -> x.toDomain()).collect(Collectors.toList()));
+		});
 
 		Map<DatePeriod, Set<String>> groupByDateEmpExportEmpList = new HashMap<>();
 		Map<String, List<StatusOfEmployeeExport>> statusOfEmps = new HashMap<>();
@@ -258,7 +264,6 @@ public class ConfirmStatusInfoEmp {
 				List<ApplicationRecordImport> application = lstApplication.stream()
 						.filter(i -> i.getEmployeeID().equals(employeeId)).collect(Collectors.toList());
 
-				InformationMonth inforMonth = inforMonths.get(employeeId);
 						
 				// [No.303]対象期間に日別実績のエラーが発生している年月日を取得する
 				List<EmployeeDateErrorOuput> lstOut = realityStatusService
@@ -273,8 +278,7 @@ public class ConfirmStatusInfoEmp {
 					.findFirst().orElse(null);
 
 				// 外部でremoveIfなどの操作が実行されるため、変更可能なArrayListで作る必要がある
-				List<InformationMonth> inforMonthMutableList = new ArrayList<>();
-				inforMonthMutableList.add(inforMonth);
+				List<InformationMonth> inforMonth = inforMonths.getOrDefault(employeeId, new ArrayList<>());
 				
 				ConfirmInfoResult result = ConfirmInfoResult.builder()
 						.employeeId(employeeId)
@@ -283,7 +287,7 @@ public class ConfirmStatusInfoEmp {
 						.lstApplication(application)
 						.lstOut(lstOut)
 						.statusOfEmp(statusOfEmps.get(employeeId).get(0))
-						.informationMonths(inforMonthMutableList)
+						.informationMonths(inforMonth)
 						.build();
 				results.add(result);
 			}

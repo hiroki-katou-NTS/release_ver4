@@ -211,7 +211,7 @@ public class ApprovalStatusInfoEmp {
 				});
 		}
 
-		Map<String, InformationMonth> inforMonths = createInforMonths(empTarget, employeeIds, isCallBy587, aggrPeriods);
+		Map<String, List<InformationMonth>> inforMonths = createInforMonths(empTarget, employeeIds, isCallBy587, aggrPeriods);
 
 		Map<DatePeriod, Set<String>> groupByDateEmpExportEmpList = new HashMap<>();
 		Map<String, List<StatusOfEmployeeExport>> statusOfEmps = new HashMap<>();
@@ -281,8 +281,7 @@ public class ApprovalStatusInfoEmp {
 					.findFirst().orElse(null);
 				
 				// 外部でremoveIfなどの操作が実行されるため、変更可能なArrayListで作る必要がある
-				List<InformationMonth> inforMonthMutableList = new ArrayList<>();
-				inforMonthMutableList.add(inforMonths.get(employeeId));
+				List<InformationMonth> inforMonthMutableList = inforMonths.getOrDefault(employeeId, new ArrayList<>());
 				
 				ConfirmInfoResult result = ConfirmInfoResult.builder()
 					.employeeId(employeeId)
@@ -299,9 +298,10 @@ public class ApprovalStatusInfoEmp {
 		return results;
 	}
 
-	private Map<String, InformationMonth> createInforMonths(String empTarget, List<String> employeeIds, boolean isCallBy587,
+	private Map<String, List<InformationMonth>> createInforMonths(String empTarget, List<String> employeeIds, boolean isCallBy587,
 			Map<AggrPeriodEachActualClosure, Set<String>> aggrPeriods) {
-		Map<String, InformationMonth> inforMonths = new HashMap<>();
+		Map<String, List<InformationMonth>> inforMonths = new HashMap<>();
+		List<InformationMonthDto> listInfo = new ArrayList<>();
 		for (AggrPeriodEachActualClosure mergePeriodClr : aggrPeriods.keySet()) {
 			List<String> emplist = new ArrayList<>(aggrPeriods.get(mergePeriodClr));
 			List<ConfirmationMonth> lstConfirmMonth = confirmationMonthRepository.findBySomeProperty(
@@ -319,15 +319,19 @@ public class ApprovalStatusInfoEmp {
 			}
 
 			for (String employeeId : emplist) {
-				if(!inforMonths.containsKey(employeeId)){
-					inforMonths.put(employeeId, new InformationMonth(
+				listInfo.add(new InformationMonthDto(
+							employeeId,
 							mergePeriodClr,
 							lstConfirmMonth.stream().filter(cm -> employeeId.equals(cm.getEmployeeId())).collect(Collectors.toList()),
 							lstApprovalMonthStatus.stream().filter(ams -> employeeId.equals(ams.getEmployeeId())).collect(Collectors.toList()),
 							appRootOfEmpMonth));
-				}
 			}
 		}
+		
+		Map<String, List<InformationMonthDto>> mapInfoMonths = listInfo.stream().collect(Collectors.groupingBy(i -> i.sid));
+		mapInfoMonths.entrySet().stream().forEach(m -> {
+			inforMonths.put(m.getKey(), m.getValue().stream().map(x -> x.toDomain()).collect(Collectors.toList()));
+		});
 		return inforMonths;
 	}
 
