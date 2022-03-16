@@ -388,11 +388,10 @@ public class AggregateMonthlyRecordServiceProc {
 			this.aggregateResult.setAttendanceTime(Optional.of(attendanceTime));
 			
 			/** TODO: #123164　→　一時の対応、後で同じキーの週次データを合体する　*/
-			val weekAtds = aggregateResult.getAttendanceTimeWeeks().stream()
-					.filter(distinctByKey(c -> new AttendanceTimeOfWeeklyKey(c.getEmployeeId(), c.getYearMonth(), 
-							c.getClosureId(), c.getClosureDate(), c.getWeekNo())))
-					.collect(Collectors.toList());
-			this.aggregateResult.getAttendanceTimeWeeks().addAll(weekAtds);
+			val allWeekAtds = new ArrayList<>(this.aggregateResult.getAttendanceTimeWeeks());
+			allWeekAtds.addAll(aggregateResult.getAttendanceTimeWeeks());
+			val weekAtds = allWeekAtds.stream().distinct().collect(Collectors.toList());
+			this.aggregateResult.setAttendanceTimeWeeks(weekAtds);
 
 			ConcurrentStopwatches.stop("12200:労働条件ごと：");
 		}
@@ -411,11 +410,6 @@ public class AggregateMonthlyRecordServiceProc {
 
 		// 合算後のチェック処理
 		this.checkAfterSum(monthPeriod);
-	}
-	
-	public static Predicate<AttendanceTimeOfWeekly> distinctByKey(Function<AttendanceTimeOfWeekly, AttendanceTimeOfWeeklyKey> keyExtractor) {
-	    Set<AttendanceTimeOfWeeklyKey> seen = ConcurrentHashMap.newKeySet();
-	    return t -> seen.add(keyExtractor.apply(t));
 	}
 
 	/**

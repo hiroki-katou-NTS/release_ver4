@@ -113,4 +113,42 @@ public class AttendanceTimeOfWeekly extends AggregateRoot {
 		domain.aggregateDays = aggregateDays;
 		return domain;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AttendanceTimeOfWeekly other = (AttendanceTimeOfWeekly) obj;
+		
+		if ((this.employeeId == null && other.employeeId != null) 
+				|| !this.employeeId.equals(other.employeeId)) 
+				return false;
+		if ((this.yearMonth == null && other.yearMonth != null) 
+				|| !this.yearMonth.equals(other.yearMonth)) 
+				return false;
+		if ((this.closureId == null && other.closureId != null) 
+				|| !this.closureId.equals(other.closureId)) 
+				return false;
+		if ((this.closureDate == null && other.closureDate != null) 
+				|| !this.closureDate.equals(other.closureDate)) 
+				return false;
+		
+		return this.weekNo == other.weekNo;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((this.employeeId == null) ? 0 : this.employeeId.hashCode());
+		result = prime * result + ((this.yearMonth == null) ? 0 : this.yearMonth.hashCode());
+		result = prime * result + ((this.closureId == null) ? 0 : this.closureId.hashCode());
+		result = prime * result + ((this.closureDate == null) ? 0 : this.closureDate.hashCode());
+		result = prime * result + this.weekNo;
+		return result;
+	}
 }

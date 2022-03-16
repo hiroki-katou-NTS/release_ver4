@@ -40,6 +40,7 @@ public class AggregateMonthlyRecordValue {
 	@Setter
 	private Optional<AttendanceTimeOfMonthly> attendanceTime;
 	/** 週別実績の勤怠時間 */
+	@Setter
 	private List<AttendanceTimeOfWeekly> attendanceTimeWeeks;
 	/** 月別実績の所属情報 */
 	@Setter
